@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.3
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://linux.do/*
@@ -13,7 +13,6 @@
   ("use strict");
   //1.进入网页 https://linux.do/t/topic/数字（1，2，3，4）
   //2.使滚轮均衡的往下移动模拟刷文章
-  localStorage.setItem("read", "true"); // 开始时就自动滚动
   const delay = 2000; // 滚动检查的间隔（毫秒）
   let scrollInterval = null;
   let checkScrollTimeout = null;
@@ -167,7 +166,7 @@
     });
   }
   const button = document.createElement("button");
-  button.textContent = "停止阅读";
+  button.textContent = "开始阅读";
   button.style.position = "fixed";
   button.style.top = "10px";
   button.style.right = "10px";

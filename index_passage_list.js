@@ -100,8 +100,10 @@
         console.log("执行正常的滚动和检查逻辑");
         // 执行正常的滚动和检查逻辑
         checkScroll();
-        //自动点赞
-        autoLike();
+        if (isAutoLikeEnabled()) {
+          //自动点赞
+          autoLike();
+        }
       }
     }
   });
@@ -192,4 +194,47 @@
       checkScroll();
     }
   };
+
+  //自动点赞按钮
+  // 在页面上添加一个控制自动点赞的按钮
+  const toggleAutoLikeButton = document.createElement("button");
+  toggleAutoLikeButton.textContent = isAutoLikeEnabled()
+    ? "禁用自动点赞"
+    : "启用自动点赞";
+  toggleAutoLikeButton.style.position = "fixed";
+  toggleAutoLikeButton.style.top = "50px"; // 与停止阅读按钮错开位置
+  toggleAutoLikeButton.style.right = "10px";
+  toggleAutoLikeButton.style.zIndex = "1000";
+  document.body.appendChild(toggleAutoLikeButton);
+
+  // 为按钮添加点击事件处理函数
+  toggleAutoLikeButton.addEventListener("click", () => {
+    const isEnabled = !isAutoLikeEnabled();
+    setAutoLikeEnabled(isEnabled);
+    toggleAutoLikeButton.textContent = isEnabled
+      ? "禁用自动点赞"
+      : "启用自动点赞";
+  });
+  // 判断是否启用自动点赞
+  function isAutoLikeEnabled() {
+    // 从localStorage获取autoLikeEnabled的值，如果未设置，默认为"true"
+    return localStorage.getItem("autoLikeEnabled") !== "false";
+  }
+
+  // 设置自动点赞的启用状态
+  function setAutoLikeEnabled(enabled) {
+    localStorage.setItem("autoLikeEnabled", enabled ? "true" : "false");
+  }
+
+  // 在页面加载时检查是否启用自动点赞，并执行相应的操作
+  window.addEventListener("load", () => {
+    if (localStorage.getItem("read") === "true") {
+      // 根据设置决定是否执行自动点赞
+      if (isAutoLikeEnabled()) {
+        autoLike();
+      }
+
+      // 其余的加载逻辑...
+    }
+  });
 })();

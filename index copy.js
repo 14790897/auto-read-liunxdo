@@ -17,7 +17,10 @@
   let scrollInterval = null;
   let checkScrollTimeout = null;
 
-  function scrollToBottomSlowly(stopDistance = 9999999999) {
+  function scrollToBottomSlowly(
+    stopDistance = 9999999999,
+    callback = undefined
+  ) {
     const distancePerStep = 20;
     const delayPerStep = 20;
     if (scrollInterval !== null) {
@@ -31,6 +34,9 @@
       ) {
         clearInterval(scrollInterval);
         scrollInterval = null;
+        if (typeof callback === "function") {
+          callback(); // 当滚动结束时调用回调函数
+        }
       } else {
         window.scrollBy(0, distancePerStep);
       }
@@ -40,9 +46,14 @@
 
   function navigateToNextTopic() {
     // 定义包含两个URL的数组
-    const urls = ["https://linux.do/latest", "https://linux.do/top?period=all"];
+    const urls = [
+      "https://linux.do/latest",
+      "https://linux.do/top?period=all",
+      "https://linux.do/unread",
+      "https://linux.do/new",
+    ];
 
-    // 生成一个随机索引，0或1
+    // 生成一个随机索引
     const randomIndex = Math.floor(Math.random() * urls.length);
 
     // 根据随机索引选择一个URL
@@ -52,20 +63,22 @@
     window.location.href = nextTopicURL;
   }
 
-  // 检查是否已滚动到底部
+  // 检查是否已滚动到底部(不断重复执行)
   function checkScroll() {
-    if (
-      window.innerHeight + window.scrollY >=
-      document.body.offsetHeight - 100
-    ) {
-      console.log("已滚动到底部");
-      navigateToNextTopic();
-    } else if (localStorage.getItem("read")) {
-      scrollToBottomSlowly();
-      if (checkScrollTimeout !== null) {
-        clearTimeout(checkScrollTimeout);
+    if (localStorage.getItem("read")) {
+      if (
+        window.innerHeight + window.scrollY >=
+        document.body.offsetHeight - 100
+      ) {
+        console.log("已滚动到底部");
+        navigateToNextTopic();
+      } else {
+        scrollToBottomSlowly();
+        if (checkScrollTimeout !== null) {
+          clearTimeout(checkScrollTimeout);
+        }
+        checkScrollTimeout = setTimeout(checkScroll, delay);
       }
-      checkScrollTimeout = setTimeout(checkScroll, delay);
     }
   }
   // 入口函数
@@ -78,27 +91,10 @@
         // 页面加载完成后，移除标记
         localStorage.removeItem("navigatingToNextTopic");
         //先随机滚动一段距离然后再查找链接
-        scrollToBottomSlowly(Math.random() * document.body.offsetHeight * 3);
-        // 在新页面加载后执行检查
-        // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
-        const links = document.querySelectorAll('a[href^="/t/topic/"]');
-        // 如果找到了这样的链接
-        if (links.length > 0) {
-          // 从所有匹配的链接中随机选择一个
-          const randomIndex = Math.floor(Math.random() * links.length);
-          const link = links[randomIndex];
-          // 打印找到的链接（可选）
-          console.log("Found link:", link.href);
-          // // 模拟点击该链接
-          // setTimeout(() => {
-          //   link.click();
-          // }, delay);
-          // 导航到该链接
-          window.location.href = link.href;
-        } else {
-          // 如果没有找到符合条件的链接，打印消息（可选）
-          console.log("No link with the specified format was found.");
-        }
+        scrollToBottomSlowly(
+          Math.random() * document.body.offsetHeight * 3,
+          searchLinkClick
+        );
       } else {
         console.log("执行正常的滚动和检查逻辑");
         // 执行正常的滚动和检查逻辑
@@ -107,7 +103,28 @@
     }
   });
   // 创建一个控制滚动的按钮
-
+  function searchLinkClick() {
+    // 在新页面加载后执行检查
+    // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
+    const links = document.querySelectorAll('a[href^="/t/topic/"]');
+    // 如果找到了这样的链接
+    if (links.length > 0) {
+      // 从所有匹配的链接中随机选择一个
+      const randomIndex = Math.floor(Math.random() * links.length);
+      const link = links[randomIndex];
+      // 打印找到的链接（可选）
+      console.log("Found link:", link.href);
+      // // 模拟点击该链接
+      // setTimeout(() => {
+      //   link.click();
+      // }, delay);
+      // 导航到该链接
+      window.location.href = link.href;
+    } else {
+      // 如果没有找到符合条件的链接，打印消息（可选）
+      console.log("No link with the specified format was found.");
+    }
+  }
   const button = document.createElement("button");
   button.textContent = "停止阅读";
   button.style.position = "fixed";
@@ -117,9 +134,11 @@
   document.body.appendChild(button);
 
   button.onclick = function () {
-    const read = localStorage.setItem("read", !localStorage.getItem("read"));
-    button.textContent = read ? "停止阅读" : "开始阅读";
-    if (!read) {
+    const currentlyReading = localStorage.getItem("read") === "true";
+    const newReadState = !currentlyReading;
+    localStorage.setItem("read", newReadState.toString());
+    button.textContent = newReadState ? "停止阅读" : "开始阅读";
+    if (!newReadState) {
       if (scrollInterval !== null) {
         clearInterval(scrollInterval);
         scrollInterval = null;
@@ -130,7 +149,7 @@
       }
       localStorage.removeItem("navigatingToNextTopic");
     } else {
-      window.location.href = "https://linux.do/t/topic/13716";
+      window.location.href = "https://linux.do/t/topic/13716/40";
       checkScroll();
     }
   };

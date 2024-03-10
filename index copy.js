@@ -6,6 +6,7 @@
 // @author       liuweiqing
 // @match        https://linux.do/*
 // @grant        none
+// @license      MIT
 // ==/UserScript==
 
 (function () {
@@ -107,22 +108,42 @@
     // 在新页面加载后执行检查
     // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
     const links = document.querySelectorAll('a[href^="/t/topic/"]');
+    const alreadyReadLinks = JSON.parse(
+      localStorage.getItem("alreadyReadLinks") || "[]"
+    ); // 获取已阅读链接列表
+
+    // 筛选出未阅读的链接
+    const unreadLinks = Array.from(links).filter(
+      (link) => !alreadyReadLinks.includes(link.href)
+    );
+
     // 如果找到了这样的链接
-    if (links.length > 0) {
+    if (unreadLinks.length > 0) {
       // 从所有匹配的链接中随机选择一个
-      const randomIndex = Math.floor(Math.random() * links.length);
-      const link = links[randomIndex];
+      const randomIndex = Math.floor(Math.random() * unreadLinks.length);
+      const link = unreadLinks[randomIndex];
       // 打印找到的链接（可选）
       console.log("Found link:", link.href);
       // // 模拟点击该链接
       // setTimeout(() => {
       //   link.click();
       // }, delay);
+      // 将链接添加到已阅读列表并更新localStorage
+      alreadyReadLinks.push(link.href);
+      localStorage.setItem(
+        "alreadyReadLinks",
+        JSON.stringify(alreadyReadLinks)
+      );
+
       // 导航到该链接
       window.location.href = link.href;
     } else {
       // 如果没有找到符合条件的链接，打印消息（可选）
       console.log("No link with the specified format was found.");
+      scrollToBottomSlowly(
+        Math.random() * document.body.offsetHeight * 3,
+        searchLinkClick
+      );
     }
   }
   const button = document.createElement("button");

@@ -51,7 +51,6 @@
       "https://linux.do/latest",
       "https://linux.do/top?period=all",
       "https://linux.do/unread",
-      "https://linux.do/new",
     ];
 
     // 生成一个随机索引

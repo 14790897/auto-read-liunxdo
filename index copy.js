@@ -7,6 +7,7 @@
 // @match        https://linux.do/*
 // @grant        none
 // @license      MIT
+// @version      0.2
 // ==/UserScript==
 
 (function () {

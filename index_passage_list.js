@@ -46,7 +46,7 @@
   // 功能：跳转到下一个话题
 
   function navigateToNextTopic() {
-    // 定义包含两个URL的数组
+    // 定义包含三个文章列表的数组
     const urls = [
       "https://linux.do/latest",
       "https://linux.do/top?period=all",
@@ -81,10 +81,11 @@
       }
     }
   }
+
   // 入口函数
-  // 检查是否正在导航到下一个话题
   window.addEventListener("load", () => {
     if (localStorage.getItem("read") === "true") {
+      // 检查是否正在导航到下一个话题
       if (localStorage.getItem("navigatingToNextTopic") === "true") {
         console.log("正在导航到下一个话题");
         // 等待一段时间或直到页面完全加载
@@ -99,6 +100,8 @@
         console.log("执行正常的滚动和检查逻辑");
         // 执行正常的滚动和检查逻辑
         checkScroll();
+        //自动点赞
+        autoLike();
       }
     }
   });
@@ -144,6 +147,22 @@
         searchLinkClick
       );
     }
+  }
+  function autoLike() {
+    // 寻找所有的discourse-reactions-reaction-button
+    const buttons = document.querySelectorAll(
+      ".discourse-reactions-reaction-button"
+    );
+
+    // 逐个点击找到的按钮
+    buttons.forEach((button, index) => {
+      // 使用setTimeout来错开每次点击的时间，避免同时触发点击
+      setTimeout(() => {
+        // 模拟点击
+        button.click();
+        console.log(`Clicked button ${index + 1}`);
+      }, index * 1000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
+    });
   }
   const button = document.createElement("button");
   button.textContent = "停止阅读";

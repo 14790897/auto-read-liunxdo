@@ -12,7 +12,7 @@
   ("use strict");
   //1.进入网页 https://linux.do/t/topic/数字（1，2，3，4）
   //2.使滚轮均衡的往下移动模拟刷文章
-  let scrolling = true; // 开始时就自动滚动
+  localStorage.setItem("read", "true"); // 开始时就自动滚动
   const delay = 2000; // 滚动检查的间隔（毫秒）
   let scrollInterval = null;
   let checkScrollTimeout = null;
@@ -39,8 +39,14 @@
   // 功能：跳转到下一个话题
 
   function navigateToNextTopic() {
-    const nextTopicURL = `https://linux.do/top?period=all`;
-    // 在跳转之前，标记即将跳转到下一个话题
+    // 定义包含两个URL的数组
+    const urls = ["https://linux.do/latest", "https://linux.do/top?period=all"];
+
+    // 生成一个随机索引，0或1
+    const randomIndex = Math.floor(Math.random() * urls.length);
+
+    // 根据随机索引选择一个URL
+    const nextTopicURL = urls[randomIndex]; // 在跳转之前，标记即将跳转到下一个话题
     localStorage.setItem("navigatingToNextTopic", "true");
     // 尝试导航到下一个话题
     window.location.href = nextTopicURL;
@@ -54,7 +60,7 @@
     ) {
       console.log("已滚动到底部");
       navigateToNextTopic();
-    } else if (scrolling) {
+    } else if (localStorage.getItem("read")) {
       scrollToBottomSlowly();
       if (checkScrollTimeout !== null) {
         clearTimeout(checkScrollTimeout);
@@ -65,37 +71,39 @@
   // 入口函数
   // 检查是否正在导航到下一个话题
   window.addEventListener("load", () => {
-    if (localStorage.getItem("navigatingToNextTopic") === "true") {
-      console.log("正在导航到下一个话题");
-      // 等待一段时间或直到页面完全加载
-      // 页面加载完成后，移除标记
-      localStorage.removeItem("navigatingToNextTopic");
-      //先随机滚动一段距离然后再查找链接
-      scrollToBottomSlowly(Math.random() * 2000);
-      // 在新页面加载后执行检查
-      // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
-      const links = document.querySelectorAll('a[href^="/t/topic/"]');
-      // 如果找到了这样的链接
-      if (links.length > 0) {
-        // 从所有匹配的链接中随机选择一个
-        const randomIndex = Math.floor(Math.random() * links.length);
-        const link = links[randomIndex];
-        // 打印找到的链接（可选）
-        console.log("Found link:", link.href);
-        // // 模拟点击该链接
-        // setTimeout(() => {
-        //   link.click();
-        // }, delay);
-        // 导航到该链接
-        window.location.href = link.href;
+    if (localStorage.getItem("read") === "true") {
+      if (localStorage.getItem("navigatingToNextTopic") === "true") {
+        console.log("正在导航到下一个话题");
+        // 等待一段时间或直到页面完全加载
+        // 页面加载完成后，移除标记
+        localStorage.removeItem("navigatingToNextTopic");
+        //先随机滚动一段距离然后再查找链接
+        scrollToBottomSlowly(Math.random() * document.body.offsetHeight * 3);
+        // 在新页面加载后执行检查
+        // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
+        const links = document.querySelectorAll('a[href^="/t/topic/"]');
+        // 如果找到了这样的链接
+        if (links.length > 0) {
+          // 从所有匹配的链接中随机选择一个
+          const randomIndex = Math.floor(Math.random() * links.length);
+          const link = links[randomIndex];
+          // 打印找到的链接（可选）
+          console.log("Found link:", link.href);
+          // // 模拟点击该链接
+          // setTimeout(() => {
+          //   link.click();
+          // }, delay);
+          // 导航到该链接
+          window.location.href = link.href;
+        } else {
+          // 如果没有找到符合条件的链接，打印消息（可选）
+          console.log("No link with the specified format was found.");
+        }
       } else {
-        // 如果没有找到符合条件的链接，打印消息（可选）
-        console.log("No link with the specified format was found.");
+        console.log("执行正常的滚动和检查逻辑");
+        // 执行正常的滚动和检查逻辑
+        checkScroll();
       }
-    } else {
-      console.log("执行正常的滚动和检查逻辑");
-      // 执行正常的滚动和检查逻辑
-      checkScroll();
     }
   });
   // 创建一个控制滚动的按钮
@@ -109,9 +117,9 @@
   document.body.appendChild(button);
 
   button.onclick = function () {
-    scrolling = !scrolling;
-    button.textContent = scrolling ? "停止阅读" : "开始阅读";
-    if (!scrolling) {
+    const read = localStorage.setItem("read", !localStorage.getItem("read"));
+    button.textContent = read ? "停止阅读" : "开始阅读";
+    if (!read) {
       if (scrollInterval !== null) {
         clearInterval(scrollInterval);
         scrollInterval = null;
@@ -120,7 +128,9 @@
         clearTimeout(checkScrollTimeout);
         checkScrollTimeout = null;
       }
+      localStorage.removeItem("navigatingToNextTopic");
     } else {
+      window.location.href = "https://linux.do/t/topic/13716";
       checkScroll();
     }
   };

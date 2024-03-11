@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      0.2
+// @version      0.4
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://linux.do/*
@@ -20,10 +20,10 @@
 
   function scrollToBottomSlowly(
     stopDistance = 9999999999,
-    callback = undefined
+    callback = undefined,
+    distancePerStep = 20,
+    delayPerStep = 50
   ) {
-    const distancePerStep = 20;
-    const delayPerStep = 20;
     if (scrollInterval !== null) {
       clearInterval(scrollInterval);
     }
@@ -94,7 +94,9 @@
         //先随机滚动一段距离然后再查找链接
         scrollToBottomSlowly(
           Math.random() * document.body.offsetHeight * 3,
-          searchLinkClick
+          searchLinkClick,
+          20,
+          20
         );
       } else {
         console.log("执行正常的滚动和检查逻辑");

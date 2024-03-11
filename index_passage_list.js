@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      0.4
+// @version      0.5
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://linux.do/*
@@ -46,11 +46,11 @@
   // 功能：跳转到下一个话题
 
   function navigateToNextTopic() {
-    // 定义包含三个文章列表的数组
+    // 定义包含文章列表的数组
     const urls = [
       "https://linux.do/latest",
-      "https://linux.do/top?period=all",
-      "https://linux.do/unread",
+      "https://linux.do/top",
+      // "https://linux.do/unread",
     ];
 
     // 生成一个随机索引

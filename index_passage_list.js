@@ -13,8 +13,27 @@
   ("use strict");
   //1.进入网页 https://linux.do/t/topic/数字（1，2，3，4）
   //2.使滚轮均衡的往下移动模拟刷文章
-  localStorage.setItem("read", "true"); // 开始时就自动滚动
-  localStorage.setItem("autoLikeEnabled", false); //默认关闭自动点赞
+  // 检查是否是第一次运行脚本
+  function checkFirstRun() {
+    if (localStorage.getItem("isFirstRun") === null) {
+      // 是第一次运行，执行初始化操作
+      console.log("脚本第一次运行，执行初始化操作...");
+      updateInitialData();
+
+      // 设置 isFirstRun 标记为 false
+      localStorage.setItem("isFirstRun", "false");
+    } else {
+      // 非第一次运行
+      console.log("脚本非第一次运行");
+    }
+  }
+
+  // 更新初始数据的函数
+  function updateInitialData() {
+    localStorage.setItem("read", "false"); // 开始时就自动滚动
+    localStorage.setItem("autoLikeEnabled", "false"); //默认关闭自动点赞
+    console.log("执行了初始数据更新操作");
+  }
   const delay = 2000; // 滚动检查的间隔（毫秒）
   let scrollInterval = null;
   let checkScrollTimeout = null;
@@ -85,6 +104,7 @@
 
   // 入口函数
   window.addEventListener("load", () => {
+    checkFirstRun();
     if (localStorage.getItem("read") === "true") {
       // 检查是否正在导航到下一个话题
       if (localStorage.getItem("navigatingToNextTopic") === "true") {
@@ -170,7 +190,9 @@
     });
   }
   const button = document.createElement("button");
-  button.textContent = "停止阅读";
+  // 初始化按钮文本基于当前的阅读状态
+  button.textContent =
+    localStorage.getItem("read") === "true" ? "停止阅读" : "开始阅读";
   button.style.position = "fixed";
   button.style.top = "10px";
   button.style.right = "10px";

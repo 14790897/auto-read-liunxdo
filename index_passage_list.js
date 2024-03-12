@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      0.5
+// @version      0.7
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://linux.do/*
@@ -70,6 +70,7 @@
     const urls = [
       "https://linux.do/latest",
       "https://linux.do/top",
+      "https://linux.do/latest?ascending=false&order=posts",
       // "https://linux.do/unread",
     ];
 
@@ -105,6 +106,7 @@
   // 入口函数
   window.addEventListener("load", () => {
     checkFirstRun();
+    console.log("locals");
     if (localStorage.getItem("read") === "true") {
       // 检查是否正在导航到下一个话题
       if (localStorage.getItem("navigatingToNextTopic") === "true") {

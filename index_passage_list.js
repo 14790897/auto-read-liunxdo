@@ -140,9 +140,28 @@
     ); // 获取已阅读链接列表
 
     // 筛选出未阅读的链接
-    const unreadLinks = Array.from(links).filter(
-      (link) => !alreadyReadLinks.includes(link.href)
-    );
+    const unreadLinks = Array.from(links).filter((link) => {
+      // 检查链接是否已经被读过
+      const isAlreadyRead = alreadyReadLinks.includes(link.href);
+      if (isAlreadyRead) {
+        return false; // 如果链接已被读过，直接排除
+      }
+
+      // 向上遍历DOM树，查找包含'visited'类的父级元素，最多查找三次
+      let parent = link.parentElement;
+      let times = 0; // 查找次数计数器
+      while (parent && times < 3) {
+        if (parent.classList.contains("visited")) {
+          // 如果找到包含'visited'类的父级元素，中断循环
+          return false; // 父级元素包含'visited'类，排除这个链接
+        }
+        parent = parent.parentElement; // 继续向上查找
+        times++; // 增加查找次数
+      }
+
+      // 如果链接未被读过，且在向上查找三次内，其父级元素中没有包含'visited'类，则保留这个链接
+      return true;
+    });
 
     // 如果找到了这样的链接
     if (unreadLinks.length > 0) {

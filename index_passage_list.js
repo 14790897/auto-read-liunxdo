@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.1
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://linux.do/*

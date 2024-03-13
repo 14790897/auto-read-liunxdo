@@ -221,6 +221,11 @@
   button.style.bottom = "10px"; // 之前是 top
   button.style.left = "10px"; // 之前是 right
   button.style.zIndex = 1000;
+  button.style.backgroundColor = "#f0f0f0"; // 浅灰色背景
+  button.style.color = "#000"; // 黑色文本
+  button.style.border = "1px solid #ddd"; // 浅灰色边框
+  button.style.padding = "5px 10px"; // 内边距
+  button.style.borderRadius = "5px"; // 圆角
   document.body.appendChild(button);
 
   button.onclick = function () {
@@ -254,6 +259,11 @@
   toggleAutoLikeButton.style.bottom = "50px"; // 之前是 top，且与另一个按钮错开位置
   toggleAutoLikeButton.style.left = "10px"; // 之前是 right
   toggleAutoLikeButton.style.zIndex = "1000";
+  toggleAutoLikeButton.style.backgroundColor = "#f0f0f0"; // 浅灰色背景
+  toggleAutoLikeButton.style.color = "#000"; // 黑色文本
+  toggleAutoLikeButton.style.border = "1px solid #ddd"; // 浅灰色边框
+  toggleAutoLikeButton.style.padding = "5px 10px"; // 内边距
+  toggleAutoLikeButton.style.borderRadius = "5px"; // 圆角
   document.body.appendChild(toggleAutoLikeButton);
 
   // 为按钮添加点击事件处理函数

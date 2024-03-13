@@ -218,8 +218,8 @@
   button.textContent =
     localStorage.getItem("read") === "true" ? "停止阅读" : "开始阅读";
   button.style.position = "fixed";
-  button.style.top = "10px";
-  button.style.right = "10px";
+  button.style.bottom = "10px"; // 之前是 top
+  button.style.left = "10px"; // 之前是 right
   button.style.zIndex = 1000;
   document.body.appendChild(button);
 
@@ -251,8 +251,8 @@
     ? "禁用自动点赞"
     : "启用自动点赞";
   toggleAutoLikeButton.style.position = "fixed";
-  toggleAutoLikeButton.style.top = "50px"; // 与停止阅读按钮错开位置
-  toggleAutoLikeButton.style.right = "10px";
+  toggleAutoLikeButton.style.bottom = "50px"; // 之前是 top，且与另一个按钮错开位置
+  toggleAutoLikeButton.style.left = "10px"; // 之前是 right
   toggleAutoLikeButton.style.zIndex = "1000";
   document.body.appendChild(toggleAutoLikeButton);
 

@@ -114,13 +114,16 @@
         // 等待一段时间或直到页面完全加载
         // 页面加载完成后，移除标记
         localStorage.removeItem("navigatingToNextTopic");
-        //先随机滚动一段距离然后再查找链接
-        scrollToBottomSlowly(
-          Math.random() * document.body.offsetHeight * 3,
-          searchLinkClick,
-          20,
-          20
-        );
+        // 使用setTimeout延迟执行
+        setTimeout(() => {
+          // 先随机滚动一段距离然后再查找链接
+          scrollToBottomSlowly(
+            Math.random() * document.body.offsetHeight * 3,
+            searchLinkClick,
+            20,
+            20
+          );
+        }, 2000); // 延迟2000毫秒（即2秒）
       } else {
         console.log("执行正常的滚动和检查逻辑");
         // 执行正常的滚动和检查逻辑
@@ -137,17 +140,17 @@
     // 在新页面加载后执行检查
     // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
     const links = document.querySelectorAll('a[href^="/t/topic/"]');
-    const alreadyReadLinks = JSON.parse(
-      localStorage.getItem("alreadyReadLinks") || "[]"
-    ); // 获取已阅读链接列表
+    // const alreadyReadLinks = JSON.parse(
+    //   localStorage.getItem("alreadyReadLinks") || "[]"
+    // ); // 获取已阅读链接列表
 
     // 筛选出未阅读的链接
     const unreadLinks = Array.from(links).filter((link) => {
       // 检查链接是否已经被读过
-      const isAlreadyRead = alreadyReadLinks.includes(link.href);
-      if (isAlreadyRead) {
-        return false; // 如果链接已被读过，直接排除
-      }
+      // const isAlreadyRead = alreadyReadLinks.includes(link.href);
+      // if (isAlreadyRead) {
+      //   return false; // 如果链接已被读过，直接排除
+      // }
 
       // 向上遍历DOM树，查找包含'visited'类的父级元素，最多查找三次
       let parent = link.parentElement;
@@ -177,11 +180,11 @@
       //   link.click();
       // }, delay);
       // 将链接添加到已阅读列表并更新localStorage
-      alreadyReadLinks.push(link.href);
-      localStorage.setItem(
-        "alreadyReadLinks",
-        JSON.stringify(alreadyReadLinks)
-      );
+      // alreadyReadLinks.push(link.href);
+      // localStorage.setItem(
+      //   "alreadyReadLinks",
+      //   JSON.stringify(alreadyReadLinks)
+      // );
 
       // 导航到该链接
       window.location.href = link.href;
@@ -271,16 +274,4 @@
   function setAutoLikeEnabled(enabled) {
     localStorage.setItem("autoLikeEnabled", enabled ? "true" : "false");
   }
-
-  // 在页面加载时检查是否启用自动点赞，并执行相应的操作
-  window.addEventListener("load", () => {
-    if (localStorage.getItem("read") === "true") {
-      // 根据设置决定是否执行自动点赞
-      if (isAutoLikeEnabled()) {
-        autoLike();
-      }
-
-      // 其余的加载逻辑...
-    }
-  });
 })();

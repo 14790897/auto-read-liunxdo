@@ -206,6 +206,10 @@
 
     // 逐个点击找到的按钮
     buttons.forEach((button, index) => {
+      if (button.title !== '点赞此帖子'){
+        return;
+      }
+
       // 使用setTimeout来错开每次点击的时间，避免同时触发点击
       setTimeout(() => {
         // 模拟点击

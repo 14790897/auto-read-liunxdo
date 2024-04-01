@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.2.1
+// @version      1.2.3
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://linux.do/*
@@ -206,7 +206,7 @@
 
     // 逐个点击找到的按钮
     buttons.forEach((button, index) => {
-      if (button.title !== '点赞此帖子'){
+      if (button.title !== "点赞此帖子") {
         return;
       }
 

@@ -1,15 +1,59 @@
 const puppeteer = require("puppeteer");
 
 (async () => {
+  //随机等待时间
+  function delayClick(time) {
+    return new Promise(function (resolve) {
+      setTimeout(resolve, time);
+    });
+  }
   const browser = await puppeteer.launch({ headless: false });
   const page = await browser.newPage();
+  //登录操作
+  await page.goto("https://linux.do");
+  // 使用XPath查询找到包含"登录"或"login"文本的按钮
+  await page.evaluate(() => {
+    const loginButton = Array.from(document.querySelectorAll("button")).find(
+      (button) =>
+        button.textContent.includes("登录") ||
+        button.textContent.includes("login")
+    );
 
+    if (loginButton) {
+      loginButton.click();
+    } else {
+      console.log("Login button not found.");
+    }
+  });
+
+  // 等待用户名输入框加载
+  await page.waitForSelector("#login-account-name");
+  // 模拟人类在找到输入框后的短暂停顿
+  await delayClick(500); // 延迟500毫秒
+  // 清空输入框并输入用户名
+  await page.click("#login-account-name", { clickCount: 3 });
+  await page.type("#login-account-name", "hahaha2", { delay: 100 }); // 输入时在每个按键之间添加额外的延迟
+
+  // 等待密码输入框加载
+  await page.waitForSelector("#login-account-password");
+  // 模拟人类在输入用户名后的短暂停顿
+  await delayClick(500);
+  // 清空输入框并输入密码
+  await page.click("#login-account-password", { clickCount: 3 });
+  await page.type("#login-account-password", "BfdSGt}F4!5pLHt", { delay: 100 });
+
+  // 模拟人类在输入完成后思考的短暂停顿
+  await delayClick(1000);
+
+  // 假设登录按钮的ID是'login-button'，点击登录按钮
+  await page.waitForSelector("#login-button");
+  await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
+  await page.click("#login-button");
   // 定义包含文章列表的数组
   const urls = [
     "https://linux.do/latest",
     "https://linux.do/top",
     "https://linux.do/latest?ascending=false&order=posts",
-    // "https://linux.do/unread",
   ];
 
   // 生成一个随机索引
@@ -17,8 +61,11 @@ const puppeteer = require("puppeteer");
 
   // 根据随机索引选择一个URL
   const initialURL = urls[randomIndex];
-
-  await page.goto(initialURL);
+  await delayClick(1000);
+  await page.goto(initialURL, {
+    waitUntil: "networkidle2",
+    timeout: 0,
+  });
 
   // 检查是否是第一次运行脚本
   async function checkFirstRun() {
@@ -42,7 +89,7 @@ const puppeteer = require("puppeteer");
   async function updateInitialData() {
     await page.evaluate(() => {
       localStorage.setItem("read", "false");
-      localStorage.setItem("autoLikeEnabled", "false");
+      localStorage.setItem("autoLikeEnabled", "true");
     });
     console.log("执行了初始数据更新操作");
   }
@@ -125,41 +172,45 @@ const puppeteer = require("puppeteer");
 
   // 入口函数
   await checkFirstRun();
-  console.log("locals");
-  const isRead = await page.evaluate(
-    () => localStorage.getItem("read") === "true"
-  );
-  if (isRead) {
-    // 检查是否正在导航到下一个话题
-    const isNavigatingToNextTopic = await page.evaluate(
-      () => localStorage.getItem("navigatingToNextTopic") === "true"
+  console.log("开始操作");
+  try {
+    const isRead = await page.evaluate(
+      () => localStorage.getItem("read") === "true"
     );
-    if (isNavigatingToNextTopic) {
-      console.log("正在导航到下一个话题");
-      // 等待一段时间或直到页面完全加载
-      await page.waitForTimeout(2000);
-      // 页面加载完成后，移除标记
-      await page.evaluate(() => {
-        localStorage.removeItem("navigatingToNextTopic");
-      });
-      // 先随机滚动一段距离然后再查找链接
-      await scrollToBottomSlowly(
-        Math.random() * 9999999999,
-        searchLinkClick,
-        20,
-        20
+    if (isRead) {
+      // 检查是否正在导航到下一个话题
+      const isNavigatingToNextTopic = await page.evaluate(
+        () => localStorage.getItem("navigatingToNextTopic") === "true"
       );
-    } else {
-      console.log("执行正常的滚动和检查逻辑");
-      // 执行正常的滚动和检查逻辑
-      await checkScroll();
-      const isAutoLikeEnabled = await page.evaluate(
-        () => localStorage.getItem("autoLikeEnabled") !== "false"
-      );
-      if (isAutoLikeEnabled) {
-        await autoLike();
+      if (isNavigatingToNextTopic) {
+        console.log("正在导航到下一个话题");
+        // 等待一段时间或直到页面完全加载
+        await page.waitForTimeout(2000);
+        // 页面加载完成后，移除标记
+        await page.evaluate(() => {
+          localStorage.removeItem("navigatingToNextTopic");
+        });
+        // 先随机滚动一段距离然后再查找链接
+        await scrollToBottomSlowly(
+          Math.random() * 9999999999,
+          searchLinkClick,
+          20,
+          20
+        );
+      } else {
+        console.log("执行正常的滚动和检查逻辑");
+        // 执行正常的滚动和检查逻辑
+        await checkScroll();
+        const isAutoLikeEnabled = await page.evaluate(
+          () => localStorage.getItem("autoLikeEnabled") !== "false"
+        );
+        if (isAutoLikeEnabled) {
+          await autoLike();
+        }
       }
     }
+  } catch (error) {
+    console.error("Error occurred:", error);
   }
 
   async function searchLinkClick() {
@@ -274,6 +325,6 @@ const puppeteer = require("puppeteer");
   });
 
   // 保持浏览器打开
-  await page.waitForTimeout(9999999999);
+  // await page.waitForTimeout(9999999999);
   await browser.close();
 })();

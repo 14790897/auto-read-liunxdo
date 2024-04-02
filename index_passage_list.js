@@ -31,7 +31,7 @@
 
   // 更新初始数据的函数
   function updateInitialData() {
-    localStorage.setItem("read", "false"); // 开始时就自动滚动
+    localStorage.setItem("read", "false"); // 开始时自动滚动关闭
     localStorage.setItem("autoLikeEnabled", "false"); //默认关闭自动点赞
     console.log("执行了初始数据更新操作");
   }

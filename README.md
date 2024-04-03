@@ -1,16 +1,23 @@
-# auto-read-liunxdo
+## 使用方法一：油猴脚本
 
-自动刷 Linux do 的文章 以及自动点赞
+自动刷 Linux do 的文章以及自动点赞
 代码在 index_passage_list 中
+油猴：https://greasyfork.org/en/scripts/489464-auto-read
 
-## puppeteer 运行方法
+## 使用方法二：puppeteer 无头运行
 
-### Windows
+### 1.设置环境变量
+
+.env 里面设置用户名 密码
+
+### 2.运行
+
+#### Windows
 
 npm install
 node .\pteer.js
 
-### Linux 额外安装以下包
+#### Linux 额外安装以下包
 
 ```sh
 sudo apt-get update

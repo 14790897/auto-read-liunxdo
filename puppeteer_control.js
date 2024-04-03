@@ -88,7 +88,7 @@ const puppeteer = require("puppeteer");
   // 更新初始数据的函数
   async function updateInitialData() {
     await page.evaluate(() => {
-      localStorage.setItem("read", "false");
+      localStorage.setItem("read", "true");
       localStorage.setItem("autoLikeEnabled", "true");
     });
     console.log("执行了初始数据更新操作");
@@ -326,5 +326,5 @@ const puppeteer = require("puppeteer");
 
   // 保持浏览器打开
   // await page.waitForTimeout(9999999999);
-  await browser.close();
+  // await browser.close();
 })();

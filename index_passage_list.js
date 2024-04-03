@@ -209,8 +209,7 @@
     // 逐个点击找到的按钮
     buttons.forEach((button, index) => {
       if (
-        button.title !== "点赞此帖子" ||
-        button.title !== "Like this post" ||
+        (button.title !== "点赞此帖子" && button.title !== "Like this post") ||
         clickCounter >= 50
       ) {
         return;

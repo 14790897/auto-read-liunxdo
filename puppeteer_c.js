@@ -1,6 +1,8 @@
 const fs = require("fs");
+
 const path = require("path");
 const puppeteer = require("puppeteer");
+require("dotenv").config();
 
 (async () => {
   //随机等待时间
@@ -34,7 +36,9 @@ const puppeteer = require("puppeteer");
   await delayClick(500); // 延迟500毫秒
   // 清空输入框并输入用户名
   await page.click("#login-account-name", { clickCount: 3 });
-  await page.type("#login-account-name", process.env.USERNAME, { delay: 100 }); // 输入时在每个按键之间添加额外的延迟
+  await page.type("#login-account-name", process.env.USERNAMELINUXDO, {
+    delay: 100,
+  }); // 输入时在每个按键之间添加额外的延迟
 
   // 等待密码输入框加载
   await page.waitForSelector("#login-account-password");
@@ -55,8 +59,6 @@ const puppeteer = require("puppeteer");
   await page.click("#login-button");
 
   //真正执行阅读脚本
-  await page.goto("https://linux.do/t/topic/13716/100");
-
   // 读取外部脚本文件的内容
   const externalScriptPath = path.join(__dirname, "external.js");
   const externalScript = fs.readFileSync(externalScriptPath, "utf8");
@@ -66,4 +68,5 @@ const puppeteer = require("puppeteer");
     const [scriptToEval] = args;
     eval(scriptToEval);
   }, externalScript);
+  await page.goto("https://linux.do/t/topic/13716/100");
 })();

@@ -198,6 +198,8 @@
       );
     }
   }
+  // 从localStorage获取当前的点击计数，如果不存在则初始化为0
+  let clickCounter = parseInt(localStorage.getItem("clickCounter") || "0", 10);
   function autoLike() {
     // 寻找所有的discourse-reactions-reaction-button
     const buttons = document.querySelectorAll(
@@ -206,7 +208,7 @@
 
     // 逐个点击找到的按钮
     buttons.forEach((button, index) => {
-      if (button.title !== "点赞此帖子") {
+      if (button.title !== "点赞此帖子" || clickCounter >= 50) {
         return;
       }
 
@@ -215,6 +217,14 @@
         // 模拟点击
         button.click();
         console.log(`Clicked button ${index + 1}`);
+        clickCounter++; // 更新点击计数器
+        // 将新的点击计数存储到localStorage
+        localStorage.setItem("clickCounter", clickCounter.toString());
+        // 如果点击次数达到50次，则设置点赞变量为false
+        if (clickCounter === 50) {
+          console.log("Reached 50 likes, setting the like variable to false.");
+          localStorage.setItem("autoLikeEnabled", "false"); // 使用localStorage存储点赞变量状态
+        }
       }, index * 1000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
     });
   }

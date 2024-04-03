@@ -13,6 +13,12 @@ require("dotenv").config();
   }
   const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
+  page.on("pageerror", (error) => {
+    console.error(`Page error: ${error.message}`);
+  });
+  page.on("error", (error) => {
+    console.error(`Error: ${error.message}`);
+  });
   //登录操作
   await page.goto("https://linux.do", { timeout: 60000 });
   // 使用XPath查询找到包含"登录"或"login"文本的按钮

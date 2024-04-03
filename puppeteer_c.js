@@ -57,6 +57,7 @@ require("dotenv").config();
   await page.waitForSelector("#login-button");
   await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
   await page.click("#login-button");
+  await delayClick(500);
 
   //真正执行阅读脚本
   // 读取外部脚本文件的内容

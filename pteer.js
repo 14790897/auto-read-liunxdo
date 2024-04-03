@@ -11,7 +11,10 @@ require("dotenv").config();
       setTimeout(resolve, time);
     });
   }
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], // 添加这些参数
+  });
   const page = await browser.newPage();
   page.on("pageerror", (error) => {
     console.error(`Page error: ${error.message}`);

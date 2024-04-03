@@ -11,7 +11,7 @@ require("dotenv").config();
       setTimeout(resolve, time);
     });
   }
-  const browser = await puppeteer.launch({ headless: false });
+  const browser = await puppeteer.launch({ headless: true });
   const page = await browser.newPage();
   //登录操作
   await page.goto("https://linux.do", { timeout: 60000 });

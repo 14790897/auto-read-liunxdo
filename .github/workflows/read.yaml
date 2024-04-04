@@ -1,26 +1,26 @@
-name: Node.js CI
+# name: Node.js CI
 
-on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
 
-jobs:
-  build:
-    runs-on: ubuntu-latest
+# jobs:
+#   build:
+#     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [20.x] # 选择你需要的 Node.js 版本
+#     strategy:
+#       matrix:
+#         node-version: [20.x] # 选择你需要的 Node.js 版本
 
-    steps:
-      - uses: actions/checkout@v3 # 检出你的仓库
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-      - name: Install dependencies
-        run: npm install # 安装 package.json 中的依赖项
-      - name: Run a script
-        run: node pteer.js # 替换为你想运行的脚本的实际名称
+#     steps:
+#       - uses: actions/checkout@v3 # 检出你的仓库
+#       - name: Use Node.js ${{ matrix.node-version }}
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: ${{ matrix.node-version }}
+#       - name: Install dependencies
+#         run: npm install # 安装 package.json 中的依赖项
+#       - name: Run a script
+#         run: node pteer.js # 替换为你想运行的脚本的实际名称

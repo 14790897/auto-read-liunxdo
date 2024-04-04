@@ -28,12 +28,14 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 
 ```
 
-## 使用方法三：GitHub Action
+## 使用方法三：GitHub Action 每天 0 点阅读
 
-### 1.设置环境变量
+### 1. fork 仓库
+
+### 2.设置环境变量
 
 .env 里面设置用户名 密码
 
-### 2.启动 workflow
+### 3.启动 workflow
 
 教程：https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates

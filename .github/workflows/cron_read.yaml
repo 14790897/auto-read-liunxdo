@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 10 # 设置作业超时时间为10分钟
 
     strategy:
       matrix:

@@ -114,6 +114,15 @@ require("dotenv").config();
       page.click("#login-button"), // 点击登录按钮触发跳转
     ]);
     await delayClick(1000);
+    // 查找具有类名 "avatar" 的 img 元素验证登录是否成功
+    const avatarImg = await page.$("img.avatar");
+
+    if (avatarImg) {
+      console.log("找到avatarImg，登录成功");
+      // 可以继续对 avatarImg 进行操作，比如获取其属性等
+    } else {
+      console.log("未找到avatarImg，登录失败");
+    }
 
     //真正执行阅读脚本
     // 读取外部脚本文件的内容

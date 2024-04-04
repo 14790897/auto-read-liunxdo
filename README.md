@@ -1,7 +1,6 @@
 ## 使用方法一：油猴脚本
 
-自动刷 Linux do 的文章以及自动点赞
-代码在 index_passage_list 中
+油猴脚本代码在 index_passage_list 中
 油猴：https://greasyfork.org/en/scripts/489464-auto-read
 
 ## 使用方法二：puppeteer 无头运行

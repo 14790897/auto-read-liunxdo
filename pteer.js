@@ -42,7 +42,7 @@ require("dotenv").config();
   });
 
   // 等待用户名输入框加载
-  await page.waitForSelector("#login-account-name");
+  await page.waitForSelector("#login-form");
   // 模拟人类在找到输入框后的短暂停顿
   await delayClick(500); // 延迟500毫秒
   // 清空输入框并输入用户名
@@ -52,7 +52,7 @@ require("dotenv").config();
   }); // 输入时在每个按键之间添加额外的延迟
 
   // 等待密码输入框加载
-  await page.waitForSelector("#login-account-password");
+  // await page.waitForSelector("#login-account-password");
   // 模拟人类在输入用户名后的短暂停顿
   await delayClick(500);
   // 清空输入框并输入密码

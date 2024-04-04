@@ -25,6 +25,11 @@ require("dotenv").config();
       console.error(`Error: ${error.message}`);
     });
     page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
+    // 监听所有请求
+    page.on("request", (request) => {
+      console.log("Request URL:", request.url());
+      console.log("Request Headers:", request.headers());
+    });
 
     //登录操作
     await page.goto("https://linux.do");
@@ -52,7 +57,7 @@ require("dotenv").config();
     });
 
     // 等待用户名输入框加载
-    await page.waitForSelector("#login-form");
+    await page.waitForSelector("#login-account-name");
     // 模拟人类在找到输入框后的短暂停顿
     await delayClick(500); // 延迟500毫秒
     // 清空输入框并输入用户名
@@ -62,7 +67,7 @@ require("dotenv").config();
     }); // 输入时在每个按键之间添加额外的延迟
 
     // 等待密码输入框加载
-    // await page.waitForSelector("#login-account-password");
+    await page.waitForSelector("#login-account-password");
     // 模拟人类在输入用户名后的短暂停顿
     await delayClick(500);
     // 清空输入框并输入密码

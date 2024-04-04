@@ -15,6 +15,7 @@ function delayClick(time) {
 
 (async () => {
   if (usernames.length !== passwords.length) {
+    console.log(usernames.length, usernames, passwords.length, passwords);
     console.log("用户名和密码的数量不匹配！");
     return;
   }
@@ -31,7 +32,7 @@ function delayClick(time) {
 async function launchBrowserForUser(username, password) {
   try {
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"], //linux需要
       defaultViewport: {
         width: 1280,

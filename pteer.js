@@ -15,7 +15,12 @@ require("dotenv").config();
     const browser = await puppeteer.launch({
       headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"], //linuzx需要
-      defaultViewport: { width: 1920, height: 1080 },
+      defaultViewport: {
+        width: 1280,
+        height: 800,
+        userAgent:
+          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
+      },
     });
     const page = await browser.newPage();
     page.on("pageerror", (error) => {

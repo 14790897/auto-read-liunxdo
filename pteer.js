@@ -25,11 +25,11 @@ require("dotenv").config();
       console.error(`Error: ${error.message}`);
     });
     page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
-    // 监听所有请求
-    page.on("request", (request) => {
-      console.log("Request URL:", request.url());
-      console.log("Request Headers:", request.headers());
-    });
+    // // 监听所有请求
+    // page.on("request", (request) => {
+    //   console.log("Request URL:", request.url());
+    //   console.log("Request Headers:", request.headers());
+    // });
 
     //登录操作
     await page.goto("https://linux.do");

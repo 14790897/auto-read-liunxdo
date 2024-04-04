@@ -26,8 +26,18 @@ require("dotenv").config();
     page.on("pageerror", (error) => {
       console.error(`Page error: ${error.message}`);
     });
-    page.on("error", (error) => {
+    page.on("error", async (error) => {
       console.error(`Error: ${error.message}`);
+      // 检查是否是 localStorage 的访问权限错误
+      if (
+        error.message.includes(
+          "Failed to read the 'localStorage' property from 'Window'"
+        )
+      ) {
+        console.log("Trying to refresh the page to resolve the issue...");
+        await page.reload(); // 刷新页面
+        // 重新尝试你的操作...
+      }
     });
     page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
     // // 监听所有请求

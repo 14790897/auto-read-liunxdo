@@ -13,7 +13,8 @@ require("dotenv").config();
   }
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox", "--disable-setuid-sandbox"], // 添加这些参数
+    args: ["--no-sandbox", "--disable-setuid-sandbox"], //linuzx需要
+    defaultViewport: { width: 1920, height: 1080 },
   });
   const page = await browser.newPage();
   page.on("pageerror", (error) => {
@@ -23,7 +24,7 @@ require("dotenv").config();
     console.error(`Error: ${error.message}`);
   });
   //登录操作
-  await page.goto("https://linux.do", { timeout: 0 });
+  await page.goto("https://linux.do");
   // 使用XPath查询找到包含"登录"或"login"文本的按钮
   await page.evaluate(() => {
     const loginButton = Array.from(document.querySelectorAll("button")).find(
@@ -34,13 +35,14 @@ require("dotenv").config();
 
     if (loginButton) {
       loginButton.click();
+      console.log("Login button clicked.");
     } else {
       console.log("Login button not found.");
     }
   });
 
   // 等待用户名输入框加载
-  await page.waitForSelector("#login-account-name", { timeout: 0 });
+  await page.waitForSelector("#login-account-name");
   // 模拟人类在找到输入框后的短暂停顿
   await delayClick(500); // 延迟500毫秒
   // 清空输入框并输入用户名
@@ -50,7 +52,7 @@ require("dotenv").config();
   }); // 输入时在每个按键之间添加额外的延迟
 
   // 等待密码输入框加载
-  await page.waitForSelector("#login-account-password", { timeout: 0 });
+  await page.waitForSelector("#login-account-password");
   // 模拟人类在输入用户名后的短暂停顿
   await delayClick(500);
   // 清空输入框并输入密码

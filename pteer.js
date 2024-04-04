@@ -3,18 +3,36 @@ const fs = require("fs");
 const path = require("path");
 const puppeteer = require("puppeteer");
 require("dotenv").config();
+// 从环境变量解析用户名和密码
+const usernames = process.env.USERNAMES.split(",");
+const passwords = process.env.PASSWORDS.split(",");
+//随机等待时间
+function delayClick(time) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, time);
+  });
+}
 
 (async () => {
+  if (usernames.length !== passwords.length) {
+    console.log("用户名和密码的数量不匹配！");
+    return;
+  }
+
+  // 并发启动浏览器实例进行登录
+  const loginPromises = usernames.map((username, index) => {
+    const password = passwords[index];
+    return launchBrowserForUser(username, password);
+  });
+
+  // 等待所有登录操作完成
+  await Promise.all(loginPromises);
+})();
+async function launchBrowserForUser(username, password) {
   try {
-    //随机等待时间
-    function delayClick(time) {
-      return new Promise(function (resolve) {
-        setTimeout(resolve, time);
-      });
-    }
     const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"], //linuzx需要
+      headless: false,
+      args: ["--no-sandbox", "--disable-setuid-sandbox"], //linux需要
       defaultViewport: {
         width: 1280,
         height: 800,
@@ -41,12 +59,19 @@ require("dotenv").config();
     });
     page.on("console", async (msg) => {
       console.log("PAGE LOG:", msg.text());
-      if (msg.text().includes("the server responded with a status of 429")) {
-        await page.evaluate(() => {
+      // 使用一个标志变量来检测是否已经刷新过页面
+      if (
+        !page._isReloaded &&
+        msg.text().includes("the server responded with a status of 429")
+      ) {
+        // 设置标志变量为 true，表示即将刷新页面
+        page._isReloaded = true;
+        //由于油候脚本它这个时候可能会导航到新的网页,会导致直接执行代码报错,所以使用这个来在每个新网页加载之前来执行
+        await page.evaluateOnNewDocument(() => {
           localStorage.setItem("autoLikeEnabled", "false");
         });
-        // 等待一段时间，比如 10 秒
-        await new Promise((resolve) => setTimeout(resolve, 10000));
+        // 等待一段时间，比如 3 秒
+        await new Promise((resolve) => setTimeout(resolve, 3000));
         console.log("Retrying now...");
         // 尝试刷新页面
         await page.reload();
@@ -83,37 +108,7 @@ require("dotenv").config();
       }
     });
 
-    // 等待用户名输入框加载
-    await page.waitForSelector("#login-account-name");
-    // 模拟人类在找到输入框后的短暂停顿
-    await delayClick(500); // 延迟500毫秒
-    // 清空输入框并输入用户名
-    await page.click("#login-account-name", { clickCount: 3 });
-    await page.type("#login-account-name", process.env.USERNAMELINUXDO, {
-      delay: 100,
-    }); // 输入时在每个按键之间添加额外的延迟
-
-    // 等待密码输入框加载
-    await page.waitForSelector("#login-account-password");
-    // 模拟人类在输入用户名后的短暂停顿
-    await delayClick(500);
-    // 清空输入框并输入密码
-    await page.click("#login-account-password", { clickCount: 3 });
-    await page.type("#login-account-password", process.env.PASSWORDLINUXDO, {
-      delay: 100,
-    });
-
-    // 模拟人类在输入完成后思考的短暂停顿
-    await delayClick(1000);
-
-    // 假设登录按钮的ID是'login-button'，点击登录按钮
-    await page.waitForSelector("#login-button");
-    await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
-    await Promise.all([
-      page.waitForNavigation(), // 等待页面跳转
-      page.click("#login-button"), // 点击登录按钮触发跳转
-    ]);
-    await delayClick(1000);
+    await login(page, username, password);
     // 查找具有类名 "avatar" 的 img 元素验证登录是否成功
     const avatarImg = await page.$("img.avatar");
 
@@ -143,4 +138,37 @@ require("dotenv").config();
   } catch (err) {
     console.log(err);
   }
-})();
+}
+async function login(page, username, password) {
+  // 等待用户名输入框加载
+  await page.waitForSelector("#login-account-name");
+  // 模拟人类在找到输入框后的短暂停顿
+  await delayClick(500); // 延迟500毫秒
+  // 清空输入框并输入用户名
+  await page.click("#login-account-name", { clickCount: 3 });
+  await page.type("#login-account-name", username, {
+    delay: 100,
+  }); // 输入时在每个按键之间添加额外的延迟
+
+  // 等待密码输入框加载
+  await page.waitForSelector("#login-account-password");
+  // 模拟人类在输入用户名后的短暂停顿
+  await delayClick(500);
+  // 清空输入框并输入密码
+  await page.click("#login-account-password", { clickCount: 3 });
+  await page.type("#login-account-password", password, {
+    delay: 100,
+  });
+
+  // 模拟人类在输入完成后思考的短暂停顿
+  await delayClick(1000);
+
+  // 假设登录按钮的ID是'login-button'，点击登录按钮
+  await page.waitForSelector("#login-button");
+  await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
+  await Promise.all([
+    page.waitForNavigation(), // 等待页面跳转
+    page.click("#login-button"), // 点击登录按钮触发跳转
+  ]);
+  await delayClick(1000);
+}

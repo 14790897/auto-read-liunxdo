@@ -107,7 +107,12 @@
   // 入口函数
   window.addEventListener("load", () => {
     checkFirstRun();
-    console.log("locals");
+    console.log(
+      "autoRead",
+      localStorage.getItem("read"),
+      "autoLikeEnabled",
+      localStorage.getItem("autoLikeEnabled")
+    );
     if (localStorage.getItem("read") === "true") {
       // 检查是否正在导航到下一个话题
       if (localStorage.getItem("navigatingToNextTopic") === "true") {

@@ -39,7 +39,19 @@ require("dotenv").config();
         // 重新尝试你的操作...
       }
     });
-    page.on("console", (msg) => console.log("PAGE LOG:", msg.text()));
+    page.on("console", async (msg) => {
+      console.log("PAGE LOG:", msg.text());
+      if (msg.text().includes("the server responded with a status of 429")) {
+        await page.evaluate(() => {
+          localStorage.setItem("autoLikeEnabled", "false");
+        });
+        // 等待一段时间，比如 10 秒
+        await new Promise((resolve) => setTimeout(resolve, 10000));
+        console.log("Retrying now...");
+        // 尝试刷新页面
+        await page.reload();
+      }
+    });
     // // 监听所有请求
     // page.on("request", (request) => {
     //   console.log("Request URL:", request.url());

@@ -224,7 +224,7 @@
       setTimeout(() => {
         // 模拟点击
         button.click();
-        console.log(`Clicked button ${index + 1}`);
+        console.log(`Clicked like button ${index + 1}`);
         clickCounter++; // 更新点击计数器
         // 将新的点击计数存储到localStorage
         localStorage.setItem("clickCounter", clickCounter.toString());
@@ -267,7 +267,7 @@
       }
       localStorage.removeItem("navigatingToNextTopic");
     } else {
-      window.location.href = "https://linux.do/t/topic/13716/100";
+      window.location.href = "https://linux.do/t/topic/13716/120";
       checkScroll();
     }
   };

@@ -142,7 +142,7 @@ async function launchBrowserForUser(username, password) {
     // page.on("load", async () => {
     //   await page.evaluate(externalScript);
     // });
-    await page.goto("https://linux.do/t/topic/13716/100");
+    await page.goto("https://linux.do/t/topic/13716/110");
   } catch (err) {
     console.log(err);
   }
@@ -177,6 +177,6 @@ async function login(page, username, password) {
   await Promise.all([
     page.waitForNavigation(), // 等待页面跳转
     page.click("#login-button"), // 点击登录按钮触发跳转
-  ]);
+  ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败
   await delayClick(1000);
 }

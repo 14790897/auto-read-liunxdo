@@ -1,5 +1,5 @@
 # 使用官方 Node.js 作为父镜像
-FROM node:14-slim
+FROM node:18-slim
 
 # 设置工作目录
 WORKDIR /app
@@ -53,9 +53,6 @@ RUN apt-get update && apt-get install -y \
 
 # 安装 Node.js 依赖
 RUN npm install
-
-# 如果你的 Puppeteer 脚本在安装时没有下载 Chromium，取消下一行的注释
-# ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 # 将你的 Puppeteer 脚本复制到容器中
 COPY . .

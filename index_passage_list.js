@@ -38,6 +38,7 @@
   const delay = 2000; // 滚动检查的间隔（毫秒）
   let scrollInterval = null;
   let checkScrollTimeout = null;
+  let autoLikeInterval = null;
 
   function scrollToBottomSlowly(
     stopDistance = 9999999999,
@@ -221,7 +222,7 @@
       }
 
       // 使用setTimeout来错开每次点击的时间，避免同时触发点击
-      setTimeout(() => {
+      autoLikeInterval = setTimeout(() => {
         // 模拟点击
         button.click();
         console.log(`Clicked like button ${index + 1}`);

@@ -46,3 +46,9 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 ```sh
  docker-compose up -d
 ```
+
+查看日志
+
+```sh
+docker-compose logs -f
+```

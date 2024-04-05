@@ -6,6 +6,8 @@ require("dotenv").config();
 // 从环境变量解析用户名和密码
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
+// 每个浏览器实例之间的延迟时间(毫秒)
+const delayBetweenInstances = 10000;
 //随机等待时间
 function delayClick(time) {
   return new Promise(function (resolve) {
@@ -23,7 +25,12 @@ function delayClick(time) {
   // 并发启动浏览器实例进行登录
   const loginPromises = usernames.map((username, index) => {
     const password = passwords[index];
-    return launchBrowserForUser(username, password);
+    const delay = index * delayBetweenInstances;
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        launchBrowserForUser(username, password).then(resolve);
+      }, delay);
+    });
   });
 
   // 等待所有登录操作完成

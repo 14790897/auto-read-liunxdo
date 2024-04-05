@@ -33,8 +33,16 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 
 ### 2.设置环境变量
 
-.env 里面设置用户名 密码
+在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的）或者在.env 里面设置用户名 密码
 
 ### 3.启动 workflow
 
 教程：https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates
+
+## 使用方法四：docker 定时运行
+
+克隆仓库，修改.env 或者在`docker-compose.yml`里面设置环境变量，然后运行
+
+```sh
+ docker-compose up -d
+```

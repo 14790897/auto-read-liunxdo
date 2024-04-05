@@ -8,8 +8,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装 Puppeteer 依赖
-# 注意：这会同时安装 Puppeteer 和 Chromium
 RUN apt-get update && apt-get install -y \
+    cron\
     wget \
     ca-certificates \
     fonts-liberation \
@@ -57,5 +57,11 @@ RUN npm install
 # 将你的 Puppeteer 脚本复制到容器中
 COPY . .
 
-# 运行 Puppeteer 脚本
-CMD ["node", "pteer.js"]
+# 创建一个新的 crontab 文件
+RUN echo "0 3 * * * node /app/pteer.js" > /etc/cron.d/puppeteer-cron
+
+# 给 crontab 文件适当的权限
+RUN chmod 0644 /etc/cron.d/puppeteer-cron
+
+# 将 cron 设置为在前台运行
+CMD ["cron", "-f"]

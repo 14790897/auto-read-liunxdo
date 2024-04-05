@@ -1,4 +1,4 @@
-name: PaperAI Docker Image Push
+name: AutoRead Docker Image Push
 
 on:
   push:

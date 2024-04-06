@@ -50,6 +50,8 @@ RUN apt-get update && apt-get install -y \
     xdg-utils \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
+#时区为中国
+ENV TZ=Asia/Shanghai
 
 # 安装 Node.js 依赖
 RUN npm install
@@ -58,10 +60,13 @@ RUN npm install
 COPY . .
 
 # 创建一个新的 crontab 文件
-RUN echo "0 3 * * * node /app/pteer.js" > /etc/cron.d/puppeteer-cron
+RUN echo "0 3 * * * node /app/pteer.js >> /var/log/cron.log 2>&1" > /etc/cron.d/puppeteer-cron
 
 # 给 crontab 文件适当的权限
 RUN chmod 0644 /etc/cron.d/puppeteer-cron
 
-# 将 cron 设置为在前台运行
-CMD ["cron", "-f"]
+# 将 cron 日志文件的权限设置为可写
+RUN touch /var/log/cron.log && chmod 0666 /var/log/cron.log
+
+# 将 cron 设置为在前台运行,并将日志输出到控制台
+CMD cron -f && tail -f /var/log/cron.log

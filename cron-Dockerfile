@@ -59,5 +59,14 @@ RUN npm install
 # 将你的 Puppeteer 脚本复制到容器中
 COPY . .
 
-# 设置容器启动时运行的命令
-CMD ["node", "/app/pteer.js"]
+# 创建一个新的 crontab 文件
+RUN echo "0 3 * * * node /app/pteer.js >> /var/log/cron.log 2>&1" > /etc/cron.d/puppeteer-cron
+
+# 给 crontab 文件适当的权限
+RUN chmod 0644 /etc/cron.d/puppeteer-cron
+
+# 将 cron 日志文件的权限设置为可写
+RUN touch /var/log/cron.log && chmod 0666 /var/log/cron.log
+
+# 将 cron 设置为在前台运行,并将日志输出到控制台
+CMD cron -f && tail -f /var/log/cron.log

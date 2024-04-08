@@ -43,6 +43,8 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 
 ## 使用方法四：docker 定时运行
 
+### 1.立刻执行
+
 克隆仓库，在`docker-compose.yml`里面设置环境变量，然后运行
 
 ```sh
@@ -55,7 +57,7 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 docker-compose logs -f
 ```
 
-定时运行(目前存在问题)
+### 2.定时运行(目前存在问题)
 
 ```sh
 docker-compose -f cron-docker-compose.yml up -d

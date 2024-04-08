@@ -2,7 +2,7 @@ version: "3.8" # 使用 Docker Compose 文件版本 3.8，根据需要可以更�
 services:
   autoread:
     image: 14790897/cron-auto-read:latest
-    container_name: auto-read
+    container_name: cron-auto-read
     # environment: # 设置环境变量(这里设置后不需要在.env文件中设置)
     #   USERNAMES: "用户名"
     #   PASSWORDS: "密码"

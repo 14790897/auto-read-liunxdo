@@ -1,4 +1,4 @@
-name: AutoRead Docker Image Push
+name: Cron AutoRead Docker Image Push
 
 on:
   push:

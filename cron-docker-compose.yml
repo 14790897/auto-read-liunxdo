@@ -1,5 +1,4 @@
-version: "3.8" # 使用 Docker Compose 文件版本 3.8，根
-据需要可以更改
+version: "3.8" # 使用 Docker Compose 文件版本 3.8，根据需要可以更改
 services:
   autoread:
     image: 14790897/cron-auto-read:latest

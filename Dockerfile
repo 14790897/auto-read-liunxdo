@@ -56,7 +56,7 @@ ENV TZ=Asia/Shanghai
 # 安装 Node.js 依赖
 RUN npm install
 
-# 将你的 Puppeteer 脚本复制到容器中
+# 将根目录复制到容器中
 COPY . .
 
 # 创建一个新的 crontab 文件

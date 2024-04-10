@@ -56,7 +56,7 @@ ENV TZ=Asia/Shanghai
 # 安装 Node.js 依赖
 RUN npm install
 
-# 将你的 Puppeteer 脚本复制到容器中
+# 将根目录复制到容器中
 COPY . .
 
 # 设置容器启动时运行的命令

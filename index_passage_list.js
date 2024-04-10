@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.2.3
+// @version      1.2.4
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://linux.do/*
@@ -268,7 +268,7 @@
       }
       localStorage.removeItem("navigatingToNextTopic");
     } else {
-      window.location.href = "https://linux.do/t/topic/13716/120";
+      window.location.href = "https://linux.do/t/topic/13716/125";
       checkScroll();
     }
   };

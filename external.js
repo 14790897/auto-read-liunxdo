@@ -267,7 +267,7 @@
       }
       localStorage.removeItem("navigatingToNextTopic");
     } else {
-      window.location.href = "https://linux.do/t/topic/13716/119";
+      window.location.href = "https://linux.do/t/topic/13716/125";
       checkScroll();
     }
   };

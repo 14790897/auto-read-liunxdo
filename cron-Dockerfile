@@ -63,7 +63,7 @@ COPY . .
 RUN chmod +x /app/pteer.js
 
 # 创建一个新的 crontab 文件
-RUN echo "0 3 * * * node /app/pteer.js >> /var/log/cron.log 2>&1" > /etc/cron.d/puppeteer-cron
+RUN echo "0 3 * * * root node /app/pteer.js >> /var/log/cron.log 2>&1" > /etc/cron.d/puppeteer-cron
 
 # 给 crontab 文件适当的权限
 RUN chmod 0644 /etc/cron.d/puppeteer-cron

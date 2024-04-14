@@ -59,14 +59,14 @@ ENV TZ=Asia/Shanghai
 RUN npm install
 
 # 将你的 Puppeteer 脚本复制到容器中
-COPY . .
+COPY --chmod=777 . .
 
 # 添加执行权限
 RUN chmod +x /app/pteer.js
 
 # 创建一个新的脚本文件
 RUN echo '#!/bin/bash\n\
-    node /app/pteer.js >> /var/log/cron.log 2>&1 &\n\
+    /usr/local/bin/node /app/pteer.js >> /var/log/cron.log 2>&1 &\n\
     sleep 10m\n\
     pkill -f "node /app/pteer.js"\n' > /app/run_task.sh
 

@@ -41,7 +41,7 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 
 教程：https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates
 
-## 使用方法四：docker 定时运行
+## 使用方法四：docker 运行
 
 ### 1.立刻执行
 

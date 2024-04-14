@@ -60,8 +60,6 @@ RUN npm install
 
 # 将你的 Puppeteer 脚本复制到容器中
 COPY . .
-# 设置 pteer.js 文件的执行权限
-RUN chmod +x /app/pteer.js
 
 # 添加执行权限
 RUN chmod +x /app/pteer.js

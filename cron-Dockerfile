@@ -52,14 +52,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 #时区为中国
 
+# 将你的 Puppeteer 脚本复制到容器中
+COPY --chmod=777 . .
+
 #时区为中国
 ENV TZ=Asia/Shanghai
 
 # 安装 Node.js 依赖
 RUN npm install
 
-# 将你的 Puppeteer 脚本复制到容器中
-COPY --chmod=777 . .
 
 # 添加执行权限
 RUN chmod +x /app/pteer.js

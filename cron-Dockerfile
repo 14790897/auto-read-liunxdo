@@ -75,8 +75,7 @@ RUN echo '#!/bin/bash\n\
 RUN chmod +x /app/run_task.sh
 
 # 创建一个新的 crontab 文件
-RUN echo "0 3 * * * root /app/run_task.sh
-" > /etc/cron.d/puppeteer-cron
+RUN echo "0 3 * * * root /app/run_task.sh" > /etc/cron.d/puppeteer-cron
 
 # 给 crontab 文件适当的权限
 RUN chmod 0644 /etc/cron.d/puppeteer-cron

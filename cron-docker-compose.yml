@@ -3,7 +3,7 @@ services:
   cronautoread:
     image: 14790897/cron-auto-read:latest
     container_name: cron-auto-read
-    # environment: # 设置环境变量(这里设置后不需要在.env文件中设置)
-    #   USERNAMES: "用户名"
-    #   PASSWORDS: "密码"
+    environment: # 设置环境变量(这里设置后不需要在.env文件中设置)
+      USERNAMES: hahaha2,hahaha1,ha1,ha2,DrKBoogieWoogie,lsp,lsb
+      PASSWORDS: BfdSGt}F4!5pLHt,BfdSGt}F4!5pLHt,iTs9Wx4+3Eavkhk,W$RhQUVn5E?BBBq,]"w%2Qd%M8Z6-SS,HU5B6Ee]kRB%Qj',uYE)46Ej8phu$#u
     restart: unless-stopped # 容器退出时重启策略

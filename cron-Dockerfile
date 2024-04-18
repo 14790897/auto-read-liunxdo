@@ -67,6 +67,7 @@ RUN chmod +x /app/pteer.js
 
 # 创建一个新的脚本文件
 RUN echo '#!/bin/bash\n\
+    cd /app\n\
     node /app/pteer.js >> /var/log/cron.log 2>&1 &\n\
     sleep 10m\n\
     pkill -f "node /app/pteer.js"\n' > /app/run_task.sh

@@ -249,7 +249,7 @@
   button.style.border = "1px solid #ddd"; // 浅灰色边框
   button.style.padding = "5px 10px"; // 内边距
   button.style.borderRadius = "5px"; // 圆角
-  document.body.appendChild(button);
+  // document.body.appendChild(button);
 
   button.onclick = function () {
     const currentlyReading = localStorage.getItem("read") === "true";
@@ -287,7 +287,7 @@
   toggleAutoLikeButton.style.border = "1px solid #ddd"; // 浅灰色边框
   toggleAutoLikeButton.style.padding = "5px 10px"; // 内边距
   toggleAutoLikeButton.style.borderRadius = "5px"; // 圆角
-  document.body.appendChild(toggleAutoLikeButton);
+  // document.body.appendChild(toggleAutoLikeButton);
 
   // 为按钮添加点击事件处理函数
   toggleAutoLikeButton.addEventListener("click", () => {

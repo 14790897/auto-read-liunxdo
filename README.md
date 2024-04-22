@@ -57,9 +57,8 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 docker-compose logs -f
 ```
 
-### 2.定时运行(目前存在问题)
+### 2.定时运行
 
 ```sh
-docker-compose -f cron-docker-compose.yml up -d
-
+0 6 * * *  /root/auto-read-liunxdo/cron.sh  # 注意这是示例目录，要改为所在仓库目录的cron.sh（使用pwd查看所在目录）
 ```

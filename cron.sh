@@ -16,4 +16,4 @@ cd $WORKDIR
 sleep 10m
 
 # 停止 Docker Compose
-/usr/local/bin/docker-compose down >> ./cron.log 2>&1
+/usr/local/bin/docker-compose down --remove-orphans --volumes >> ./cron.log 2>&1

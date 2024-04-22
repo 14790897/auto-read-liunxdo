@@ -60,5 +60,13 @@ docker-compose logs -f
 ### 2.定时运行
 
 ```sh
+chmod +x cron.sh
+
+crontab -e
+```
+
+手动添加以下内容(功能是每天六点执行)
+
+```sh
 0 6 * * *  /root/auto-read-liunxdo/cron.sh  # 注意这是示例目录，要改为所在仓库目录的cron.sh（使用pwd查看所在目录）
 ```

@@ -7,7 +7,7 @@ WORKDIR=$(dirname $(readlink -f $0))
 cd $WORKDIR
 
 # 停止 Docker Compose
-/usr/local/bin/docker-compose down
+/usr/local/bin/docker-compose down --remove-orphans --volumes
 
 # 重新启动 Docker Compose
 /usr/local/bin/docker-compose up -d >> ./cron.log 2>&1

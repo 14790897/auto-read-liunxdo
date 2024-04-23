@@ -1,5 +1,7 @@
 #!/bin/bash
-
+#设置为中文
+export LANG=zh_CN.UTF-8
+export LC_ALL=zh_CN.UTF-8
 # 获取当前工作目录
 WORKDIR=$(dirname $(readlink -f $0))
 

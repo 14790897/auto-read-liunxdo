@@ -1,84 +1,87 @@
-## 使用方法一：油猴脚本
+ [中文文档](./README_zh.md)
+## Method 1: Tampermonkey Script
 
-油猴脚本代码在 index_passage_list 中
-油猴：https://greasyfork.org/en/scripts/489464-auto-read
+The Tampermonkey script can be accessed in the `index_passage_list`. You can find and install the script from Greasy Fork:
 
-## 使用方法二：puppeteer 无头运行
+[Tampermonkey Script: Auto Read](https://greasyfork.org/en/scripts/489464-auto-read)
 
-### 1.设置环境变量
+## Method 2: Headless Execution with Puppeteer
 
-.env 里面设置用户名 密码
+### 1. Setting Environment Variables
 
-### 2.运行
+Set your username and password in the `.env` file.
 
-#### Windows
+### 2. Execution
+
+#### For Windows
+
+Run the following commands:
 
 ```sh
 npm install
 node .\pteer.js
 ```
 
-#### Linux 额外安装以下包，运行命令相同
+#### For Linux (additional packages needed)
+
+Install the required packages and run the same commands as for Windows:
 
 ```sh
 sudo apt-get update
-sudo apt install nodejs npm  -y
+sudo apt install nodejs npm -y
 sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
-
 ```
 
-## 使用方法三：GitHub Action 每天 0 点阅读
+## Method 3: GitHub Actions for Daily Reading at Midnight
 
-(可自行修改启动时间和持续时间，代码.github\workflows\cron_read.yaml)
+Modify the start time and duration as needed. The code is located in `.github/workflows/cron_read.yaml`.
 
-### 1. fork 仓库
+### 1. Fork the Repository
 
-### 2.设置环境变量
+### 2. Set Environment Variables
 
-在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的）（.env 里面设置用户名密码在这里无效）
+Set the username and password in the secrets of GitHub actions (variable names can be referred from `.env`). Note that setting the environment variables in `.env` here does not work for GitHub actions.
 
-### 3.启动 workflow
+### 3. Start the Workflow
 
-教程：https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates
+Tutorial: [Enable Automatic Updates](https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates)
 
-## 使用方法四：docker 运行
+## Method 4: Docker Execution
 
-### 1.立刻执行
+### 1. Immediate Execution
 
-克隆仓库，在`docker-compose.yml`里面设置环境变量，然后运行
+Clone the repository, set environment variables in `docker-compose.yml`, and run:
 
 ```sh
- docker-compose up -d
+docker-compose up -d
 ```
 
-查看日志
+To view logs:
 
 ```sh
 docker-compose logs -f
 ```
 
-### 2.定时运行
+### 2. Scheduled Execution
+
+Set permissions and edit the crontab:
 
 ```sh
 chmod +x cron.sh
-
 crontab -e
 ```
 
-手动添加以下内容(功能是每天六点执行)
+Manually add the following entry (to execute daily at 6 AM, adjust the directory as needed):
 
 ```sh
-0 6 * * *  /root/auto-read-liunxdo/cron.sh  # 注意这是示例目录，要改为所在仓库目录的cron.sh（使用pwd查看所在目录）
+0 6 * * * /root/auto-read-linuxdo/cron.sh  # Note this is a sample directory, change to your repository's cron.sh directory (use pwd to find your directory)
 ```
 
+#### Additional Information
 
-#### 其它
+The external script is used for puppeteer and is modified from `index_passage_list.js`. Main modifications include removing buttons and setting automatic reading and liking to start by default:
 
-external是作为puppeteer的脚本使用的，由index_passage_list.js改造，主要是去除了按钮以及设置为自动阅读和自动点赞启动
 ```sh
-   localStorage.setItem("read", "true"); // 开始时自动滚动关闭
-    localStorage.setItem("autoLikeEnabled", "true"); //默认关闭自动点赞
-
-      // document.body.appendChild(button);
-  // document.body.appendChild(toggleAutoLikeButton);
+localStorage.setItem("read", "true"); // Initially disables auto-scroll
+localStorage.setItem("autoLikeEnabled", "true"); // Auto-liking is enabled by default
 ```

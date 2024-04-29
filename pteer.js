@@ -6,6 +6,7 @@ require("dotenv").config();
 // 从环境变量解析用户名和密码
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
+const loginUrl = process.env.WEBSITE;
 // 每个浏览器实例之间的延迟时间(毫秒)
 const delayBetweenInstances = 10000;
 //随机等待时间
@@ -39,7 +40,7 @@ function delayClick(time) {
 async function launchBrowserForUser(username, password) {
   try {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: false,
       args: ["--no-sandbox", "--disable-setuid-sandbox"], //linux需要
       defaultViewport: {
         width: 1280,
@@ -92,7 +93,7 @@ async function launchBrowserForUser(username, password) {
     // });
 
     //登录操作
-    await page.goto("https://linux.do");
+    await page.goto(loginUrl);
     console.log("登录操作");
     // 使用XPath查询找到包含"登录"或"login"文本的按钮
     await page.evaluate(() => {

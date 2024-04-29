@@ -3,6 +3,7 @@
 
 The Tampermonkey script can be accessed in the `index_passage_list`. You can find and install the script from Greasy Fork:
 
+![alt text](image.png)
 [Tampermonkey Script: Auto Read](https://greasyfork.org/en/scripts/489464-auto-read)
 
 ## Method 2: Headless Execution with Puppeteer

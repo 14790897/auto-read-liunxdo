@@ -12,6 +12,10 @@
 
 (function () {
   ("use strict");
+  // 环境变量：阅读网址
+  const BASE_URL = "https://linux.do";
+  const ARTICLE_NUMBER = "13716/125"; // 可以将文章编号也设为一个变量或环境设置
+
   //1.进入网页 https://linux.do/t/topic/数字（1，2，3，4）
   //2.使滚轮均衡的往下移动模拟刷文章
   // 检查是否是第一次运行脚本
@@ -70,10 +74,10 @@
   function navigateToNextTopic() {
     // 定义包含文章列表的数组
     const urls = [
-      "https://linux.do/latest",
-      "https://linux.do/top",
-      "https://linux.do/latest?ascending=false&order=posts",
-      // "https://linux.do/unread",
+      `${BASE_URL}/latest`,
+      `${BASE_URL}/top`,
+      `${BASE_URL}/latest?ascending=false&order=posts`,
+      // `${BASE_URL}/unread`, // 示例：如果你想将这个URL启用，只需去掉前面的注释
     ];
 
     // 生成一个随机索引

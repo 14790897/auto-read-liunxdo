@@ -70,3 +70,15 @@ crontab -e
 ```sh
 0 6 * * *  /root/auto-read-liunxdo/cron.sh  # 注意这是示例目录，要改为所在仓库目录的cron.sh（使用pwd查看所在目录）
 ```
+
+
+#### 其它
+
+external是作为puppeteer的脚本使用的，由index_passage_list.js改造，主要是去除了按钮以及设置为自动阅读和自动点赞启动
+```sh
+   localStorage.setItem("read", "true"); // 开始时自动滚动关闭
+    localStorage.setItem("autoLikeEnabled", "true"); //默认关闭自动点赞
+
+      // document.body.appendChild(button);
+  // document.body.appendChild(toggleAutoLikeButton);
+```

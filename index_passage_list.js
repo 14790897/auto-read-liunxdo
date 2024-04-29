@@ -1,9 +1,10 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.2.4
+// @version      1.3.0
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
+// @match        https://meta.discourse.org/*
 // @match        https://linux.do/*
 // @grant        none
 // @license      MIT
@@ -12,10 +13,25 @@
 
 (function () {
   ("use strict");
-  // 环境变量：阅读网址
-  const BASE_URL = "https://linux.do";
-  const ARTICLE_NUMBER = "13716/125"; // 可以将文章编号也设为一个变量或环境设置
+  // 定义可能的基本URL
+  const possibleBaseURLs = ["https://meta.discourse.org", "https://linux.do"];
 
+  // 获取当前页面的URL
+  const currentURL = window.location.href;
+
+  // 确定当前页面对应的BASE_URL
+  let BASE_URL = possibleBaseURLs.find((url) => currentURL.startsWith(url));
+
+  // 环境变量：阅读网址，如果没有找到匹配的URL，则默认为第一个
+  if (!BASE_URL) {
+    BASE_URL = possibleBaseURLs[0];
+    console.log("默认BASE_URL设置为: " + BASE_URL);
+  } else {
+    console.log("当前BASE_URL是: " + BASE_URL);
+  }
+
+  // 以下是脚本的其余部分
+  console.log("脚本正在运行在: " + BASE_URL);
   //1.进入网页 https://linux.do/t/topic/数字（1，2，3，4）
   //2.使滚轮均衡的往下移动模拟刷文章
   // 检查是否是第一次运行脚本
@@ -150,7 +166,7 @@
   function searchLinkClick() {
     // 在新页面加载后执行检查
     // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
-    const links = document.querySelectorAll('a[href^="/t/topic/"]');
+    const links = document.querySelectorAll('a[href^="/t/"]');
     // const alreadyReadLinks = JSON.parse(
     //   localStorage.getItem("alreadyReadLinks") || "[]"
     // ); // 获取已阅读链接列表
@@ -272,7 +288,12 @@
       }
       localStorage.removeItem("navigatingToNextTopic");
     } else {
-      window.location.href = "https://linux.do/t/topic/13716/125";
+      // 如果是Linuxdo，就导航到我的帖子
+      if (BASE_URL == "https://linux.do") {
+        window.location.href = "https://linux.do/t/topic/13716/191";
+      } else {
+        window.location.href = `${BASE_URL}/t/topic/1`;
+      }
       checkScroll();
     }
   };

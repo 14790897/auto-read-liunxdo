@@ -6,6 +6,8 @@
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
 // @match        https://linux.do/*
+// @match        https://meta.appinn.net/*
+// @match        https://community.openai.com/
 // @grant        none
 // @license      MIT
 // @icon         https://www.google.com/s2/favicons?domain=linux.do
@@ -14,7 +16,12 @@
 (function () {
   ("use strict");
   // 定义可能的基本URL
-  const possibleBaseURLs = ["https://meta.discourse.org", "https://linux.do"];
+  const possibleBaseURLs = [
+    "https://meta.discourse.org",
+    "https://linux.do",
+    "https://meta.appinn.net/",
+    "https://community.openai.com/",
+  ];
 
   // 获取当前页面的URL
   const currentURL = window.location.href;

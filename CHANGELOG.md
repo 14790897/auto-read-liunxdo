@@ -1,5 +1,39 @@
 # Changelog
 
+## [1.1.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.0.0...v1.1.0) (2024-04-30)
+
+
+### Features
+
+* cron的docker ([3f96acc](https://www.github.com/14790897/auto-read-liunxdo/commit/3f96accce19c263263ad953f3c55f422a0c16c37))
+* docker 定时运行 ([963a2ed](https://www.github.com/14790897/auto-read-liunxdo/commit/963a2edf466cf113908493e1144f23c1ea9c95c6))
+* docker输出日志 ([a0a13e6](https://www.github.com/14790897/auto-read-liunxdo/commit/a0a13e6f09d6226f3811cb82425852f4283f48f5))
+* 环境变量可以配置阅读网站 ([fc1e52b](https://www.github.com/14790897/auto-read-liunxdo/commit/fc1e52b20fe8ad17a3c5215a3732da5d91a49d12))
+* 适用于meta.discourse ([ada117a](https://www.github.com/14790897/auto-read-liunxdo/commit/ada117af31053029fcec28292844175db6b5d6a6))
+
+
+### Bug Fixes
+
+* cron ([13e2181](https://www.github.com/14790897/auto-read-liunxdo/commit/13e21815c8b4f081cef4c76d113781451e738030))
+* cron ([3986f1d](https://www.github.com/14790897/auto-read-liunxdo/commit/3986f1d22c2c6be1ff0e373fad5862dcf2f3b4e5))
+* cron ([d428a63](https://www.github.com/14790897/auto-read-liunxdo/commit/d428a6357f2c705c6b288188909fa5f62f35ab5a))
+* cron ([82376ca](https://www.github.com/14790897/auto-read-liunxdo/commit/82376ca52bbd374ce8596b4583bc3e09e30d741c))
+* cron ([b3f17c7](https://www.github.com/14790897/auto-read-liunxdo/commit/b3f17c75fbc83b2f4be005e6de8d683a4d93ad70))
+* cron ([feec05e](https://www.github.com/14790897/auto-read-liunxdo/commit/feec05e10149f7314894b3d6284285f2aaa564d5))
+* cron ([1ba6a4d](https://www.github.com/14790897/auto-read-liunxdo/commit/1ba6a4d7862f6d9c46b464be107b8ac7aaed66b3))
+* cron ([bdd3db0](https://www.github.com/14790897/auto-read-liunxdo/commit/bdd3db0d9e0bf3109fbe2af3fee3731c9fd8478f))
+* cron ([51d9566](https://www.github.com/14790897/auto-read-liunxdo/commit/51d95663b21121328ddd257e87c529fd807b7155))
+* cron ([51326fe](https://www.github.com/14790897/auto-read-liunxdo/commit/51326fec312ada029e29fb8fe7b46996ae17d3a6))
+* cron ([69b1801](https://www.github.com/14790897/auto-read-liunxdo/commit/69b1801b11af87685761927488937ac18592b42c))
+* cron bug ([e749db7](https://www.github.com/14790897/auto-read-liunxdo/commit/e749db7d50586082e8efae2e3e3cd8b8a1f3dd56))
+* cron docker ([a572a72](https://www.github.com/14790897/auto-read-liunxdo/commit/a572a720be95a8d1496699fd2203cace0cc53041))
+* cron添加执行权限 ([c57da15](https://www.github.com/14790897/auto-read-liunxdo/commit/c57da15f3bd2e5f119a8f145adfb9c97d1a624e1))
+* docker ([effbaa1](https://www.github.com/14790897/auto-read-liunxdo/commit/effbaa1b6982b0dd90494c0ddc9726481a824e73))
+* docker 环境变量配置 ([b651584](https://www.github.com/14790897/auto-read-liunxdo/commit/b651584caa5fed554f9b95707d87e0465e3ed698))
+* remove button in pteer ([edc8ef0](https://www.github.com/14790897/auto-read-liunxdo/commit/edc8ef04eb4a9034d46194722864d00f32aaadf1))
+* workdir ([6083de8](https://www.github.com/14790897/auto-read-liunxdo/commit/6083de8418e1f2f8f34937f73716d30a40b673bd))
+* 权限 ([4c33ce9](https://www.github.com/14790897/auto-read-liunxdo/commit/4c33ce93f29013f88611ed29d4177d2ed935fe98))
+
 ## 1.0.0 (2024-04-05)
 
 

@@ -71,7 +71,9 @@ crontab -e
 0 6 * * *  /root/auto-read-liunxdo/cron.sh  # 注意这是示例目录，要改为所在仓库目录的cron.sh（使用pwd查看所在目录）
 ```
 
-
+# 如何增加基于discourse的其它网站的支持？
+1. 修改 index_passage_list 中的// @match ，根据其它示例网站，填写新的url，此外在脚本开头的possibleBaseURLs中也添加url
+2. 服务器运行时，还需要修改.env下的WEBSITE变量为对应的网址（如果网址是不存在原先脚本的，需要修改external.js中对应的部分，重新构建镜像）
 #### 其它
 
 external是作为puppeteer的脚本使用的，由index_passage_list.js改造，主要是去除了按钮以及设置为自动阅读和自动点赞启动

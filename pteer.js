@@ -40,7 +40,7 @@ function delayClick(time) {
 async function launchBrowserForUser(username, password) {
   try {
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: true,
       args: ["--no-sandbox", "--disable-setuid-sandbox"], //linux需要
       defaultViewport: {
         width: 1280,

@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.1.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.1.0...v1.1.1) (2024-05-06)
+
+
+### Bug Fixes
+
+* headless改为true ([77bee42](https://www.github.com/14790897/auto-read-liunxdo/commit/77bee42accad682cc9ed4e680b1d529d7274d015))
+
 ## [1.1.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.0.0...v1.1.0) (2024-04-30)
 
 

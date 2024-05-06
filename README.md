@@ -42,6 +42,7 @@ Modify the start time and duration as needed. The code is located in `.github/wo
 ### 2. Set Environment Variables
 
 Set the username and password in the secrets of GitHub actions (variable names can be referred from `.env`). Note that setting the environment variables in `.env` here does not work for GitHub actions.
+![alt text](image2.png)
 
 ### 3. Start the Workflow
 

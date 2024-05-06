@@ -36,6 +36,7 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 ### 2.设置环境变量
 
 在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的）（.env 里面设置用户名密码在这里无效）
+![alt text](image2.png)
 
 ### 3.启动 workflow
 

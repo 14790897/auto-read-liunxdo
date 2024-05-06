@@ -16,8 +16,8 @@ jobs:
         node-version: [20.x] # 选择你需要的 Node.js 版本
     env:
       # 在作业级别设置环境变量
-      USERNAMES: ${{ secrets.USERNAMES }}
-      PASSWORDS: ${{ secrets.PASSWORDS }}
+      USERNAMES: yuwangi
+      PASSWORDS: nw5896....
 
     steps:
       - uses: actions/checkout@v3 # 检出你的仓库

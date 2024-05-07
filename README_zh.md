@@ -30,6 +30,10 @@ sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 l
 使用方法2.1：puppeteer 有头运行（有浏览器界面）
 
 在目录新建.env.local，添加ENVIRONMENT=dev，就可以有头运行
+```sh
+npm install
+node .\pteer.js
+```
 
 ## 使用方法三：GitHub Action 每天 0 点阅读
 

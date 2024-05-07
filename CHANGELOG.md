@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.1.0...v1.2.0) (2024-05-07)
+
+
+### Features
+
+* 增加local变量的读取方便调试 ([08c5631](https://www.github.com/14790897/auto-read-liunxdo/commit/08c563143d7fd1ae868e90a950cbd51ea46fe279))
+
+
+### Bug Fixes
+
+* headless改为true ([77bee42](https://www.github.com/14790897/auto-read-liunxdo/commit/77bee42accad682cc9ed4e680b1d529d7274d015))
+
 ## [1.1.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.0.0...v1.1.0) (2024-04-30)
 
 

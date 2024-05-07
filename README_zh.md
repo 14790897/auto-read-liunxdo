@@ -1,6 +1,6 @@
 ## 使用方法一：油猴脚本
 
-油猴脚本代码在 index_passage_list 中
+油猴脚本代码在 index_passage_list 中，建议在使用前将浏览器页面缩小，这样子可以一次读更多的回复
 油猴：https://greasyfork.org/en/scripts/489464-auto-read
 
 ## 使用方法二：puppeteer 无头运行
@@ -26,6 +26,10 @@ sudo apt install nodejs npm  -y
 sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
 
 ```
+
+使用方法2.1：puppeteer 有头运行（有浏览器界面）
+
+在目录新建.env.local，添加ENVIRONMENT=dev，就可以有头运行
 
 ## 使用方法三：GitHub Action 每天 0 点阅读
 

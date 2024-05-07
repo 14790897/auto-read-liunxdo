@@ -2,7 +2,17 @@ const fs = require("fs");
 
 const path = require("path");
 const puppeteer = require("puppeteer");
-require("dotenv").config();
+const dotenv = require("dotenv");
+
+// Load the default .env file
+dotenv.config();
+if (fs.existsSync(".env.local")) {
+  console.log("Using .env.local file to supply config environment variables");
+  const envConfig = dotenv.parse(fs.readFileSync(".env.local"));
+  for (const k in envConfig) {
+    process.env[k] = envConfig[k];
+  }
+}
 // 从环境变量解析用户名和密码
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
@@ -40,7 +50,7 @@ function delayClick(time) {
 async function launchBrowserForUser(username, password) {
   try {
     const browser = await puppeteer.launch({
-      headless: true,
+      headless: process.env.ENVIRONMENT !== "dev", // 当ENVIRONMENT不是'dev'时启用无头模式
       args: ["--no-sandbox", "--disable-setuid-sandbox"], //linux需要
       defaultViewport: {
         width: 1280,
@@ -138,12 +148,11 @@ async function launchBrowserForUser(username, password) {
       const [scriptToEval] = args;
       eval(scriptToEval);
     }, externalScript);
-
     // 添加一个监听器来监听每次页面加载完成的事件
-    // page.on("load", async () => {
-    //   await page.evaluate(externalScript);
-    // });
-    await page.goto("https://linux.do/t/topic/13716/110");
+    page.on("load", async () => {
+      // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
+    });
+    await page.goto("https://linux.do/t/topic/13716/190");
   } catch (err) {
     console.log(err);
   }

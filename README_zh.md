@@ -2,7 +2,6 @@
 
 油猴脚本代码在 index_passage_list 中，建议在使用前将浏览器页面缩小，这样子可以一次读更多的回复
 油猴：https://greasyfork.org/en/scripts/489464-auto-read
-
 ## 使用方法二：puppeteer 无头运行
 
 ### 1.设置环境变量

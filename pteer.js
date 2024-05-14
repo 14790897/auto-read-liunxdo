@@ -185,7 +185,7 @@ async function login(page, username, password) {
   await page.waitForSelector("#login-button");
   await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
   await Promise.all([
-    page.waitForNavigation(), // 等待页面跳转
+    page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
     page.click("#login-button"), // 点击登录按钮触发跳转
   ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败
   await delayClick(1000);

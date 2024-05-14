@@ -27,25 +27,30 @@ function delayClick(time) {
 }
 
 (async () => {
-  if (usernames.length !== passwords.length) {
-    console.log(usernames.length, usernames, passwords.length, passwords);
-    console.log("用户名和密码的数量不匹配！");
-    return;
-  }
+  try {
+    if (usernames.length !== passwords.length) {
+      console.log(usernames.length, usernames, passwords.length, passwords);
+      console.log("用户名和密码的数量不匹配！");
+      return;
+    }
 
-  // 并发启动浏览器实例进行登录
-  const loginPromises = usernames.map((username, index) => {
-    const password = passwords[index];
-    const delay = index * delayBetweenInstances;
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        launchBrowserForUser(username, password).then(resolve);
-      }, delay);
+    // 并发启动浏览器实例进行登录
+    const loginPromises = usernames.map((username, index) => {
+      const password = passwords[index];
+      const delay = index * delayBetweenInstances;
+      return new Promise((resolve, reject) => {
+        setTimeout(() => {
+          launchBrowserForUser(username, password).then(resolve).catch(reject);
+        }, delay);
+      });
     });
-  });
 
-  // 等待所有登录操作完成
-  await Promise.all(loginPromises);
+    // 等待所有登录操作完成
+    await Promise.all(loginPromises);
+  } catch (error) {
+    // 错误处理逻辑
+    console.error("发生错误：", error);
+  }
 })();
 async function launchBrowserForUser(username, password) {
   try {
@@ -184,9 +189,14 @@ async function login(page, username, password) {
   // 假设登录按钮的ID是'login-button'，点击登录按钮
   await page.waitForSelector("#login-button");
   await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
-  await Promise.all([
-    page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
-    page.click("#login-button"), // 点击登录按钮触发跳转
-  ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败
+  try {
+    await Promise.all([
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
+      page.click("#login-button"), // 点击登录按钮触发跳转
+    ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败
+  } catch (error) {
+    console.error("Navigation timed out in login.:", error);
+    throw new Error("Navigation timed out in login.");
+  }
   await delayClick(1000);
 }

@@ -39,6 +39,7 @@ function delayClick(time) {
       const password = passwords[index];
       const delay = index * delayBetweenInstances;
       return new Promise((resolve, reject) => {
+        //其实直接使用await就可以了
         setTimeout(() => {
           launchBrowserForUser(username, password).then(resolve).catch(reject);
         }, delay);

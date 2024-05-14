@@ -92,3 +92,9 @@ external是作为puppeteer的脚本使用的，由index_passage_list.js改造，
       // document.body.appendChild(button);
   // document.body.appendChild(toggleAutoLikeButton);
 ```
+
+
+#### 随笔
+开发中遇到的问题：
+TimeoutError: Navigation timeout of 30000 ms exceeded   为什么puppeteer经常出现这个错误
+[见文章分析](随笔.md)

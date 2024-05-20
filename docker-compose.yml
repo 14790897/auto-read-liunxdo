@@ -14,4 +14,5 @@ services:
         HU5B6Ee]kRB%Qj',
         uYE)46Ej8phu$#u
       WEBSITE: "https://linux.do" #目前支持 "https://meta.discourse.org","https://linux.do","https://meta.appinn.net","https://community.openai.com",
+      ENVIRONMENT: "production" #这个不需要改动
     restart: unless-stopped # 容器退出时重启策略

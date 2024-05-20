@@ -1,5 +1,15 @@
 # Changelog
 
+### [1.2.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.2.0...v1.2.1) (2024-05-20)
+
+
+### Bug Fixes
+
+* env注释 ([22b118f](https://www.github.com/14790897/auto-read-liunxdo/commit/22b118f5c18f24471feb48890bcbc32f905037a0))
+* 使用domcontentloaded等待页面跳转 ([611290c](https://www.github.com/14790897/auto-read-liunxdo/commit/611290c4c64aa7d75736156dae61674284d67499))
+* 点赞每日重置，修复只能启动一次自动点赞 ([15529df](https://www.github.com/14790897/auto-read-liunxdo/commit/15529df487d307cd421008cb9477e369cda6075a))
+* 错误处理 ([c1ad79f](https://www.github.com/14790897/auto-read-liunxdo/commit/c1ad79ff26d3a806b0e9ae450b4d36a4f8e134c1))
+
 ## [1.2.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.1.0...v1.2.0) (2024-05-07)
 
 

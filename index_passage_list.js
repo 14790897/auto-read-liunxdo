@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.3.0
+// @version      1.3.1
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
@@ -231,13 +231,49 @@
       );
     }
   }
-  // 从localStorage获取当前的点击计数，如果不存在则初始化为0
+  // 获取当前时间戳
+  const currentTime = Date.now();
+  // 获取存储的时间戳
+  const defaultTimestamp = new Date("1999-01-01T00:00:00Z").getTime(); //默认值为1999年
+  const storedTime = parseInt(
+    localStorage.getItem("clickCounterTimestamp") ||
+      defaultTimestamp.toString(),
+    10
+  );
+
+  // 获取当前的点击计数，如果不存在则初始化为0
   let clickCounter = parseInt(localStorage.getItem("clickCounter") || "0", 10);
+  // 检查是否超过24小时（24小时 = 24 * 60 * 60 * 1000 毫秒）
+  if (currentTime - storedTime > 24 * 60 * 60 * 1000) {
+    // 超过24小时，清空点击计数器并更新时间戳
+    clickCounter = 0;
+    localStorage.setItem("clickCounter", "0");
+    localStorage.setItem("clickCounterTimestamp", currentTime.toString());
+  }
+
+  console.log(`Initial clickCounter: ${clickCounter}`);
+  function triggerClick(button) {
+    const event = new MouseEvent("click", {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    });
+    button.dispatchEvent(event);
+  }
+
   function autoLike() {
+    console.log(`Initial clickCounter: ${clickCounter}`);
     // 寻找所有的discourse-reactions-reaction-button
     const buttons = document.querySelectorAll(
       ".discourse-reactions-reaction-button"
     );
+    if (buttons.length === 0) {
+      console.error(
+        "No buttons found with the selector '.discourse-reactions-reaction-button'"
+      );
+      return;
+    }
+    console.log(`Found ${buttons.length} buttons.`); // 调试信息
 
     // 逐个点击找到的按钮
     buttons.forEach((button, index) => {
@@ -251,7 +287,7 @@
       // 使用setTimeout来错开每次点击的时间，避免同时触发点击
       autoLikeInterval = setTimeout(() => {
         // 模拟点击
-        button.click();
+        triggerClick(button); // 使用自定义的触发点击方法
         console.log(`Clicked like button ${index + 1}`);
         clickCounter++; // 更新点击计数器
         // 将新的点击计数存储到localStorage
@@ -260,6 +296,8 @@
         if (clickCounter === 50) {
           console.log("Reached 50 likes, setting the like variable to false.");
           localStorage.setItem("autoLikeEnabled", "false"); // 使用localStorage存储点赞变量状态
+        } else {
+          console.log("clickCounter:", clickCounter);
         }
       }, index * 1000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
     });

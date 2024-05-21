@@ -1,8 +1,7 @@
 ## 使用方法一：油猴脚本
 
-油猴脚本代码在 index_passage_list 中
+油猴脚本代码在 index_passage_list 中，建议在使用前将浏览器页面缩小，这样子可以一次读更多的回复
 油猴：https://greasyfork.org/en/scripts/489464-auto-read
-
 ## 使用方法二：puppeteer 无头运行
 
 ### 1.设置环境变量
@@ -25,6 +24,14 @@ sudo apt-get update
 sudo apt install nodejs npm  -y
 sudo apt-get install -y wget unzip fontconfig locales gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
 
+```
+
+使用方法2.1：puppeteer 有头运行（有浏览器界面）
+
+在目录新建.env.local，添加ENVIRONMENT=dev，就可以有头运行
+```sh
+npm install
+node .\pteer.js
 ```
 
 ## 使用方法三：GitHub Action 每天 0 点阅读
@@ -79,9 +86,15 @@ crontab -e
 
 external是作为puppeteer的脚本使用的，由index_passage_list.js改造，主要是去除了按钮以及设置为自动阅读和自动点赞启动
 ```sh
-   localStorage.setItem("read", "true"); // 开始时自动滚动关闭
-    localStorage.setItem("autoLikeEnabled", "true"); //默认关闭自动点赞
+   localStorage.setItem("read", "true"); // 自动滚动
+    localStorage.setItem("autoLikeEnabled", "true"); //自动点赞
 
       // document.body.appendChild(button);
   // document.body.appendChild(toggleAutoLikeButton);
 ```
+
+
+#### 随笔
+开发中遇到的问题：
+TimeoutError: Navigation timeout of 30000 ms exceeded   为什么puppeteer经常出现这个错误
+[见文章分析](随笔.md)

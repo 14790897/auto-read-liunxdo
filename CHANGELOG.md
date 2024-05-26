@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.2.2](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.2.1...v1.2.2) (2024-05-26)
+
+
+### Bug Fixes
+
+* docker compose环境变量配置 ([b67d946](https://www.github.com/14790897/auto-read-liunxdo/commit/b67d94633920a9c8f2c5eaf6a8a08590d443cf7c))
+* docker compose环境变量配置 ([a7f19bb](https://www.github.com/14790897/auto-read-liunxdo/commit/a7f19bbd3d139e5ede1402127fed13ce5bfea9f1))
+
 ### [1.2.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.2.0...v1.2.1) (2024-05-20)
 
 

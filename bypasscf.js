@@ -171,7 +171,7 @@ async function launchBrowserForUser(username, password) {
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
     });
-    await page.goto("https://linux.do/t/topic/13716/190");
+    await page.goto("https://linux.do/t/topic/13716/285");
   } catch (err) {
     console.log(err);
   }

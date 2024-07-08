@@ -335,7 +335,7 @@
     } else {
       // 如果是Linuxdo，就导航到我的帖子
       if (BASE_URL == "https://linux.do") {
-        window.location.href = "https://linux.do/t/topic/13716/237";
+        window.location.href = "https://linux.do/t/topic/13716/285";
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }

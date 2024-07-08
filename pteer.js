@@ -1,7 +1,10 @@
 const fs = require("fs");
 
 const path = require("path");
-const puppeteer = require("puppeteer");
+const puppeteer = require("puppeteer-extra");
+const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+
+puppeteer.use(StealthPlugin());
 const dotenv = require("dotenv");
 
 // Load the default .env file
@@ -57,7 +60,42 @@ async function launchBrowserForUser(username, password) {
   try {
     const browser = await puppeteer.launch({
       headless: process.env.ENVIRONMENT !== "dev", // 当ENVIRONMENT不是'dev'时启用无头模式
-      args: ["--no-sandbox", "--disable-setuid-sandbox"], //linux需要
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--disable-infobars",
+        "--window-position=0,0",
+        "--ignore-certifcate-errors",
+        "--ignore-certifcate-errors-spki-list",
+        "--disable-web-security",
+        "--disable-features=IsolateOrigins,site-per-process",
+        "--allow-running-insecure-content",
+        "--disable-blink-features=AutomationControlled",
+        "--no-sandbox",
+        "--mute-audio",
+        "--no-zygote",
+        "--no-xshm",
+        "--window-size=1920,1080",
+        "--no-first-run",
+        "--no-default-browser-check",
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--enable-webgl",
+        "--ignore-certificate-errors",
+        "--lang=en-US,en;q=0.9",
+        "--password-store=basic",
+        "--disable-gpu-sandbox",
+        "--disable-software-rasterizer",
+        "--disable-background-timer-throttling",
+        "--disable-backgrounding-occluded-windows",
+        "--disable-renderer-backgrounding",
+        "--disable-infobars",
+        "--disable-breakpad",
+        "--disable-canvas-aa",
+        "--disable-2d-canvas-clip-aa",
+        "--disable-gl-drawing-for-tests",
+        "--enable-low-end-device-mode",
+      ], //linux需要
       defaultViewport: {
         width: 1280,
         height: 800,
@@ -66,6 +104,19 @@ async function launchBrowserForUser(username, password) {
       },
     });
     const page = await browser.newPage();
+    // 设置额外的 headers
+    await page.setExtraHTTPHeaders({
+      "accept-language": "en-US,en;q=0.9",
+    });
+
+    // 调用封装的反检测函数
+    await bypassDetection(page);
+    // 验证 `navigator.webdriver` 属性是否为 undefined
+    const isWebDriverUndefined = await page.evaluate(() => {
+      return `${navigator.webdriver}`;
+    });
+
+    console.log("navigator.webdriver is :", isWebDriverUndefined); // 输出应为 true
     page.on("pageerror", (error) => {
       console.error(`Page error: ${error.message}`);
     });
@@ -102,14 +153,9 @@ async function launchBrowserForUser(username, password) {
         await page.reload();
       }
     });
-    // // 监听所有请求
-    // page.on("request", (request) => {
-    //   console.log("Request URL:", request.url());
-    //   console.log("Request Headers:", request.headers());
-    // });
 
     //登录操作
-    await page.goto(loginUrl);
+    await page.goto(loginUrl, { waitUntil: "networkidle0" });
     console.log("登录操作");
     // 使用XPath查询找到包含"登录"或"login"文本的按钮
     await page.evaluate(() => {
@@ -200,4 +246,37 @@ async function login(page, username, password) {
     throw new Error("Navigation timed out in login.");
   }
   await delayClick(1000);
+}
+
+async function bypassDetection(page) {
+  // 在页面上下文中执行脚本，修改 `navigator.webdriver` 以及其他反检测属性
+  await page.evaluateOnNewDocument(() => {
+    // Overwrite the `navigator.webdriver` property to return `undefined`.
+    Object.defineProperty(navigator, "webdriver", {
+      get: () => undefined,
+    });
+
+    // Pass the Chrome Test.
+    window.chrome = {
+      runtime: {},
+      // Add more if needed
+    };
+
+    // Pass the Permissions Test.
+    const originalQuery = window.navigator.permissions.query;
+    window.navigator.permissions.query = (parameters) =>
+      parameters.name === "notifications"
+        ? Promise.resolve({ state: Notification.permission })
+        : originalQuery(parameters);
+
+    // Pass the Plugins Length Test.
+    Object.defineProperty(navigator, "plugins", {
+      get: () => [1, 2, 3, 4, 5], // Make plugins array non-empty
+    });
+
+    // Pass the Languages Test.
+    Object.defineProperty(navigator, "languages", {
+      get: () => ["en-US", "en"],
+    });
+  });
 }

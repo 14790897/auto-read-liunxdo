@@ -72,8 +72,8 @@ async function launchBrowserForUser(username, password) {
     // await page.goto(loginUrl);
     //登录操作
     // await page.goto(loginUrl, { waitUntil: "networkidle0" });
-      await navigatePage(loginUrl, page, browser);
-      await delayClick(8000)
+    await navigatePage(loginUrl, page, browser);
+    await delayClick(8000);
     // 设置额外的 headers
     await page.setExtraHTTPHeaders({
       "accept-language": "en-US,en;q=0.9",
@@ -120,9 +120,7 @@ async function launchBrowserForUser(username, password) {
         // await page.reload();
       }
     });
-    // await page.waitForNavigation({ waitUntil: "networkidle0" });
     // //登录操作
-    // await page.goto(loginUrl, { waitUntil: "networkidle0" });
     console.log("登录操作");
     // 使用XPath查询找到包含"登录"或"login"文本的按钮
     await page.evaluate(() => {
@@ -204,7 +202,7 @@ async function login(page, username, password) {
   await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
   try {
     await Promise.all([
-    //   page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
+      //   page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
       page.click("#login-button"), // 点击登录按钮触发跳转
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败
   } catch (error) {

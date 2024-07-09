@@ -221,7 +221,7 @@ async function login(page, username, password) {
 }
 
 async function navigatePage(url, page, browser) {
-  await page.goto(url, { waitUntil: "networkidle0" });
+  await page.goto(url);
 
   const startTime = Date.now(); // 记录开始时间
   let pageTitle = await page.title(); // 获取当前页面标题

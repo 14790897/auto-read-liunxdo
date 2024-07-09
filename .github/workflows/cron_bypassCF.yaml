@@ -29,10 +29,10 @@ jobs:
         run: |
           npm install
           sudo apt install -y xvfb
-      - name: Start Xvfb
-        run: |
-          # 启动 Xvfb 在 Display :99
-          sudo Xvfb :99 & 
-          export DISPLAY=:99
+      # - name: Start Xvfb
+      #   run: |
+      #     # 启动 Xvfb 在 Display :99
+      #     sudo Xvfb :99 & 
+      #     export DISPLAY=:99
       - name: Run a script
         run: node bypassCF.js

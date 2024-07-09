@@ -228,7 +228,7 @@ async function navigatePage(url, page, browser) {
 
   while (pageTitle.includes("Just a moment")) {
     console.log(
-      "The page is still loading or under Cloudflare protection. Waiting..."
+      "The page is under Cloudflare protection. Waiting..."
     );
 
     await delayClick(2000); // 每次检查间隔2秒

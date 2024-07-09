@@ -58,17 +58,25 @@ function delayClick(time) {
 })();
 async function launchBrowserForUser(username, password) {
   try {
+    const browserOptions = {
+      headless: "auto", 
+      args: ["--no-sandbox", "--disable-setuid-sandbox"], // Linux 需要的安全设置
+    };
+
+    // 如果环境变量不是 'dev'，则添加代理配置
+    if (process.env.ENVIRONMENT !== "dev") {
+      browserOptions["proxy"] = {
+        host: "216.98.11.172",
+        port: "54651",
+        username: "T5kQrKCwXZ",
+        password: "jH51RWYSkr",
+      };
+    }
+
     var { connect } = await import("puppeteer-real-browser");
-    const { page, browser } = await connect({
-      headless: 'auto', // 当ENVIRONMENT不是'dev'时启用无头模式
-      args: ["--no-sandbox", "--disable-setuid-sandbox"], //linux需要
-      defaultViewport: {
-        width: 1280,
-        height: 800,
-        userAgent:
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.150 Safari/537.36",
-      },
-    });
+    const { page, browser } = await connect(
+        browserOptions
+    );
     // await page.goto(loginUrl);
     //登录操作
     // await page.goto(loginUrl, { waitUntil: "networkidle0" });

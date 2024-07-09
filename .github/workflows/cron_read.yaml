@@ -1,4 +1,4 @@
-name: Scheduled Node.js CI
+name: read cron
 
 on:
   schedule:

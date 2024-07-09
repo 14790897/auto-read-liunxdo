@@ -30,4 +30,4 @@ jobs:
           npm install
           sudo apt install -y xvfb
       - name: Run a script
-        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" node bypasscf.js 
+        run: xvfb-run  node bypasscf.js 

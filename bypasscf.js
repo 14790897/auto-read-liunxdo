@@ -65,12 +65,12 @@ async function launchBrowserForUser(username, password) {
 
     // 如果环境变量不是 'dev'，则添加代理配置
     // if (process.env.ENVIRONMENT !== "dev") {
-      browserOptions["proxy"] = {
-        host: "3.26.115.230",
-        port: "27754",
-        username: "GECPjZ1jcC",
-        password: "Sa39rYDhNx",
-      };
+    //   browserOptions["proxy"] = {
+    //     host: "3.26.115.230",
+    //     port: "27754",
+    //     username: "GECPjZ1jcC",
+    //     password: "Sa39rYDhNx",
+    //   };
     // }
 
     var { connect } = await import("puppeteer-real-browser");
@@ -237,7 +237,7 @@ async function navigatePage(url, page, browser) {
     pageTitle = await page.title();
 
     // 检查是否超过15秒
-    if (Date.now() - startTime > 25000) {
+    if (Date.now() - startTime > 35000) {
       console.log("Timeout exceeded, aborting actions.");
       await browser.close();
       return; // 超时则退出函数

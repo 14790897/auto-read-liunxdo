@@ -35,4 +35,4 @@ jobs:
       #     sudo Xvfb :99 & 
       #     export DISPLAY=:99
       - name: Run a script
-        run: node bypassCF.js
+        run: node bypasscf.js

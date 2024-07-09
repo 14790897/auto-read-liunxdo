@@ -29,10 +29,5 @@ jobs:
         run: |
           npm install
           sudo apt install -y xvfb
-      - name: Start Xvfb
-        run: |
-          # 启动 Xvfb 在 Display :99
-          sudo Xvfb :99 & 
-          export DISPLAY=:99
       - name: Run a script
-        run: xvfb-run --server-args="-screen 0 1024x768x24" node bypasscf.js
+        run: xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" node bypasscf.js 

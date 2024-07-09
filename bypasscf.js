@@ -60,7 +60,7 @@ async function launchBrowserForUser(username, password) {
   try {
     var { connect } = await import("puppeteer-real-browser");
     const { page, browser } = await connect({
-      headless: auto, // 当ENVIRONMENT不是'dev'时启用无头模式
+      headless: 'auto', // 当ENVIRONMENT不是'dev'时启用无头模式
       args: ["--no-sandbox", "--disable-setuid-sandbox"], //linux需要
       defaultViewport: {
         width: 1280,

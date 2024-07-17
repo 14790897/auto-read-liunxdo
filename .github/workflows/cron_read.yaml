@@ -3,13 +3,13 @@ name: read cron
 on:
   schedule:
     # 每天 UTC 时间 18:00 运行
-    - cron: "0 18 * * *"
+    - cron: "0 6,9,12,15,18,21,24 * * *"
   workflow_dispatch: # 添加这行以允许手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # 设置作业超时时间为20分钟
+    timeout-minutes: 60 # 设置作业超时时间为20分钟
 
     strategy:
       matrix:

@@ -65,12 +65,12 @@ async function launchBrowserForUser(username, password) {
 
     // 如果环境变量不是 'dev'，则添加代理配置
     // if (process.env.ENVIRONMENT !== "dev") {
-    //   browserOptions["proxy"] = {
-    //     host: "3.26.115.230",
-    //     port: "27754",
-    //     username: "GECPjZ1jcC",
-    //     password: "Sa39rYDhNx",
-    //   };
+      // browserOptions["proxy"] = {
+      //   host: "38.154.227.167",
+      //   port: "5868",
+      //   username: "pqxujuyl",
+      //   password: "y1nmb5kjbz9t",
+      // };
     // }
 
     var { connect } = await import("puppeteer-real-browser");

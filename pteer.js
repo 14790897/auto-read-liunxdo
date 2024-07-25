@@ -1,11 +1,10 @@
-const fs = require("fs");
-
-const path = require("path");
-const puppeteer = require("puppeteer-extra");
-const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+import fs from "fs";
+import path from "path";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import dotenv from "dotenv";
 
 puppeteer.use(StealthPlugin());
-const dotenv = require("dotenv");
 
 // Load the default .env file
 dotenv.config();

@@ -17,7 +17,8 @@ while (true) {
       .catch((e) => console.log(e.message));
   }, 1000);
   console.log("Connected to browser");
-  await page.goto("https://linux.do", {
+  // https://nopecha.com/demo/cloudflare  https://linux.do
+  await page.goto("https://nopecha.com/demo/cloudflare", {
     waitUntil: "domcontentloaded",
   });
   console.log("Navigated to page");

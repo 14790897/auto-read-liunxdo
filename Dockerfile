@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # 安装 Puppeteer 依赖
-RUN apt-get update && apt-get install -y \
+RUN apt update && apt install -y \
     cron\
     wget \
     ca-certificates \
@@ -49,7 +49,10 @@ RUN apt-get update && apt-get install -y \
     lsb-release \
     xdg-utils \
     --no-install-recommends \
+    xvfb \
     && rm -rf /var/lib/apt/lists/*
+RUN sudo snap install chromium
+
 #时区为中国
 ENV TZ=Asia/Shanghai
 
@@ -60,4 +63,4 @@ RUN npm install
 COPY . .
 
 # 设置容器启动时运行的命令
-CMD ["node", "/app/pteer.js"]
+CMD ["node", "/app/bypasscf.js.js"]

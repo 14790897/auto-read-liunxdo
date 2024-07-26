@@ -1,11 +1,10 @@
-const fs = require("fs");
-
-const path = require("path");
-const puppeteer = require("puppeteer-extra");
-const StealthPlugin = require("puppeteer-extra-plugin-stealth");
+import fs from "fs";
+import path from "path";
+import puppeteer from "puppeteer-extra";
+import StealthPlugin from "puppeteer-extra-plugin-stealth";
+import dotenv from "dotenv";
 
 puppeteer.use(StealthPlugin());
-const dotenv = require("dotenv");
 
 // Load the default .env file
 dotenv.config();
@@ -59,24 +58,22 @@ function delayClick(time) {
 async function launchBrowserForUser(username, password) {
   try {
     const browserOptions = {
-      headless: "auto", 
+      headless: "auto",
       args: ["--no-sandbox", "--disable-setuid-sandbox"], // Linux 需要的安全设置
     };
 
     // 如果环境变量不是 'dev'，则添加代理配置
     // if (process.env.ENVIRONMENT !== "dev") {
-      // browserOptions["proxy"] = {
-      //   host: "38.154.227.167",
-      //   port: "5868",
-      //   username: "pqxujuyl",
-      //   password: "y1nmb5kjbz9t",
-      // };
+    // browserOptions["proxy"] = {
+    //   host: "38.154.227.167",
+    //   port: "5868",
+    //   username: "pqxujuyl",
+    //   password: "y1nmb5kjbz9t",
+    // };
     // }
 
     var { connect } = await import("puppeteer-real-browser");
-    const { page, browser } = await connect(
-        browserOptions
-    );
+    const { page, browser } = await connect(browserOptions);
     // await page.goto(loginUrl);
     //登录操作
     // await page.goto(loginUrl, { waitUntil: "networkidle0" });
@@ -227,9 +224,7 @@ async function navigatePage(url, page, browser) {
   let pageTitle = await page.title(); // 获取当前页面标题
 
   while (pageTitle.includes("Just a moment")) {
-    console.log(
-      "The page is under Cloudflare protection. Waiting..."
-    );
+    console.log("The page is under Cloudflare protection. Waiting...");
 
     await delayClick(2000); // 每次检查间隔2秒
 

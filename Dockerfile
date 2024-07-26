@@ -62,4 +62,4 @@ RUN npm install
 COPY . .
 
 # 设置容器启动时运行的命令
-CMD ["node", "/app/bypasscf.js"]
+CMD ["node", "/app/pteer.js"]

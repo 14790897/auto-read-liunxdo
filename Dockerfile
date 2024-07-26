@@ -4,6 +4,8 @@ FROM buildkite/puppeteer
 # 设置工作目录
 WORKDIR /app
 
+# 复制 package.json 和 package-lock.json 文件，可能利用缓存，避免重复构建
+COPY package*.json ./
 
 #时区为中国
 ENV TZ=Asia/Shanghai
@@ -15,4 +17,4 @@ RUN npm install
 COPY . .
 
 # 设置容器启动时运行的命令
-CMD ["node", "/app/bypasscf.js.js"]
+CMD ["node", "/app/bypasscf.js"]

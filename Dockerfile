@@ -50,14 +50,8 @@ RUN apt update && apt install -y \
     xdg-utils \
     --no-install-recommends \
     xvfb \
-    snapd \
     && rm -rf /var/lib/apt/lists/*
-# 启动 Snapd 服务
-RUN systemctl enable snapd
-RUN systemctl start snapd
 
-# 安装 Chromium 浏览器
-RUN snap install chromium
 #时区为中国
 ENV TZ=Asia/Shanghai
 
@@ -68,4 +62,4 @@ RUN npm install
 COPY . .
 
 # 设置容器启动时运行的命令
-CMD ["node", "/app/bypasscf.js.js"]
+CMD ["node", "/app/bypasscf.js"]

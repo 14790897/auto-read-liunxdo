@@ -1,4 +1,4 @@
-version: "3.8" # 使用 Docker Compose 文件版本 3.8，根据需要可以更改
+version: "3.8" 
 services:
   autoread:
     image: 14790897/auto-read:latest
@@ -9,4 +9,4 @@ services:
         BfdSGt}F4!5pLHt,
       WEBSITE: "https://linux.do" #目前支持 "https://meta.discourse.org","https://linux.do","https://meta.appinn.net","https://community.openai.com",
       ENVIRONMENT: "production" #这个不需要改动
-    restart: unless-stopped # 容器退出时重启策略
+    restart: no # 容器退出时重启策略

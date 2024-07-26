@@ -1,5 +1,5 @@
 # 使用官方 Node.js 作为父镜像
-FROM node:18-slim
+FROM buildkite/puppeteer
 
 # 设置工作目录
 WORKDIR /app
@@ -51,7 +51,6 @@ RUN apt update && apt install -y \
     --no-install-recommends \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
-RUN  apt install chromium-browser 
 
 #时区为中国
 ENV TZ=Asia/Shanghai

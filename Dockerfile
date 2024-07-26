@@ -51,7 +51,7 @@ RUN apt update && apt install -y \
     --no-install-recommends \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
-RUN  snap install chromium
+RUN  apt install chromium
 
 #时区为中国
 ENV TZ=Asia/Shanghai

@@ -1,4 +1,4 @@
-import { connect } from "puppeteer-bypass-cf";
+import { connect } from "puppeteer-real-browser";
 
 while (true) {
   console.log("Start of test.js");

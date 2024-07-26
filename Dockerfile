@@ -51,7 +51,7 @@ RUN apt update && apt install -y \
     --no-install-recommends \
     xvfb \
     && rm -rf /var/lib/apt/lists/*
-RUN  apt install chromium
+RUN  apt install chromium-browser 
 
 #时区为中国
 ENV TZ=Asia/Shanghai

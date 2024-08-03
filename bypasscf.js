@@ -5,7 +5,11 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
-
+// 截图保存的文件夹
+const screenshotDir = "screenshots";
+if (!fs.existsSync(screenshotDir)) {
+  fs.mkdirSync(screenshotDir);
+}
 puppeteer.use(StealthPlugin());
 
 // Load the default .env file
@@ -76,6 +80,8 @@ async function launchBrowserForUser(username, password) {
 
     var { connect } = await import("puppeteer-real-browser");
     const { page, browser } = await connect(browserOptions);
+    // 启动截图功能
+    takeScreenshots(page);
     // await page.goto(loginUrl);
     //登录操作
     // await page.goto(loginUrl, { waitUntil: "networkidle0" });
@@ -246,4 +252,31 @@ async function navigatePage(url, page, browser) {
 
   // 如果循环正常结束，说明页面已经加载完毕，没有超时
   console.log("The page is ready for further actions.");
+}
+
+// 每秒截图功能
+async function takeScreenshots(page) {
+  let screenshotIndex = 0;
+  setInterval(async () => {
+    screenshotIndex++;
+    const screenshotPath = path.join(
+      screenshotDir,
+      `screenshot-${screenshotIndex}.png`
+    );
+    try {
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      console.log(`Screenshot saved: ${screenshotPath}`);
+    } catch (error) {
+      console.error("Error taking screenshot:", error);
+    }
+  }, 1000);
+  // 注册退出时删除文件夹的回调函数
+  process.on("exit", () => {
+    try {
+      fs.rmdirSync(screenshotDir, { recursive: true });
+      console.log(`Deleted folder: ${screenshotDir}`);
+    } catch (error) {
+      console.error(`Error deleting folder ${screenshotDir}:`, error);
+    }
+  });
 }

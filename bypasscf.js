@@ -55,7 +55,7 @@ function delayClick(time) {
     });
 
     // 等待所有登录操作完成
-    await Promise.all(loginPromises);
+    // await Promise.all(loginPromises);
   } catch (error) {
     // 错误处理逻辑
     console.error("发生错误：", error);
@@ -147,8 +147,14 @@ async function launchBrowserForUser(username, password) {
         loginButton = document.querySelector(
           ".widget-button.btn.btn-primary.btn-small.login-button.btn-icon-text"
         );
+      } else {
+        console.log("通过文字登录或login找到loginButton:", loginButton);
       }
-      console.log(loginButton);
+      if (!loginButton) {
+        console.log("没有找到loginbutton");
+      } else {
+        console.log("通过类名找到了loginButton:", loginButton);
+      }
       if (loginButton) {
         loginButton.click();
         console.log("Login button clicked.");
@@ -231,24 +237,24 @@ async function login(page, username, password) {
 async function navigatePage(url, page, browser) {
   await page.goto(url);
 
-  const startTime = Date.now(); // 记录开始时间
+  // const startTime = Date.now(); // 记录开始时间
   let pageTitle = await page.title(); // 获取当前页面标题
+  console.log('页面标题：', pageTitle)
+  // while (pageTitle.includes("Just a moment")) {
+  //   console.log("The page is under Cloudflare protection. Waiting...");
 
-  while (pageTitle.includes("Just a moment")) {
-    console.log("The page is under Cloudflare protection. Waiting...");
+  //   await delayClick(2000); // 每次检查间隔2秒
 
-    await delayClick(2000); // 每次检查间隔2秒
+  //   // 重新获取页面标题
+  //   pageTitle = await page.title();
 
-    // 重新获取页面标题
-    pageTitle = await page.title();
-
-    // 检查是否超过15秒
-    if (Date.now() - startTime > 35000) {
-      console.log("Timeout exceeded, aborting actions.");
-      await browser.close();
-      return; // 超时则退出函数
-    }
-  }
+  //   // 检查是否超过15秒
+  //   if (Date.now() - startTime > 35000) {
+  //     console.log("Timeout exceeded, aborting actions.");
+  //     await browser.close();
+  //     return; // 超时则退出函数
+  //   }
+  // }
 
   // 如果循环正常结束，说明页面已经加载完毕，没有超时
   console.log("The page is ready for further actions.");

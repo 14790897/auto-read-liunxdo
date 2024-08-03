@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-# 这里其实可以使用Windows环境这样就不需要考虑Linux
+# 这里其实可以使用Windows环境，这样就不需要考虑Linux
 jobs:
   build-and-push:
     runs-on: ubuntu-latest

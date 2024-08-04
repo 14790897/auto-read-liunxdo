@@ -106,5 +106,9 @@ external 是作为 puppeteer 的脚本使用的，由 index_passage_list.js 改�
 
 开发中遇到的问题：
 问：TimeoutError: Navigation timeout of 30000 ms exceeded 为什么 puppeteer 经常出现这个错误?
-答：linux使用{waitUntil: 'domcontentloaded'}后，情况大大好转，但还是有时出现，Windows未曾出现此问题
+答：linux 使用{waitUntil: 'domcontentloaded'}后，情况大大好转，但还是有时出现，Windows 未曾出现此问题
 [见文章分析](随笔.md)
+
+#### 待做
+
+1. TimeoutError 时候可以捕获错误然后关掉当前浏览器重新再开一次

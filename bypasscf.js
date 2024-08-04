@@ -231,8 +231,24 @@ async function login(page, username, password) {
 async function navigatePage(url, page, browser) {
   await page.goto(url, { waitUntil: "domcontentloaded" }); //如果使用默认的load,linux下页面会一直加载导致无法继续执行
 
-  // const startTime = Date.now(); // 记录开始时间
+  const startTime = Date.now(); // 记录开始时间
   let pageTitle = await page.title(); // 获取当前页面标题
+
+  while (pageTitle.includes("Just a moment")) {
+    console.log("The page is under Cloudflare protection. Waiting...");
+
+    await delayClick(2000); // 每次检查间隔2秒
+
+    // 重新获取页面标题
+    pageTitle = await page.title();
+
+    // 检查是否超过15秒
+    if (Date.now() - startTime > 35000) {
+      console.log("Timeout exceeded, aborting actions.");
+      await browser.close();
+      return; // 超时则退出函数
+    }
+  } 
   console.log("页面标题：", pageTitle);
 }
 

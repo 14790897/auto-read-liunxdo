@@ -42,7 +42,7 @@ node .\bypasscf.js
 
 ## 使用方法三：GitHub Action 每天 0 点阅读
 
-(可自行修改启动时间和持续时间，代码.github\workflows\cron_read.yaml)
+(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml)
 
 ### 1. fork 仓库
 

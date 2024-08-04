@@ -17,7 +17,7 @@
 
 ```sh
 npm install
-node .\pteer.js
+node .\bypasscf.js
 ```
 
 #### Linux 额外安装以下包，运行命令相同
@@ -37,7 +37,7 @@ sudo snap install chromium
 
 ```sh
 npm install
-node .\pteer.js
+node .\bypasscf.js
 ```
 
 ## 使用方法三：GitHub Action 每天 0 点阅读

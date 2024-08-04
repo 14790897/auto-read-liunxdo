@@ -5,7 +5,7 @@
 油猴脚本代码在 index_passage_list 中，建议在使用前将浏览器页面缩小，这样子可以一次读更多的回复
 油猴：https://greasyfork.org/en/scripts/489464-auto-read
 
-## 使用方法二：puppeteer 无头运行
+## 使用方法二：后台puppeteer运行（Windows默认有头，Linux默认无头）
 
 ### 1.设置环境变量
 
@@ -112,3 +112,40 @@ external 是作为 puppeteer 的脚本使用的，由 index_passage_list.js 改�
 #### 待做
 
 1. TimeoutError 时候可以捕获错误然后关掉当前浏览器重新再开一次
+
+<!-- 
+代码：
+https://github.com/14790897/auto-read-liunxdo
+## 手动运行
+
+### 1.设置环境变量
+
+.env 里面设置用户名 密码
+
+### 2.运行
+
+
+```sh
+
+npm install
+
+node .\bypasscf.js
+
+```
+## GitHub Action 每天 阅读
+
+(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml)
+
+### 1. fork 仓库
+
+### 2.设置环境变量
+
+在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的）（.env 里面设置用户名密码在这里无效）
+![alt text](image2.png)
+
+### 3.启动 workflow
+
+教程：https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates
+
+## 演示视频
+<iframe src="//player.bilibili.com/player.html?isOutside=true&aid=112902946161711&bvid=BV1QLiceMExQ&cid=500001637992386&p=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"></iframe> -->

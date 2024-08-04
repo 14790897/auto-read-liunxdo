@@ -81,10 +81,8 @@ async function launchBrowserForUser(username, password) {
     var { connect } = await import("puppeteer-real-browser");
     const { page, browser } = await connect(browserOptions);
     // 启动截图功能
-    takeScreenshots(page);
-    // await page.goto(loginUrl);
+    // takeScreenshots(page);
     //登录操作
-    // await page.goto(loginUrl, { waitUntil: "networkidle0" });
     await navigatePage(loginUrl, page, browser);
     await delayClick(8000);
     // 设置额外的 headers
@@ -92,11 +90,11 @@ async function launchBrowserForUser(username, password) {
       "accept-language": "en-US,en;q=0.9",
     });
     // 验证 `navigator.webdriver` 属性是否为 undefined
-    const isWebDriverUndefined = await page.evaluate(() => {
-      return `${navigator.webdriver}`;
-    });
+    // const isWebDriverUndefined = await page.evaluate(() => {
+    //   return `${navigator.webdriver}`;
+    // });
 
-    console.log("navigator.webdriver is :", isWebDriverUndefined); // 输出应为 true
+    // console.log("navigator.webdriver is :", isWebDriverUndefined); // 输出应为 false
     page.on("pageerror", (error) => {
       console.error(`Page error: ${error.message}`);
     });
@@ -135,47 +133,17 @@ async function launchBrowserForUser(username, password) {
     });
     // //登录操作
     console.log("登录操作");
-    // 使用XPath查询找到包含"登录"或"login"文本的按钮
-    await page.evaluate(() => {
-      let loginButton = Array.from(document.querySelectorAll("button")).find(
-        (button) =>
-          button.textContent.includes("登录") ||
-          button.textContent.includes("login")
-      );
-      // 如果没有找到，尝试根据类名查找
-      if (!loginButton) {
-        loginButton = document.querySelector(
-          ".widget-button.btn.btn-primary.btn-small.login-button.btn-icon-text"
-        );
-      } else {
-        console.log("通过文字登录或login找到loginButton:", loginButton);
-      }
-      if (!loginButton) {
-        console.log("没有找到loginbutton");
-      } else {
-        console.log("通过类名找到了loginButton:", loginButton);
-      }
-      if (loginButton) {
-        loginButton.click();
-        console.log("Login button clicked.");
-      } else {
-        console.log("Login button not found.");
-      }
-    });
-
     await login(page, username, password);
     // 查找具有类名 "avatar" 的 img 元素验证登录是否成功
     const avatarImg = await page.$("img.avatar");
 
     if (avatarImg) {
       console.log("找到avatarImg，登录成功");
-      // 可以继续对 avatarImg 进行操作，比如获取其属性等
     } else {
       console.log("未找到avatarImg，登录失败");
     }
 
     //真正执行阅读脚本
-    // 读取外部脚本文件的内容
     const externalScriptPath = path.join(
       dirname(fileURLToPath(import.meta.url)),
       "external.js"
@@ -191,12 +159,37 @@ async function launchBrowserForUser(username, password) {
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
     });
-    await page.goto("https://linux.do/t/topic/13716/285");
+    await page.goto("https://linux.do/t/topic/13716/285", {
+      waitUntil: "domcontentloaded",
+    });
   } catch (err) {
     console.log(err);
   }
 }
 async function login(page, username, password) {
+  // 使用XPath查询找到包含"登录"或"login"文本的按钮
+  let loginButton;
+  await page.evaluate(() => {
+    let loginButton = Array.from(document.querySelectorAll("button")).find(
+      (button) =>
+        button.textContent.includes("登录") ||
+        button.textContent.includes("login")
+    );
+    // 如果没有找到，尝试根据类名查找
+    if (!loginButton) {
+      loginButton = document.querySelector(".login-button");
+    }
+    if (loginButton) {
+      loginButton.click();
+      console.log("Login button clicked.");
+    } else {
+      console.log("Login button not found.");
+    }
+  });
+  if (!loginButton) {
+    await page.goto(`${loginUrl}/t/topic/1`, { waitUntil: "domcontentloaded" });
+    await page.click(".discourse-reactions-reaction-button");
+  }
   // 等待用户名输入框加载
   await page.waitForSelector("#login-account-name");
   // 模拟人类在找到输入框后的短暂停顿
@@ -223,8 +216,9 @@ async function login(page, username, password) {
   await page.waitForSelector("#login-button");
   await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
   try {
+    // page.click("#login-button");
     await Promise.all([
-      //   page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
+      page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
       page.click("#login-button"), // 点击登录按钮触发跳转
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败
   } catch (error) {
@@ -235,29 +229,11 @@ async function login(page, username, password) {
 }
 
 async function navigatePage(url, page, browser) {
-  await page.goto(url);
+  await page.goto(url, { waitUntil: "domcontentloaded" }); //如果使用默认的load,linux下页面会一直加载导致无法继续执行
 
   // const startTime = Date.now(); // 记录开始时间
   let pageTitle = await page.title(); // 获取当前页面标题
-  console.log('页面标题：', pageTitle)
-  // while (pageTitle.includes("Just a moment")) {
-  //   console.log("The page is under Cloudflare protection. Waiting...");
-
-  //   await delayClick(2000); // 每次检查间隔2秒
-
-  //   // 重新获取页面标题
-  //   pageTitle = await page.title();
-
-  //   // 检查是否超过15秒
-  //   if (Date.now() - startTime > 35000) {
-  //     console.log("Timeout exceeded, aborting actions.");
-  //     await browser.close();
-  //     return; // 超时则退出函数
-  //   }
-  // }
-
-  // 如果循环正常结束，说明页面已经加载完毕，没有超时
-  console.log("The page is ready for further actions.");
+  console.log("页面标题：", pageTitle);
 }
 
 // 每秒截图功能

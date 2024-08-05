@@ -80,6 +80,8 @@ async function launchBrowserForUser(username, password) {
 
     var { connect } = await import("puppeteer-real-browser");
     const { page, browser } = await connect(browserOptions);
+    // 设置导航超时时间为60秒
+    page.setDefaultNavigationTimeout(60000);
     // 启动截图功能
     // takeScreenshots(page);
     //登录操作
@@ -216,9 +218,9 @@ async function login(page, username, password) {
   await page.waitForSelector("#login-button");
   await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
   try {
-    // page.click("#login-button");
     await Promise.all([
       page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
+      // 去掉上面一行会报错：Error: Execution context was destroyed, most likely because of a navigation. 可能是因为之后没等页面加载完成就执行了脚本
       page.click("#login-button"), // 点击登录按钮触发跳转
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败
   } catch (error) {

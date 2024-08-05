@@ -222,9 +222,9 @@ async function login(page, username, password) {
       page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
       // 去掉上面一行会报错：Error: Execution context was destroyed, most likely because of a navigation. 可能是因为之后没等页面加载完成就执行了脚本
       page.click("#login-button"), // 点击登录按钮触发跳转
-    ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败
+    ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败 这点四个月之前你就发现了结果今天又遇到（有个用户遇到了https://linux.do/t/topic/169209/82），但是你没有在这个报错你提示我8.5
   } catch (error) {
-    console.error("Navigation timed out in login.:", error);
+    console.error("Navigation timed out in login.请检查用户名是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串):", error);
     throw new Error("Navigation timed out in login.");
   }
   await delayClick(1000);

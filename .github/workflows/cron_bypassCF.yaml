@@ -13,14 +13,14 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x] # 选择你需要的 Node.js 版本
+        node-version: [20.x]
     env:
-      # 在作业级别设置环境变量
-      USERNAMES: ${{ secrets.USERNAMES }}
-      PASSWORDS: ${{ secrets.PASSWORDS }}
+      USERNAMES: "${{ secrets.USERNAMES }}"
+      PASSWORDS: "${{ secrets.PASSWORDS }}"
+      WEBSITE: "${{ secrets.WEBSITE }}"
 
     steps:
-      - uses: actions/checkout@v3 # 检出你的仓库
+      - uses: actions/checkout@v3 # 检出仓库
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:

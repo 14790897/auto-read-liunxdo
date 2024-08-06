@@ -4,7 +4,7 @@ on:
   schedule:
     # 每天 UTC 时间 18:00 运行
     - cron: "0 18 * * *"
-  workflow_dispatch: # 添加这行以允许手动触发
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
@@ -14,10 +14,6 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
-    env:
-      USERNAMES: ${{ secrets.USERNAMES }}
-      PASSWORDS: ${{ secrets.PASSWORDS }}
-      WEBSITE: ${{ secrets.WEBSITE }}
 
     steps:
       - uses: actions/checkout@v3 # 检出仓库
@@ -25,9 +21,29 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
       - name: Install dependencies
         run: |
           npm install
           sudo apt install -y xvfb
+
+      - name: Load environment variables
+        id: load-env
+        run: |
+          if [ -z "${{ secrets.USERNAMES }}" ] || [ "${{ secrets.USERNAMES }}" == "" ]; then
+            echo "Loading environment variables from .env file"
+            set -a
+            source .env
+            set +a
+            echo "USERNAMES=${USERNAMES}" >> $GITHUB_ENV
+            echo "PASSWORDS=${PASSWORDS}" >> $GITHUB_ENV
+            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
+          else
+            echo "Using secrets"
+            echo "USERNAMES=${{ secrets.USERNAMES }}" >> $GITHUB_ENV
+            echo "PASSWORDS=${{ secrets.PASSWORDS }}" >> $GITHUB_ENV
+            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
+          fi
+
       - name: Run a script
-        run: xvfb-run  node bypasscf.js 
+        run: xvfb-run node bypasscf.js

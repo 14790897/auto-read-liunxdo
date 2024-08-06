@@ -1,5 +1,18 @@
 # Changelog
 
+### [1.3.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.3.0...v1.3.1) (2024-08-06)
+
+
+### Bug Fixes
+
+* action 中secret读取特殊字符处理 ([5457abc](https://www.github.com/14790897/auto-read-liunxdo/commit/5457abce09c0b26a54ef6b67b0563b49ca567e97))
+* docker命令执行的代码 ([aa36a2b](https://www.github.com/14790897/auto-read-liunxdo/commit/aa36a2b754e2591c65dfdd9314e8676aeba60b2b))
+* Windows需要等待cf的完成 ([bdcbeaf](https://www.github.com/14790897/auto-read-liunxdo/commit/bdcbeaff2403123b74a0e031c28560b16265798b))
+* 似乎不需要特殊处理 ([dc96005](https://www.github.com/14790897/auto-read-liunxdo/commit/dc960051002d88f27e5fd5ccde5a22d6be511250))
+* 增加navigation超时时长 ([7c92ff0](https://www.github.com/14790897/auto-read-liunxdo/commit/7c92ff0b3d58753571674f133eaf3bd88d9c75de))
+* 增加点赞间隔 ([dc472be](https://www.github.com/14790897/auto-read-liunxdo/commit/dc472be03be350e2a69d7adc25ae628f1193f241))
+* 增加点赞间隔，避免频繁429 ([706198d](https://www.github.com/14790897/auto-read-liunxdo/commit/706198d1359157da83bb839827278a6f0b61c01c))
+
 ## [1.3.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.2.1...v1.3.0) (2024-08-04)
 
 

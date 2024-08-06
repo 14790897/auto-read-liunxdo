@@ -20,6 +20,10 @@ if (fs.existsSync(".env.local")) {
   for (const k in envConfig) {
     process.env[k] = envConfig[k];
   }
+} else {
+  console.log(
+    "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git"
+  );
 }
 // 从环境变量解析用户名和密码
 const usernames = process.env.USERNAMES.split(",");

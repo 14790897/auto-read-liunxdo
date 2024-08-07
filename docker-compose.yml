@@ -5,7 +5,7 @@ services:
     container_name: auto-read
     environment: # 设置环境变量(不要在.env文件中设置，docker不读取.env)
       USERNAMES: "hahaha2"
-      PASSWORDS: "BfdSGt}F4!5pLHt",
+      PASSWORDS: "BfdSGt}F4!5pLHt"
       WEBSITE: "https://linux.do" #目前支持 "https://meta.discourse.org","https://linux.do","https://meta.appinn.net","https://community.openai.com",
       ENVIRONMENT: "production" #这个不需要改动
     restart: unless-stopped # 容器退出时重启策略

@@ -165,9 +165,20 @@ async function launchBrowserForUser(username, password) {
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
     });
-    await page.goto("https://linux.do/t/topic/13716/285", {
-      waitUntil: "domcontentloaded",
-    });
+    // 如果是Linuxdo，就导航到我的帖子
+    if (loginUrl == "https://linux.do") {
+      await page.goto("https://linux.do/t/topic/13716/340", {
+        waitUntil: "domcontentloaded",
+      });
+    } else if (loginUrl == "https://meta.appinn.net") {
+      await page.goto("https://meta.appinn.net/t/topic/52006", {
+        waitUntil: "domcontentloaded",
+      });
+    } else {
+      await page.goto(`${loginUrl}/t/topic/1`, {
+        waitUntil: "domcontentloaded",
+      });
+    }
   } catch (err) {
     console.log(err);
   }
@@ -192,10 +203,10 @@ async function login(page, username, password) {
       console.log("Login button not found.");
     }
   });
-  if (!loginButton) {
-    await page.goto(`${loginUrl}/t/topic/1`, { waitUntil: "domcontentloaded" });
-    await page.click(".discourse-reactions-reaction-button");
-  }
+  // if (!loginButton) {
+  //   await page.goto(`${loginUrl}/t/topic/1`, { waitUntil: "domcontentloaded" });
+  //   await page.click(".discourse-reactions-reaction-button");
+  // }
   // 等待用户名输入框加载
   await page.waitForSelector("#login-account-name");
   // 模拟人类在找到输入框后的短暂停顿
@@ -257,7 +268,7 @@ async function navigatePage(url, page, browser) {
       await browser.close();
       return; // 超时则退出函数
     }
-  } 
+  }
   console.log("页面标题：", pageTitle);
 }
 

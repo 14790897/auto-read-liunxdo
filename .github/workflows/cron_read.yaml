@@ -28,4 +28,4 @@ jobs:
       - name: Install dependencies
         run: npm install # 安装 package.json 中的依赖项
       - name: Run a script
-        run: node pteer.js # 替换为你想运行的脚本的实际名称
+        run: node bypasscf.js # 替换为你想运行的脚本的实际名称

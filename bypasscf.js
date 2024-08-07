@@ -185,32 +185,35 @@ async function launchBrowserForUser(username, password) {
 }
 async function login(page, username, password) {
   // 使用XPath查询找到包含"登录"或"login"文本的按钮
-  let loginButton;
-  await page.evaluate(() => {
-    let loginButton = Array.from(document.querySelectorAll("button")).find(
-      (button) =>
-        button.textContent.includes("登录") ||
-        button.textContent.includes("login")
-    );
-    // 如果没有找到，尝试根据类名查找
-    if (!loginButton) {
-      loginButton = document.querySelector(".login-button");
-    }
-    if (loginButton) {
-      loginButton.click();
-      console.log("Login button clicked.");
-    } else {
-      console.log("Login button not found.");
-    }
-  });
-  if (!loginButton) {
+ let loginButtonFound = await page.evaluate(() => {
+   let loginButton = Array.from(document.querySelectorAll("button")).find(
+     (button) =>
+       button.textContent.includes("登录") ||
+       button.textContent.includes("login")
+   ); // 注意loginButton 变量在外部作用域中是无法被 page.evaluate 内部的代码直接修改的。page.evaluate 的代码是在浏览器环境中执行的，这意味着它们无法直接影响 Node.js 环境中的变量
+   // 如果没有找到，尝试根据类名查找
+   if (!loginButton) {
+     loginButton = document.querySelector(".login-button");
+   }
+   if (loginButton) {
+     loginButton.click();
+     console.log("Login button clicked.");
+     return true; // 返回true表示找到了按钮并点击了
+   } else {
+     console.log("Login button not found.");
+     return false; // 返回false表示没有找到按钮
+   }
+ });
+  if (!loginButtonFound) {
     if (loginUrl == "https://meta.appinn.net") {
       await page.goto("https://meta.appinn.net/t/topic/52006", {
         waitUntil: "domcontentloaded",
       });
       await page.click(".discourse-reactions-reaction-button");
     } else {
-      await page.goto(`${loginUrl}/t/topic/1`, { waitUntil: "domcontentloaded" });
+      await page.goto(`${loginUrl}/t/topic/1`, {
+        waitUntil: "domcontentloaded",
+      });
       await page.click(".discourse-reactions-reaction-button");
     }
   }

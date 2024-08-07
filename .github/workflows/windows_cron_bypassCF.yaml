@@ -1,4 +1,4 @@
-name: bypassCF cron
+name: bypassCF cron windows
 
 on:
   schedule:
@@ -14,34 +14,19 @@ jobs:
       matrix:
         node-version: [20.x]
 
-    steps:
-      - uses: actions/checkout@v3
+    env:
+      # 在作业级别设置环境变量
+      USERNAMES: ${{ secrets.USERNAMES_appin }}
+      PASSWORDS: ${{ secrets.PASSWORDS_appin }}
+      WEBSITE: ${{ secrets.WEBSITE_appin }}
 
+    steps:
+      - uses: actions/checkout@v3 # 检出你的仓库
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-
       - name: Install dependencies
-        run: npm install
-
-      - name: Load environment variables
-        id: load-env
-        run: |
-          if ($env:USERNAMES -eq $null -or $env:USERNAMES -eq "") {
-            Write-Host "Loading environment variables from .env file"
-            Get-Content .env | ForEach-Object {
-              $name, $value = $_ -split '=', 2
-              Write-Host "::set-env name=$name::$value"
-              Write-Host "$name=$value" >> $env:GITHUB_ENV
-            }
-          }
-          else {
-            Write-Host "Using secrets"
-            Write-Host "USERNAMES=${{ secrets.USERNAMES_appin }}" >> $env:GITHUB_ENV
-            Write-Host "PASSWORDS=${{ secrets.PASSWORDS_appin }}" >> $env:GITHUB_ENV
-            Write-Host "WEBSITE=${{ secrets.WEBSITE_appin }}" >> $env:GITHUB_ENV
-          }
-
+        run: npm install # 安装 package.json 中的依赖项
       - name: Run a script
-        run: node bypasscf.js
+        run: node pteer.js # 替换为你想运行的脚本的实际名称

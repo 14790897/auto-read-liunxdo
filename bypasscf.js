@@ -203,10 +203,17 @@ async function login(page, username, password) {
       console.log("Login button not found.");
     }
   });
-  // if (!loginButton) {
-  //   await page.goto(`${loginUrl}/t/topic/1`, { waitUntil: "domcontentloaded" });
-  //   await page.click(".discourse-reactions-reaction-button");
-  // }
+  if (!loginButton) {
+    if (loginUrl == "https://meta.appinn.net") {
+      await page.goto("https://meta.appinn.net/t/topic/52006", {
+        waitUntil: "domcontentloaded",
+      });
+      await page.click(".discourse-reactions-reaction-button");
+    } else {
+      await page.goto(`${loginUrl}/t/topic/1`, { waitUntil: "domcontentloaded" });
+      await page.click(".discourse-reactions-reaction-button");
+    }
+  }
   // 等待用户名输入框加载
   await page.waitForSelector("#login-account-name");
   // 模拟人类在找到输入框后的短暂停顿

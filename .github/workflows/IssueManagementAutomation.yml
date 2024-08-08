@@ -18,8 +18,8 @@ jobs:
   manage-issues:
     runs-on: ubuntu-latest
     steps:
-      - name: Auto Lock Baipiao
-        uses: 14790897/auto-lock-baipiao@v0.1.2
+      - name: auto lock baipiao
+        uses: 14790897/auto-lock-baipiao@v1.0.1      
         with:
           gh_token: ${{ secrets.GITHUB_TOKEN }} 
           gh_repo: ${{ github.repository }}

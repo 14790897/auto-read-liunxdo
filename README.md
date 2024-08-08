@@ -84,10 +84,11 @@ crontab -e
 0 6 * * *  /root/auto-read-liunxdo/cron.sh  # 注意这是示例目录，要改为所在仓库目录的cron.sh（使用pwd查看所在目录）
 ```
 
-# 如何增加基于 discourse 的其它网站的支持？
+## 如何增加基于 discourse 的其它网站的支持？
 
 1. 修改 index_passage_list 中的// @match ，根据其它示例网站，填写新的 url，此外在脚本开头的 possibleBaseURLs 中也添加 url
 2. 服务器运行时，还需要修改.env 下的 WEBSITE 变量为对应的网址（如果网址是不存在原先脚本的，需要修改 external.js 中对应的部分，重新构建镜像）
+3. 小众软件论坛只能在Windows下运行，所以需要使用定制版action: [.github\workflows\windows_cron_bypassCF.yaml](https://github.com/14790897/auto-read-liunxdo/blob/main/.github/workflows/windows_cron_bypassCF.yaml)
 
 #### 其它
 

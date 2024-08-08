@@ -1,0 +1,26 @@
+name: Issue Action Test
+
+on:
+  schedule:
+    - cron: "0 18 * * *"   #"0 18 * * *"  "0 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  manage-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Auto Lock Baipiao
+        uses: 14790897/auto-lock-baipiao@v0.1.2
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }} 
+          gh_repo: ${{ github.repository }}
+          issue_labels: ${{ secrets.ISSUE_LABELS }}

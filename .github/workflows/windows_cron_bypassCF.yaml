@@ -1,5 +1,5 @@
+# 专门给小众软件论坛使用，要取消schedule的注释才能每日运行
 name: bypassCF cron windows
-# 专门给小众论坛使用，要取消schedule的注释才能每日运行
 on:
   # schedule:
   #   - cron: "0 18 * * *"
@@ -16,9 +16,9 @@ jobs:
 
     env:
       # 在作业级别设置环境变量
-      USERNAMES: ${{ secrets.USERNAMES_appin }}
-      PASSWORDS: ${{ secrets.PASSWORDS_appin }}
-      WEBSITE: ${{ secrets.WEBSITE_appin }}
+      USERNAMES: ${{ secrets.USERNAMES_APPIN }}
+      PASSWORDS: ${{ secrets.PASSWORDS_APPIN }}
+      WEBSITE: ${{ secrets.WEBSITE_APPIN }}
 
     steps:
       - uses: actions/checkout@v3 # 检出你的仓库

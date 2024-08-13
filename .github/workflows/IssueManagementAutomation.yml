@@ -1,8 +1,8 @@
-name: Issue Action Test
+name: IssueManagementAutomation
 
 on:
   schedule:
-    - cron: "0 9-17 * * *"   #"0 18 * * *"  "0 */6 * * *"
+    - cron: "0 1-9/3 * * *"   #"0 18 * * *"  "0 */6 * * *"
   workflow_dispatch:
   push:
     branches:

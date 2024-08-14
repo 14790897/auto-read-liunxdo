@@ -165,36 +165,57 @@ async function launchBrowserForUser(username, password) {
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
     });
-    await page.goto("https://linux.do/t/topic/13716/285", {
-      waitUntil: "domcontentloaded",
-    });
+    // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了
+    if (loginUrl == "https://linux.do") {
+      await page.goto("https://linux.do/t/topic/13716/340", {
+        waitUntil: "domcontentloaded",
+      });
+    } else if (loginUrl == "https://meta.appinn.net") {
+      await page.goto("https://meta.appinn.net/t/topic/52006", {
+        waitUntil: "domcontentloaded",
+      });
+    } else {
+      await page.goto(`${loginUrl}/t/topic/1`, {
+        waitUntil: "domcontentloaded",
+      });
+    }
   } catch (err) {
     console.log(err);
   }
 }
 async function login(page, username, password) {
   // 使用XPath查询找到包含"登录"或"login"文本的按钮
-  let loginButton;
-  await page.evaluate(() => {
-    let loginButton = Array.from(document.querySelectorAll("button")).find(
-      (button) =>
-        button.textContent.includes("登录") ||
-        button.textContent.includes("login")
-    );
-    // 如果没有找到，尝试根据类名查找
-    if (!loginButton) {
-      loginButton = document.querySelector(".login-button");
-    }
-    if (loginButton) {
-      loginButton.click();
-      console.log("Login button clicked.");
+ let loginButtonFound = await page.evaluate(() => {
+   let loginButton = Array.from(document.querySelectorAll("button")).find(
+     (button) =>
+       button.textContent.includes("登录") ||
+       button.textContent.includes("login")
+   ); // 注意loginButton 变量在外部作用域中是无法被 page.evaluate 内部的代码直接修改的。page.evaluate 的代码是在浏览器环境中执行的，这意味着它们无法直接影响 Node.js 环境中的变量
+   // 如果没有找到，尝试根据类名查找
+   if (!loginButton) {
+     loginButton = document.querySelector(".login-button");
+   }
+   if (loginButton) {
+     loginButton.click();
+     console.log("Login button clicked.");
+     return true; // 返回true表示找到了按钮并点击了
+   } else {
+     console.log("Login button not found.");
+     return false; // 返回false表示没有找到按钮
+   }
+ });
+  if (!loginButtonFound) {
+    if (loginUrl == "https://meta.appinn.net") {
+      await page.goto("https://meta.appinn.net/t/topic/52006", {
+        waitUntil: "domcontentloaded",
+      });
+      await page.click(".discourse-reactions-reaction-button");
     } else {
-      console.log("Login button not found.");
+      await page.goto(`${loginUrl}/t/topic/1`, {
+        waitUntil: "domcontentloaded",
+      });
+      await page.click(".discourse-reactions-reaction-button");
     }
-  });
-  if (!loginButton) {
-    await page.goto(`${loginUrl}/t/topic/1`, { waitUntil: "domcontentloaded" });
-    await page.click(".discourse-reactions-reaction-button");
   }
   // 等待用户名输入框加载
   await page.waitForSelector("#login-account-name");
@@ -257,7 +278,7 @@ async function navigatePage(url, page, browser) {
       await browser.close();
       return; // 超时则退出函数
     }
-  } 
+  }
   console.log("页面标题：", pageTitle);
 }
 

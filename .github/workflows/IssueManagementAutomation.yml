@@ -1,0 +1,26 @@
+name: IssueManagementAutomation
+
+on:
+  schedule:
+    - cron: "0 1-9/3 * * *"   #"0 18 * * *"  "0 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  manage-issues:
+    runs-on: ubuntu-latest
+    steps:
+      - name: auto lock baipiao
+        uses: 14790897/auto-lock-baipiao@v0.1.7        
+        with:
+          gh_token: ${{ secrets.GITHUB_TOKEN }} 
+          gh_repo: ${{ github.repository }}
+          issue_labels: ${{ secrets.ISSUE_LABELS }}

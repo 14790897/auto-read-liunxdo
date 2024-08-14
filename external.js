@@ -336,6 +336,8 @@
       // 如果是Linuxdo，就导航到我的帖子
       if (BASE_URL == "https://linux.do") {
         window.location.href = "https://linux.do/t/topic/13716/340";
+      } else if (BASE_URL == "https://meta.appinn.net") {
+        window.location.href = "https://meta.appinn.net/t/topic/52006";
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }

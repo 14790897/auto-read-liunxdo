@@ -1,23 +1,24 @@
-name: read cron
-
+# 专门给小众软件论坛使用，要取消schedule的注释才能每日运行
+name: bypassCF cron windows
 on:
   # schedule:
-  #   # 每天 UTC 时间 18:00 运行
   #   - cron: "0 18 * * *"
-  workflow_dispatch: # 添加这行以允许手动触发
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-    timeout-minutes: 20 # 设置作业超时时间为20分钟
+    runs-on: windows-latest
+    timeout-minutes: 20
 
     strategy:
       matrix:
-        node-version: [20.x] # 选择你需要的 Node.js 版本
+        node-version: [20.x]
+
     env:
       # 在作业级别设置环境变量
-      USERNAMES: ${{ secrets.USERNAMES }}
-      PASSWORDS: ${{ secrets.PASSWORDS }}
+      USERNAMES: ${{ secrets.USERNAMES_APPIN }}
+      PASSWORDS: ${{ secrets.PASSWORDS_APPIN }}
+      WEBSITE: ${{ secrets.WEBSITE_APPIN }}
 
     steps:
       - uses: actions/checkout@v3 # 检出你的仓库

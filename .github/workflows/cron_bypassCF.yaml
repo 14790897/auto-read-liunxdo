@@ -1,5 +1,5 @@
 name: bypassCF cron (使用这个)
-# GitHub.secrets优先级最高，即使没有设置对应的变量，它也会读取，这时变量为空值，导致报错，.env读取的变量无法覆盖这个值
+# GitHub.secrets优先级最高，即使没有设置对应的变量，它也会读取，这时变量为空值，导致报错，.env读取的变量无法覆盖这个值,使用了${PASSWORD_ESCAPED//\#/\\#}来对#转义
 on:
   schedule:
     # 每天 UTC 时间 18:00 运行

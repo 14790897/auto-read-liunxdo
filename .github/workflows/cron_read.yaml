@@ -1,10 +1,10 @@
-name: read cron
+name: bypassCF cron
 
 on:
-  # schedule:
-  #   # 每天 UTC 时间 18:00 运行
-  #   - cron: "0 18 * * *"
-  workflow_dispatch: # 添加这行以允许手动触发
+  schedule:
+    # 每天 UTC 时间 18:00 运行
+    - cron: "0 18 * * *"
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
@@ -13,19 +13,48 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20.x] # 选择你需要的 Node.js 版本
-    env:
-      # 在作业级别设置环境变量
-      USERNAMES: ${{ secrets.USERNAMES }}
-      PASSWORDS: ${{ secrets.PASSWORDS }}
+        node-version: [20.x]
 
     steps:
-      - uses: actions/checkout@v3 # 检出你的仓库
+      - uses: actions/checkout@v3 # 检出仓库
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
       - name: Install dependencies
-        run: npm install # 安装 package.json 中的依赖项
+        run: |
+          npm install
+          sudo apt install -y xvfb
+
+      - name: Load environment variables
+        id: load-env
+        run: |
+          # 加载 .env 文件中的默认值
+          if [ -f .env ]; then
+            echo "Loading environment variables from .env file"
+            export $(grep -v '^#' .env | xargs)
+          fi
+
+          # 如果 GitHub Secrets 中设置了环境变量，则覆盖默认值
+          if [ -n "${{ secrets.USERNAMES }}" ]; then
+            echo "USERNAMES=${{ secrets.USERNAMES }}" >> $GITHUB_ENV
+          else
+            echo "USERNAMES=${USERNAMES}" >> $GITHUB_ENV
+          fi
+
+          if [ -n "${{ secrets.PASSWORDS }}" ]; then
+            echo "PASSWORDS=${{ secrets.PASSWORDS }}" >> $GITHUB_ENV
+          else
+            echo "PASSWORDS=${PASSWORDS}" >> $GITHUB_ENV
+          fi
+
+          if [ -n "${{ secrets.WEBSITE }}" ]; then
+            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
+          else
+            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
+          fi
+
       - name: Run a script
-        run: node bypasscf.js # 替换为你想运行的脚本的实际名称
+        run: xvfb-run node bypasscf.js

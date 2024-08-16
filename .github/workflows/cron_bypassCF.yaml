@@ -14,10 +14,6 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
-    env:
-      # 在作业级别设置环境变量
-      USERNAMES: ${{ secrets.USERNAMES }}
-      PASSWORDS: ${{ secrets.PASSWORDS }}
 
     steps:
       - uses: actions/checkout@v3 # 检出仓库
@@ -48,6 +44,23 @@ jobs:
             echo "Loaded .env variables:"
           else
             echo ".env file not found. Skipping loading."
+          fi
+
+          # 如果 GitHub Secrets 中设置了环境变量，则覆盖默认值
+          if [ -n "${{ secrets.USERNAMES }}" ] && [ ! -z "${{ secrets.USERNAMES }}" ]; then
+            echo "Using GitHub Secret for USERNAMES"
+            echo "USERNAMES=${{ secrets.USERNAMES }}" >> $GITHUB_ENV
+          else
+            echo "USERNAMES=${USERNAMES}" >> $GITHUB_ENV
+          fi
+
+          if [ -n "${{ secrets.PASSWORDS }}" ] && [ ! -z "${{ secrets.PASSWORDS }}" ]; then
+            echo "Using GitHub Secret for PASSWORDS"
+            PASSWORD_ESCAPED="${{ secrets.PASSWORDS }}"
+            echo "PASSWORDS='$PASSWORD_ESCAPED'" >> $GITHUB_ENV
+          else
+            PASSWORD_ESCAPED="${PASSWORDS}"
+            echo "PASSWORDS='$PASSWORD_ESCAPED'" >> $GITHUB_ENV
           fi
 
           if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then

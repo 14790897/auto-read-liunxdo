@@ -1,4 +1,4 @@
-name: read cron (don't use)
+name: read cron (暂时不使用)
 
 on:
   schedule:

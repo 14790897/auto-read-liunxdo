@@ -1,5 +1,5 @@
-name: bypassCF cron (use this)
-
+name: bypassCF cron (使用这个)
+# GitHub.secrets优先级最高，即使没有设置对应的变量，它也会读取，这时变量为空值，导致报错，.env读取的变量无法覆盖这个值
 on:
   schedule:
     # 每天 UTC 时间 18:00 运行
@@ -57,9 +57,11 @@ jobs:
 
           if [ -n "${{ secrets.PASSWORDS }}" ] && [ ! -z "${{ secrets.PASSWORDS }}" ]; then
             echo "Using GitHub Secret for PASSWORDS"
-            echo "PASSWORDS=\"${{ secrets.PASSWORDS }}\"" >> $GITHUB_ENV
+            PASSWORD_ESCAPED="${{ secrets.PASSWORDS }}" && PASSWORD_ESCAPED=${PASSWORD_ESCAPED//\#/\\#}
+            echo "PASSWORDS=$PASSWORD_ESCAPED" >> $GITHUB_ENV
           else
-            echo "PASSWORDS=\"${PASSWORDS}\"" >> $GITHUB_ENV
+            PASSWORD_ESCAPED="${PASSWORDS}" && PASSWORD_ESCAPED=${PASSWORD_ESCAPED//\#/\\#}
+            echo "PASSWORDS=$PASSWORD_ESCAPED" >> $GITHUB_ENV
           fi
 
           if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then

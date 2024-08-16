@@ -57,9 +57,9 @@ jobs:
 
           if [ -n "${{ secrets.PASSWORDS }}" ] && [ ! -z "${{ secrets.PASSWORDS }}" ]; then
             echo "Using GitHub Secret for PASSWORDS"
-            echo "PASSWORDS=${{ secrets.PASSWORDS }}" >> $GITHUB_ENV
+            echo 'PASSWORDS="${{ secrets.PASSWORDS }}"'' >> $GITHUB_ENV
           else
-            echo "PASSWORDS=${PASSWORDS}" >> $GITHUB_ENV
+            echo 'PASSWORDS="${PASSWORDS}"' >> $GITHUB_ENV
           fi
 
           if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then

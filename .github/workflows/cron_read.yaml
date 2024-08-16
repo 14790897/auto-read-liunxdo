@@ -50,11 +50,19 @@ jobs:
             echo "PASSWORDS=${PASSWORDS}" >> $GITHUB_ENV
           fi
 
+          # Debug: 输出 WEBSITE 的值
+          echo "Debug: Checking if GitHub Secret 'WEBSITE' is set..."
+
           if [ -n "${{ secrets.WEBSITE }}" ]; then
+            echo "Debug: GitHub Secret 'WEBSITE' is set, using it."
             echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
           else
+            echo "Debug: GitHub Secret 'WEBSITE' is not set, using value from environment or .env file."
             echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
           fi
+
+          # Debug: 输出最后设置的 WEBSITE 值
+          echo "Debug: Final WEBSITE value is set to $(cat $GITHUB_ENV | grep WEBSITE)"
 
       - name: Run a script
         run: xvfb-run node bypasscf.js

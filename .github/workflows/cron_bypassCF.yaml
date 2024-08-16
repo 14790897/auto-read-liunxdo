@@ -1,4 +1,4 @@
-name: bypassCF cron
+name: bypassCF cron old
 
 on:
   schedule:
@@ -29,17 +29,55 @@ jobs:
           sudo apt install -y xvfb
 
       - name: Load environment variables
-        id: load-env
         run: |
-          # 加载 .env 文件中的默认值
-          set -a
-          source .env
-          set +a
+          echo "Debug: Checking if .env file exists..."
+
+          # 检查 .env 文件是否存在
+          if [ -f .env ]; then
+            echo ".env file found. Loading environment variables from .env file"
+            
+            # 加载 .env 文件中的默认值
+            set -a
+            source .env
+            set +a
+            
+            echo "Loaded .env variables:"
+            cat .env
+          else
+            echo ".env file not found. Skipping loading."
+          fi
+
+          # Debug: 确认环境变量已加载
+          echo "Debug: USERNAMES = $USERNAMES"
+          echo "Debug: PASSWORDS = $PASSWORDS"
+          echo "Debug: WEBSITE = $WEBSITE"
 
           # 如果 GitHub Secrets 中设置了环境变量，则覆盖默认值
-          echo "USERNAMES=${{ secrets.USERNAMES || env.USERNAMES }}" >> $GITHUB_ENV
-          echo "PASSWORDS=${{ secrets.PASSWORDS || env.PASSWORDS }}" >> $GITHUB_ENV
-          echo "WEBSITE=${{ secrets.WEBSITE || env.WEBSITE }}" >> $GITHUB_ENV
+          if [ -n "${{ secrets.USERNAMES }}" ] && [ ! -z "${{ secrets.USERNAMES }}" ]; then
+            echo "Using GitHub Secret for USERNAMES"
+            echo "USERNAMES=${{ secrets.USERNAMES }}" >> $GITHUB_ENV
+          else
+            echo "USERNAMES=${USERNAMES}" >> $GITHUB_ENV
+          fi
+
+          if [ -n "${{ secrets.PASSWORDS }}" ] && [ ! -z "${{ secrets.PASSWORDS }}" ]; then
+            echo "Using GitHub Secret for PASSWORDS"
+            echo "PASSWORDS=${{ secrets.PASSWORDS }}" >> $GITHUB_ENV
+          else
+            echo "PASSWORDS=${PASSWORDS}" >> $GITHUB_ENV
+          fi
+
+          if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then
+            echo "Using GitHub Secret for WEBSITE"
+            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
+          else
+            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
+          fi
+
+          # Debug: 输出最终的环境变量值
+          echo "Final values in GITHUB_ENV:"
+          cat $GITHUB_ENV
+        shell: bash
 
       - name: Run a script
         run: xvfb-run node bypasscf.js

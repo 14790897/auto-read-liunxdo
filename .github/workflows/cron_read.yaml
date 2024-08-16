@@ -1,4 +1,4 @@
-name: bypassCF cron
+name: bypassCF cron old
 
 on:
   schedule:

@@ -42,7 +42,6 @@ jobs:
             set +a
             
             echo "Loaded .env variables:"
-            cat .env
           else
             echo ".env file not found. Skipping loading."
           fi

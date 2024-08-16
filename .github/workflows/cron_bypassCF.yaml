@@ -47,11 +47,6 @@ jobs:
             echo ".env file not found. Skipping loading."
           fi
 
-          # Debug: 确认环境变量已加载
-          echo "Debug: USERNAMES = $USERNAMES"
-          echo "Debug: PASSWORDS = $PASSWORDS"
-          echo "Debug: WEBSITE = $WEBSITE"
-
           # 如果 GitHub Secrets 中设置了环境变量，则覆盖默认值
           if [ -n "${{ secrets.USERNAMES }}" ] && [ ! -z "${{ secrets.USERNAMES }}" ]; then
             echo "Using GitHub Secret for USERNAMES"
@@ -74,9 +69,6 @@ jobs:
             echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
           fi
 
-          # Debug: 输出最终的环境变量值
-          echo "Final values in GITHUB_ENV:"
-          cat $GITHUB_ENV
         shell: bash
 
       - name: Run a script

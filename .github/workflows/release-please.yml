@@ -1,4 +1,4 @@
-name: Release Please
+name: Release Please(勿动)
 on:
   push:
     branches:

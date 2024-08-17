@@ -60,4 +60,4 @@ jobs:
         shell: bash
 
       - name: Run a script
-        run: xvfb-run node bypasscf.js "$USERNAMES" "$PASSWORDS" "$WEBSITE"
+        run: node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"

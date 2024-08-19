@@ -1,9 +1,9 @@
-name: read cron
+name: read cron (暂时不使用)
 
 on:
-  # schedule:
-  #   # 每天 UTC 时间 18:00 运行
-  #   - cron: "0 18 * * *"
+  schedule:
+    # 每天 UTC 时间 18:00 运行
+    - cron: "0 18 * * *"
   workflow_dispatch: # 添加这行以允许手动触发
 
 jobs:
@@ -18,6 +18,7 @@ jobs:
       # 在作业级别设置环境变量
       USERNAMES: ${{ secrets.USERNAMES }}
       PASSWORDS: ${{ secrets.PASSWORDS }}
+      WEBSITE: ${{secrets.WEBSITE}}
 
     steps:
       - uses: actions/checkout@v3 # 检出你的仓库
@@ -26,6 +27,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Install dependencies
-        run: npm install # 安装 package.json 中的依赖项
-      - name: Run a script
+        run: |
+          npm install
+          sudo apt install -y xvfb
+      - name: Run auto read
         run: node bypasscf.js # 替换为你想运行的脚本的实际名称

@@ -1,5 +1,5 @@
-name: bypassCF cron
-
+name: bypassCF cron (使用这个)
+# GitHub.secrets优先级最高，即使没有设置对应的变量，它也会读取，这时变量为空值，导致报错，.env读取的变量无法覆盖这个值,使用了${PASSWORD_ESCAPED//\#/\\#}来对#转义,需要两个\，但是我直接在env文件使用这种方法是不行的，GitHub action是有效
 on:
   schedule:
     # 每天 UTC 时间 0:00 运行
@@ -14,9 +14,13 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
-
+    env:
+      # 在作业级别设置环境变量
+      USERNAMES: ${{ secrets.USERNAMES }}
+      PASSWORDS: ${{ secrets.PASSWORDS }}
     steps:
       - uses: actions/checkout@v3 # 检出仓库
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
@@ -28,22 +32,32 @@ jobs:
           sudo apt install -y xvfb
 
       - name: Load environment variables
-        id: load-env
         run: |
-          if [ -z "${{ secrets.USERNAMES }}" ] || [ "${{ secrets.USERNAMES }}" == "" ]; then
-            echo "Loading environment variables from .env file"
+          echo "Debug: Checking if .env file exists..."
+
+          # 检查 .env 文件是否存在
+          if [ -f .env ]; then
+            echo ".env file found. Loading environment variables from .env file"
+            
+            # 加载 .env 文件中的默认值
             set -a
             source .env
             set +a
-            echo "USERNAMES=${USERNAMES}" >> $GITHUB_ENV
-            echo "PASSWORDS=${PASSWORDS}" >> $GITHUB_ENV
-            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
+            
+            echo "Loaded .env variables:"
           else
-            echo "Using secrets"
-            echo "USERNAMES=${{ secrets.USERNAMES }}" >> $GITHUB_ENV
-            echo "PASSWORDS=${{ secrets.PASSWORDS }}" >> $GITHUB_ENV
-            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
+            echo ".env file not found. Skipping loading."
           fi
 
+
+          if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then
+            echo "Using GitHub Secret for WEBSITE"
+            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
+          else
+            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
+          fi
+
+        shell: bash
+
       - name: Run a script
-        run: xvfb-run node bypasscf.js
+        run: node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"

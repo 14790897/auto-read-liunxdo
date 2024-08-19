@@ -1,5 +1,5 @@
 # 专门给小众软件论坛使用，要取消schedule的注释才能每日运行
-name: bypassCF cron windows
+name: bypassCF cron windows(# 专门给小众软件论坛使用，要取消schedule的注释才能每日运行)
 on:
   # schedule:
   #   - cron: "0 18 * * *"

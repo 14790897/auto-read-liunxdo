@@ -3,7 +3,7 @@ name: bypassCF cron
 on:
   schedule:
     # 每天 UTC 时间 0:00 运行
-    - cron: "0 0 * * *"
+    - cron: "0 0,8 * * *"
   workflow_dispatch: # 允许手动触发
 
 jobs:

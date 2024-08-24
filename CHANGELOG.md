@@ -1,5 +1,23 @@
 # Changelog
 
+### [1.4.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.4.0...v1.4.1) (2024-08-24)
+
+
+### Bug Fixes
+
+* cron中变量的默认值 ([10499e2](https://www.github.com/14790897/auto-read-liunxdo/commit/10499e2aa7fb02075ee7925cbeb2125a59a2d922))
+* cron中变量的默认值 ([9d0302a](https://www.github.com/14790897/auto-read-liunxdo/commit/9d0302a9098267ea587456a7f607e547cd004d86))
+* cron中变量的默认值 ([09fd9bd](https://www.github.com/14790897/auto-read-liunxdo/commit/09fd9bd7a0f0e2b047d3c02bd7f4d93df22503dd))
+* cron中变量的默认值 ([c1c07ca](https://www.github.com/14790897/auto-read-liunxdo/commit/c1c07cae1bd109f8785907b35ebc63b28dce6e93))
+* cron中变量的默认值 ([6bc8bce](https://www.github.com/14790897/auto-read-liunxdo/commit/6bc8bce2a42bbb414450454f9bd36c5a07da8fc5))
+* cron中变量的默认值 ([b2227b6](https://www.github.com/14790897/auto-read-liunxdo/commit/b2227b60a0fd3af4e5abe0dbe19b85bc42ba855c))
+* cron中变量的默认值 ([b9b72fc](https://www.github.com/14790897/auto-read-liunxdo/commit/b9b72fce05be1046b7f917d9820ba3d9260ab476))
+* cron中变量的默认值 ([4cc640a](https://www.github.com/14790897/auto-read-liunxdo/commit/4cc640a7c15f30c0f6455a2e6343fd4681960a67))
+* cron中变量的默认值 ([3b044c1](https://www.github.com/14790897/auto-read-liunxdo/commit/3b044c1cbc57cb043e53a0de15287cbd35f0fce1))
+* cron中变量的默认值 ([72af582](https://www.github.com/14790897/auto-read-liunxdo/commit/72af5821a782b3eb6174372d89dbff5a78656ecf))
+* cron中变量的默认值 ([8fedb7b](https://www.github.com/14790897/auto-read-liunxdo/commit/8fedb7be3930f02fa2b89a49a35484e0f8cfd273))
+* 密码转义 ([e5802ab](https://www.github.com/14790897/auto-read-liunxdo/commit/e5802abbf770c5a65cfaee3515529d75558b8068))
+
 ## [1.4.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.3.0...v1.4.0) (2024-08-08)
 
 

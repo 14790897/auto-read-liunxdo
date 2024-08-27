@@ -98,8 +98,8 @@
     // 定义包含文章列表的数组
     const urls = [
       `${BASE_URL}/latest`,
-      `${BASE_URL}/top`,
-      `${BASE_URL}/latest?ascending=false&order=posts`,
+      //`${BASE_URL}/top`,
+      //`${BASE_URL}/latest?ascending=false&order=posts`,
       // `${BASE_URL}/unread`, // 示例：如果你想将这个URL启用，只需去掉前面的注释
     ];
 

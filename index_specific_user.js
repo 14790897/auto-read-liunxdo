@@ -26,9 +26,9 @@
   ];
   const commentLimit = 1000;
   const specificUserPostListLimit = 100;
-  const likeLimit = 50;
   const currentURL = window.location.href;
   let specificUser = localStorage.getItem("specificUser") || "14790897";
+  let likeLimit = parseInt(localStorage.getItem("likeLimit") || 50, 10);
   let BASE_URL = possibleBaseURLs.find((url) => currentURL.startsWith(url));
 
   // 环境变量：阅读网址，如果没有找到匹配的URL，则默认为第一个
@@ -56,7 +56,6 @@
     localStorage.setItem("autoLikeEnabled", "false"); //默认关闭自动点赞
     console.log("执行了初始数据更新操作");
   }
-
 
   function getLatestTopic() {
     let lastOffset = Number(localStorage.getItem("lastOffset")) || 0;
@@ -153,7 +152,7 @@
   function likeSpecificPost() {
     const urlParts = window.location.pathname.split("/");
     const lastPart = urlParts[urlParts.length - 1]; // 获取最后一部分
-
+    console.log("post number:", lastPart);
     const buttons = document.querySelectorAll("button[aria-label]");
 
     let targetButton = null;
@@ -161,6 +160,8 @@
       const ariaLabel = button.getAttribute("aria-label");
       if (ariaLabel && ariaLabel.includes(`#${lastPart}`)) {
         targetButton = button;
+        console.log("找到post number按钮:", targetButton);
+        return;
       }
     });
 
@@ -177,6 +178,7 @@
           reactionButton.title !== "Like this post") ||
         clickCounter >= likeLimit
       ) {
+        console.log("已经点赞过或者已经达到点赞上限");
         return;
       }
       triggerClick(reactionButton);
@@ -213,7 +215,7 @@
       likeSpecificPost();
       setTimeout(() => {
         openSpecificUserPost();
-      }, 1000);
+      }, 2000);
     }
   });
 
@@ -252,14 +254,14 @@
   button.textContent =
     localStorage.getItem("read") === "true" ? "停止阅读" : "开始阅读";
   button.style.position = "fixed";
-  button.style.bottom = "10px"; // 之前是 top
-  button.style.left = "10px"; // 之前是 right
+  button.style.bottom = "20px"; // 底部距离调整为20px
+  button.style.left = "20px"; // 左侧距离调整为20px
   button.style.zIndex = 1000;
-  button.style.backgroundColor = "#f0f0f0"; // 浅灰色背景
-  button.style.color = "#000"; // 黑色文本
-  button.style.border = "1px solid #ddd"; // 浅灰色边框
-  button.style.padding = "5px 10px"; // 内边距
-  button.style.borderRadius = "5px"; // 圆角
+  button.style.backgroundColor = "#e0e0e0"; // 浅灰色背景
+  button.style.color = "#333"; // 深灰色文本
+  button.style.border = "1px solid #aaa"; // 灰色边框
+  button.style.padding = "8px 16px"; // 更大的内边距
+  button.style.borderRadius = "8px"; // 更大的圆角
   document.body.appendChild(button);
 
   button.onclick = function () {
@@ -267,9 +269,7 @@
     const newReadState = !currentlyReading;
     localStorage.setItem("read", newReadState.toString());
     button.textContent = newReadState ? "停止阅读" : "开始阅读";
-    if (!newReadState) {
-      localStorage.removeItem("navigatingToNextTopic");
-    } else {
+    if (newReadState) {
       if (BASE_URL == "https://linux.do") {
         window.location.href = "https://linux.do/t/topic/13716/427";
       } else {
@@ -284,33 +284,77 @@
   userInput.placeholder = "输入要点赞的用户ID";
   userInput.style.position = "fixed";
   userInput.style.bottom = "90px";
-  userInput.style.left = "10px";
+  userInput.style.left = "20px";
   userInput.style.zIndex = "1000";
-  userInput.style.padding = "5px";
-  userInput.style.border = "1px solid #ddd";
-  userInput.style.borderRadius = "5px";
-  userInput.style.backgroundColor = "#f0f0f0";
+  userInput.style.padding = "6px";
+  userInput.style.border = "1px solid #aaa";
+  userInput.style.borderRadius = "8px";
+  userInput.style.backgroundColor = "#e0e0e0";
+  userInput.style.width = "100px";
+  userInput.value = localStorage.getItem("specificUser") || "14790897";
+
   document.body.appendChild(userInput);
 
   const saveUserButton = document.createElement("button");
   saveUserButton.textContent = "保存用户ID";
   saveUserButton.style.position = "fixed";
-  saveUserButton.style.bottom = "50px";
-  saveUserButton.style.left = "10px";
+  saveUserButton.style.bottom = "60px";
+  saveUserButton.style.left = "20px";
   saveUserButton.style.zIndex = "1000";
-  saveUserButton.style.backgroundColor = "#f0f0f0";
-  saveUserButton.style.color = "#000";
-  saveUserButton.style.border = "1px solid #ddd";
-  saveUserButton.style.padding = "5px 10px";
-  saveUserButton.style.borderRadius = "5px";
+  saveUserButton.style.backgroundColor = "#e0e0e0";
+  saveUserButton.style.color = "#333";
+  saveUserButton.style.border = "1px solid #aaa";
+  saveUserButton.style.padding = "8px 16px";
+  saveUserButton.style.borderRadius = "8px";
   document.body.appendChild(saveUserButton);
 
   saveUserButton.onclick = function () {
     const newSpecificUser = userInput.value.trim();
     if (newSpecificUser) {
       localStorage.setItem("specificUser", newSpecificUser);
+      localStorage.removeItem("specificUserPostList");
       specificUser = newSpecificUser;
-      console.log(`新的specificUser已保存: ${specificUser}`);
+      console.log(
+        `新的specificUser已保存: ${specificUser}，specificUserPostList已重置`
+      );
+    }
+  };
+
+  // 增加likeLimit输入框和保存按钮
+  const likeLimitInput = document.createElement("input");
+  likeLimitInput.type = "number";
+  likeLimitInput.placeholder = "输入点赞数量";
+  likeLimitInput.style.position = "fixed";
+  likeLimitInput.style.bottom = "180px";
+  likeLimitInput.style.left = "20px";
+  likeLimitInput.style.zIndex = "1000";
+  likeLimitInput.style.padding = "6px";
+  likeLimitInput.style.border = "1px solid #aaa";
+  likeLimitInput.style.borderRadius = "8px";
+  likeLimitInput.style.backgroundColor = "#e0e0e0";
+  likeLimitInput.style.width = "100px";
+  likeLimitInput.value = localStorage.getItem("likeLimit") || 50;
+  document.body.appendChild(likeLimitInput);
+
+  const saveLikeLimitButton = document.createElement("button");
+  saveLikeLimitButton.textContent = "保存点赞数量";
+  saveLikeLimitButton.style.position = "fixed";
+  saveLikeLimitButton.style.bottom = "140px";
+  saveLikeLimitButton.style.left = "20px";
+  saveLikeLimitButton.style.zIndex = "1000";
+  saveLikeLimitButton.style.backgroundColor = "#e0e0e0";
+  saveLikeLimitButton.style.color = "#333";
+  saveLikeLimitButton.style.border = "1px solid #aaa";
+  saveLikeLimitButton.style.padding = "8px 16px";
+  saveLikeLimitButton.style.borderRadius = "8px";
+  document.body.appendChild(saveLikeLimitButton);
+
+  saveLikeLimitButton.onclick = function () {
+    const newLikeLimit = parseInt(likeLimitInput.value.trim(), 10);
+    if (newLikeLimit && newLikeLimit > 0) {
+      localStorage.setItem("likeLimit", newLikeLimit);
+      likeLimit = newLikeLimit;
+      console.log(`新的likeLimit已保存: ${likeLimit}`);
     }
   };
 })();

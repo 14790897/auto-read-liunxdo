@@ -56,8 +56,7 @@
     localStorage.setItem("autoLikeEnabled", "false"); //默认关闭自动点赞
     console.log("执行了初始数据更新操作");
   }
-  let scrollInterval = null;
-  let checkScrollTimeout = null;
+
 
   function getLatestTopic() {
     let lastOffset = Number(localStorage.getItem("lastOffset")) || 0;
@@ -140,6 +139,8 @@
 
       // 使用 post_id 生成 URL 并导航
       window.location.href = `${BASE_URL}/t/topic/${post.topic_id}/${post.post_number}`;
+    } else {
+      console.error("未能获取到新的帖子数据。");
     }
   }
 
@@ -209,8 +210,10 @@
     );
     if (localStorage.getItem("read") === "true") {
       console.log("点赞开始");
-      openSpecificUserPost();
       likeSpecificPost();
+      setTimeout(() => {
+        openSpecificUserPost();
+      }, 1000);
     }
   });
 
@@ -265,14 +268,6 @@
     localStorage.setItem("read", newReadState.toString());
     button.textContent = newReadState ? "停止阅读" : "开始阅读";
     if (!newReadState) {
-      if (scrollInterval !== null) {
-        clearInterval(scrollInterval);
-        scrollInterval = null;
-      }
-      if (checkScrollTimeout !== null) {
-        clearTimeout(checkScrollTimeout);
-        checkScrollTimeout = null;
-      }
       localStorage.removeItem("navigatingToNextTopic");
     } else {
       if (BASE_URL == "https://linux.do") {
@@ -301,7 +296,7 @@
   saveUserButton.textContent = "保存用户ID";
   saveUserButton.style.position = "fixed";
   saveUserButton.style.bottom = "50px";
-  saveUserButton.style.left = "150px";
+  saveUserButton.style.left = "10px";
   saveUserButton.style.zIndex = "1000";
   saveUserButton.style.backgroundColor = "#f0f0f0";
   saveUserButton.style.color = "#000";

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.3.2
+// @version      1.3.1
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
@@ -11,6 +11,8 @@
 // @grant        none
 // @license      MIT
 // @icon         https://www.google.com/s2/favicons?domain=linux.do
+// @downloadURL https://update.greasyfork.org/scripts/489464/Auto%20Read.user.js
+// @updateURL https://update.greasyfork.org/scripts/489464/Auto%20Read.meta.js
 // ==/UserScript==
 
 (function () {
@@ -22,7 +24,8 @@
     "https://meta.appinn.net",
     "https://community.openai.com",
   ];
-
+  const commentLimit = 1000;
+  const topicListLimit = 50;
   // 获取当前页面的URL
   const currentURL = window.location.href;
 
@@ -37,21 +40,16 @@
     console.log("当前BASE_URL是: " + BASE_URL);
   }
 
-  // 以下是脚本的其余部分
   console.log("脚本正在运行在: " + BASE_URL);
   //1.进入网页 https://linux.do/t/topic/数字（1，2，3，4）
   //2.使滚轮均衡的往下移动模拟刷文章
   // 检查是否是第一次运行脚本
   function checkFirstRun() {
     if (localStorage.getItem("isFirstRun") === null) {
-      // 是第一次运行，执行初始化操作
       console.log("脚本第一次运行，执行初始化操作...");
       updateInitialData();
-
-      // 设置 isFirstRun 标记为 false
       localStorage.setItem("isFirstRun", "false");
     } else {
-      // 非第一次运行
       console.log("脚本非第一次运行");
     }
   }
@@ -66,7 +64,7 @@
   let scrollInterval = null;
   let checkScrollTimeout = null;
   let autoLikeInterval = null;
-//在主页去寻找可以进入的话题，同时可以在文章页进行浏览
+
   function scrollToBottomSlowly(
     stopDistance = 9999999999,
     callback = undefined,
@@ -92,6 +90,67 @@
       }
     }, delayPerStep);
   }
+
+  // 获取最新文章列表
+  function getLatestTopic() {
+    let latestPage = 0;
+    const latestPageStr = localStorage.getItem("latestPage");
+    if (latestPageStr) {
+      latestPage = Number(latestPageStr);
+    }
+    latestPage++;
+
+    const url = `${BASE_URL}/latest.json?no_definitions=true&page=${latestPage}`;
+    $.ajax({
+      url: url,
+      async: false,
+      success: function (result) {
+        if (result) {
+          const topicList = [];
+          result.topic_list.topics.forEach((topic) => {
+            // 未读以及评论数小于commentLimit
+            if (!topic.unseen && commentLimit > topic.posts_count) {
+              topicList.push(topic);
+            }
+          });
+
+          if (topicList.length > topicListLimit) {
+            topicList = topicList.slice(0, topicListLimit);
+          }
+          localStorage.setItem("latestPage", latestPage);
+          localStorage.setItem("topicList", JSON.stringify(topicList));
+        }
+      },
+      error: function (XMLHttpRequest, textStatus, errorThrown) {
+        console.error(XMLHttpRequest, textStatus, errorThrown);
+      },
+    });
+  }
+
+  // 打开新的文章
+  function openNewTopic() {
+    const topicListStr = localStorage.getItem("topicList");
+    if (topicListStr) {
+      const topicList = JSON.parse(topicListStr);
+      if (topicList && 0 < topicList.length) {
+        // 从未读列表中取出第一个
+        const topic = topicList.shift();
+        localStorage.setItem("topicList", JSON.stringify(topicList));
+        window.location.href = `${BASE_URL}/t/topic/${topic.id}`;
+      } else {
+        // 获取最新文章列表
+        getLatestTopic();
+        // 打开新的文章
+        openNewTopic();
+      }
+    } else {
+      // 获取最新文章列表
+      getLatestTopic();
+      // 打开新的文章
+      openNewTopic();
+    }
+  }
+
   // 功能：跳转到下一个话题
 
   function navigateToNextTopic() {
@@ -121,7 +180,7 @@
         document.body.offsetHeight - 100
       ) {
         console.log("已滚动到底部");
-        navigateToNextTopic();
+        openNewTopic();
       } else {
         scrollToBottomSlowly();
         if (checkScrollTimeout !== null) {
@@ -150,13 +209,7 @@
         localStorage.removeItem("navigatingToNextTopic");
         // 使用setTimeout延迟执行
         setTimeout(() => {
-          // 先随机滚动一段距离然后再查找链接
-          scrollToBottomSlowly(
-            Math.random() * document.body.offsetHeight * 3,
-            searchLinkClick,
-            20,
-            20
-          );
+          openNewTopic();
         }, 2000); // 延迟2000毫秒（即2秒）
       } else {
         console.log("执行正常的滚动和检查逻辑");
@@ -169,48 +222,7 @@
       }
     }
   });
-  // 创建一个控制滚动的按钮
-  function searchLinkClick() {
-    // 在新页面加载后执行检查
-    // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
-    const links = document.querySelectorAll('a[href^="/t/"]');
 
-    // 筛选出未阅读的链接
-    const unreadLinks = Array.from(links).filter((link) => {
-      // 向上遍历DOM树，查找包含'visited'类的父级元素，最多查找三次
-      let parent = link.parentElement;
-      let times = 0; // 查找次数计数器
-      while (parent && times < 3) {
-        if (parent.classList.contains("visited")) {
-          // 如果找到包含'visited'类的父级元素，中断循环
-          return false; // 父级元素包含'visited'类，排除这个链接
-        }
-        parent = parent.parentElement; // 继续向上查找
-        times++; // 增加查找次数
-      }
-
-      // 如果链接未被读过，且在向上查找三次内，其父级元素中没有包含'visited'类，则保留这个链接
-      return true;
-    });
-
-    // 如果找到了这样的链接
-    if (unreadLinks.length > 0) {
-      // 从所有匹配的链接中随机选择一个
-      const randomIndex = Math.floor(Math.random() * unreadLinks.length);
-      const link = unreadLinks[randomIndex];
-      // 打印找到的链接（可选）
-      console.log("Found link:", link.href);
-      // 导航到该链接
-      window.location.href = link.href;
-    } else {
-      // 如果没有找到符合条件的链接，打印消息（可选）
-      console.log("No link with the specified format was found.");
-      scrollToBottomSlowly(
-        Math.random() * document.body.offsetHeight * 3,
-        searchLinkClick
-      );
-    }
-  }
   // 获取当前时间戳
   const currentTime = Date.now();
   // 获取存储的时间戳
@@ -279,7 +291,7 @@
         } else {
           console.log("clickCounter:", clickCounter);
         }
-      }, index * 3000); // 这里的3000毫秒是两次点击之间的间隔，可以根据需要调整
+      }, index * 1000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
     });
   }
   const button = document.createElement("button");
@@ -315,9 +327,7 @@
     } else {
       // 如果是Linuxdo，就导航到我的帖子
       if (BASE_URL == "https://linux.do") {
-        window.location.href = "https://linux.do/t/topic/13716/340";
-      } else if (BASE_URL == "https://meta.appinn.net") {
-        window.location.href = "https://meta.appinn.net/t/topic/52006";
+        window.location.href = "https://linux.do/t/topic/13716/191";
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }

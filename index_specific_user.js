@@ -96,6 +96,7 @@
 
     while (!isDataSufficient) {
       lastOffset += 20;
+      // 举例：https://linux.do/user_actions.json?offset=0&username=14790897&filter=5
       const url = `${BASE_URL}/user_actions.json?offset=${lastOffset}&username=${specificUser}&filter=5`;
 
       $.ajax({
@@ -168,7 +169,6 @@
         JSON.stringify(specificUserPostList)
       );
 
-      // 使用 post_id 生成 URL 并导航
       window.location.href = `${BASE_URL}/t/topic/${post.topic_id}/${post.post_number}`;
     } else {
       console.error("未能获取到新的帖子数据。");
@@ -210,7 +210,7 @@
         reactionButton.title !== "Like this post"
       ) {
         console.log("已经点赞过");
-        return;
+        return "already liked";
       } else if (clickCounter >= likeLimit) {
         console.log("已经达到点赞上限");
         localStorage.setItem("read", false);

@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.3.1
+// @version      1.4
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
@@ -25,7 +25,8 @@
     "https://community.openai.com",
   ];
   const commentLimit = 1000;
-  const topicListLimit = 50;
+  const topicListLimit = 100;
+  const likeLimit = 50;
   // 获取当前页面的URL
   const currentURL = window.location.href;
 
@@ -91,88 +92,75 @@
     }, delayPerStep);
   }
 
-  // 获取最新文章列表
   function getLatestTopic() {
-    let latestPage = 0;
-    const latestPageStr = localStorage.getItem("latestPage");
-    if (latestPageStr) {
-      latestPage = Number(latestPageStr);
-    }
-    latestPage++;
+    let latestPage = Number(localStorage.getItem("latestPage")) || 0;
+    let topicList = [];
+    let isDataSufficient = false;
 
-    const url = `${BASE_URL}/latest.json?no_definitions=true&page=${latestPage}`;
-    $.ajax({
-      url: url,
-      async: false,
-      success: function (result) {
-        if (result) {
-          const topicList = [];
-          result.topic_list.topics.forEach((topic) => {
-            // 未读以及评论数小于commentLimit
-            if (!topic.unseen && commentLimit > topic.posts_count) {
-              topicList.push(topic);
+    while (!isDataSufficient) {
+      latestPage++;
+      const url = `${BASE_URL}/latest.json?no_definitions=true&page=${latestPage}`;
+
+      $.ajax({
+        url: url,
+        async: false,
+        success: function (result) {
+          if (
+            result &&
+            result.topic_list &&
+            result.topic_list.topics.length > 0
+          ) {
+            result.topic_list.topics.forEach((topic) => {
+              // 未读且评论数小于 commentLimit
+              if (!topic.unseen && commentLimit > topic.posts_count) {
+                topicList.push(topic);
+              }
+            });
+
+            // 检查是否已获得足够的 topics
+            if (topicList.length >= topicListLimit) {
+              isDataSufficient = true;
             }
-          });
-
-          if (topicList.length > topicListLimit) {
-            topicList = topicList.slice(0, topicListLimit);
+          } else {
+            isDataSufficient = true; // 没有更多内容时停止请求
           }
-          localStorage.setItem("latestPage", latestPage);
-          localStorage.setItem("topicList", JSON.stringify(topicList));
-        }
-      },
-      error: function (XMLHttpRequest, textStatus, errorThrown) {
-        console.error(XMLHttpRequest, textStatus, errorThrown);
-      },
-    });
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          console.error(XMLHttpRequest, textStatus, errorThrown);
+          isDataSufficient = true; // 遇到错误时也停止请求
+        },
+      });
+    }
+
+    if (topicList.length > topicListLimit) {
+      topicList = topicList.slice(0, topicListLimit);
+    }
+
+    // 其实不需要对latestPage操作
+    // localStorage.setItem("latestPage", latestPage);
+    localStorage.setItem("topicList", JSON.stringify(topicList));
   }
 
-  // 打开新的文章
   function openNewTopic() {
-    const topicListStr = localStorage.getItem("topicList");
-    if (topicListStr) {
-      const topicList = JSON.parse(topicListStr);
-      if (topicList && 0 < topicList.length) {
-        // 从未读列表中取出第一个
-        const topic = topicList.shift();
-        localStorage.setItem("topicList", JSON.stringify(topicList));
-        window.location.href = `${BASE_URL}/t/topic/${topic.id}`;
-      } else {
-        // 获取最新文章列表
-        getLatestTopic();
-        // 打开新的文章
-        openNewTopic();
-      }
-    } else {
-      // 获取最新文章列表
+    let topicListStr = localStorage.getItem("topicList");
+    let topicList = topicListStr ? JSON.parse(topicListStr) : [];
+
+    // 如果列表为空，则获取最新文章
+    if (topicList.length === 0) {
       getLatestTopic();
-      // 打开新的文章
-      openNewTopic();
+      topicListStr = localStorage.getItem("topicList");
+      topicList = topicListStr ? JSON.parse(topicListStr) : [];
+    }
+
+    // 如果获取到新文章，打开第一个
+    if (topicList.length > 0) {
+      const topic = topicList.shift();
+      localStorage.setItem("topicList", JSON.stringify(topicList));
+      window.location.href = `${BASE_URL}/t/topic/${topic.id}`;
     }
   }
 
-  // 功能：跳转到下一个话题
-
-  function navigateToNextTopic() {
-    // 定义包含文章列表的数组
-    const urls = [
-      `${BASE_URL}/latest`,
-      `${BASE_URL}/top`,
-      `${BASE_URL}/latest?ascending=false&order=posts`,
-      // `${BASE_URL}/unread`, // 示例：如果你想将这个URL启用，只需去掉前面的注释
-    ];
-
-    // 生成一个随机索引
-    const randomIndex = Math.floor(Math.random() * urls.length);
-
-    // 根据随机索引选择一个URL
-    const nextTopicURL = urls[randomIndex]; // 在跳转之前，标记即将跳转到下一个话题
-    localStorage.setItem("navigatingToNextTopic", "true");
-    // 尝试导航到下一个话题
-    window.location.href = nextTopicURL;
-  }
-
-  // 检查是否已滚动到底部(不断重复执行)
+  // 检查是否已滚动到底部(不断重复执行),到底部时跳转到下一个话题
   function checkScroll() {
     if (localStorage.getItem("read")) {
       if (
@@ -201,24 +189,10 @@
       localStorage.getItem("autoLikeEnabled")
     );
     if (localStorage.getItem("read") === "true") {
-      // 检查是否正在导航到下一个话题
-      if (localStorage.getItem("navigatingToNextTopic") === "true") {
-        console.log("正在导航到下一个话题");
-        // 等待一段时间或直到页面完全加载
-        // 页面加载完成后，移除标记
-        localStorage.removeItem("navigatingToNextTopic");
-        // 使用setTimeout延迟执行
-        setTimeout(() => {
-          openNewTopic();
-        }, 2000); // 延迟2000毫秒（即2秒）
-      } else {
-        console.log("执行正常的滚动和检查逻辑");
-        // 执行正常的滚动和检查逻辑
-        checkScroll();
-        if (isAutoLikeEnabled()) {
-          //自动点赞
-          autoLike();
-        }
+      console.log("执行正常的滚动和检查逻辑");
+      checkScroll();
+      if (isAutoLikeEnabled()) {
+        autoLike();
       }
     }
   });
@@ -271,7 +245,7 @@
     buttons.forEach((button, index) => {
       if (
         (button.title !== "点赞此帖子" && button.title !== "Like this post") ||
-        clickCounter >= 50
+        clickCounter >= likeLimit
       ) {
         return;
       }
@@ -284,9 +258,11 @@
         clickCounter++; // 更新点击计数器
         // 将新的点击计数存储到localStorage
         localStorage.setItem("clickCounter", clickCounter.toString());
-        // 如果点击次数达到50次，则设置点赞变量为false
-        if (clickCounter === 50) {
-          console.log("Reached 50 likes, setting the like variable to false.");
+        // 如果点击次数达到likeLimit次，则设置点赞变量为false
+        if (clickCounter === likeLimit) {
+          console.log(
+            `Reached ${likeLimit} likes, setting the like variable to false.`
+          );
           localStorage.setItem("autoLikeEnabled", "false"); // 使用localStorage存储点赞变量状态
         } else {
           console.log("clickCounter:", clickCounter);
@@ -327,7 +303,7 @@
     } else {
       // 如果是Linuxdo，就导航到我的帖子
       if (BASE_URL == "https://linux.do") {
-        window.location.href = "https://linux.do/t/topic/13716/191";
+        window.location.href = "https://linux.do/t/topic/13716/427";
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }

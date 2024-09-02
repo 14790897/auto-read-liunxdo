@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.4
-// @description  自动刷linuxdo文章
+// @version      1.0
+// @description  自动点赞特定用户，适用于discourse
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
 // @match        https://linux.do/*
@@ -27,11 +27,8 @@
   const commentLimit = 1000;
   const specificUserPostListLimit = 100;
   const likeLimit = 50;
-  // 获取当前页面的URL
   const currentURL = window.location.href;
-  const specificUser = "14790897";
-
-  // 确定当前页面对应的BASE_URL
+  let specificUser = localStorage.getItem("specificUser") || "14790897";
   let BASE_URL = possibleBaseURLs.find((url) => currentURL.startsWith(url));
 
   // 环境变量：阅读网址，如果没有找到匹配的URL，则默认为第一个
@@ -43,9 +40,7 @@
   }
 
   console.log("脚本正在运行在: " + BASE_URL);
-  //1.进入网页 https://linux.do/t/topic/数字（1，2，3，4）
-  //2.使滚轮均衡的往下移动模拟刷文章
-  // 检查是否是第一次运行脚本
+
   function checkFirstRun() {
     if (localStorage.getItem("isFirstRun") === null) {
       console.log("脚本第一次运行，执行初始化操作...");
@@ -56,16 +51,13 @@
     }
   }
 
-  // 更新初始数据的函数
   function updateInitialData() {
     localStorage.setItem("read", "false"); // 开始时自动滚动关闭
     localStorage.setItem("autoLikeEnabled", "false"); //默认关闭自动点赞
     console.log("执行了初始数据更新操作");
   }
-  const delay = 2000; // 滚动检查的间隔（毫秒）
   let scrollInterval = null;
   let checkScrollTimeout = null;
-  let autoLikeInterval = null;
 
   function getLatestTopic() {
     let lastOffset = Number(localStorage.getItem("lastOffset")) || 0;
@@ -73,7 +65,7 @@
     let isDataSufficient = false;
 
     while (!isDataSufficient) {
-      lastOffset++;
+      lastOffset += 20;
       const url = `${BASE_URL}/user_actions.json?offset=${lastOffset}&username=${specificUser}&filter=5`;
 
       $.ajax({
@@ -81,11 +73,18 @@
         async: false,
         success: function (result) {
           if (result && result.user_actions && result.user_actions.length > 0) {
-            result.user_actions.forEach((topic) => {
-              specificUserPostList.push(`${topic}/${post_number}`);
+            result.user_actions.forEach((action) => {
+              const topicId = action.topic_id;
+              const postId = action.post_id;
+              const postNumber = action.post_number;
+              specificUserPostList.push({
+                topic_id: topicId,
+                post_id: postId,
+                post_number: postNumber,
+              });
             });
 
-            // 检查是否已获得足够的 topics
+            // 检查是否已获得足够的 Posts
             if (specificUserPostList.length >= specificUserPostListLimit) {
               isDataSufficient = true;
             }
@@ -100,6 +99,7 @@
       });
     }
 
+    // 如果列表超出限制，则截断
     if (specificUserPostList.length > specificUserPostListLimit) {
       specificUserPostList = specificUserPostList.slice(
         0,
@@ -107,6 +107,7 @@
       );
     }
 
+    // 存储 lastOffset 和 specificUserPostList 到 localStorage
     localStorage.setItem("lastOffset", lastOffset);
     localStorage.setItem(
       "specificUserPostList",
@@ -131,24 +132,41 @@
 
     // 如果获取到新文章，打开第一个
     if (specificUserPostList.length > 0) {
-      const topic = specificUserPostList.shift();
+      const post = specificUserPostList.shift(); // 获取列表中的第一个对象
       localStorage.setItem(
         "specificUserPostList",
         JSON.stringify(specificUserPostList)
       );
-      window.location.href = `${BASE_URL}/t/topic/${topic.id}`;
+
+      // 使用 post_id 生成 URL 并导航
+      window.location.href = `${BASE_URL}/t/topic/${post.topic_id}/${post.post_number}`;
     }
   }
 
   // 检查是否点赞
-  function likePostAndGoNext() {
-    const postId = data.post_id;
+  // const postId = data.post_id;
 
-    const targetId = `discourse-reactions-counter-${postId}-right`;
+  // const targetId = `discourse-reactions-counter-${postId}-right`;
 
-    const element = document.getElementById(targetId);
+  // const element = document.getElementById(targetId);
+  function likeSpecificPost() {
+    const urlParts = window.location.pathname.split("/");
+    const lastPart = urlParts[urlParts.length - 1]; // 获取最后一部分
 
-    if (element) {
+    const buttons = document.querySelectorAll("button[aria-label]");
+
+    let targetButton = null;
+    buttons.forEach((button) => {
+      const ariaLabel = button.getAttribute("aria-label");
+      if (ariaLabel && ariaLabel.includes(`#${lastPart}`)) {
+        targetButton = button;
+      }
+    });
+
+    if (targetButton) {
+      // 找到按钮后，获取其父级元素
+      const parentElement = targetButton.parentElement;
+      console.log("父级元素:", parentElement);
       const reactionButton = parentElement.querySelector(
         ".discourse-reactions-reaction-button"
       );
@@ -162,7 +180,9 @@
       }
       triggerClick(reactionButton);
       clickCounter++;
-      console.log(`Clicked like button ${clickCounter}`);
+      console.log(
+        `Clicked like button ${clickCounter},已点赞用户${specificUser}`
+      );
       localStorage.setItem("clickCounter", clickCounter.toString());
       // 如果点击次数达到likeLimit次，则设置点赞变量为false
       if (clickCounter === likeLimit) {
@@ -174,10 +194,8 @@
         console.log("clickCounter:", clickCounter);
       }
     } else {
-      console.log("未找到对应的元素。");
+      console.log(`未找到包含 #${lastPart} 的按钮`);
     }
-    console.log("已点赞用户：");
-    openSpecificUserPost();
   }
 
   // 入口函数
@@ -190,11 +208,9 @@
       localStorage.getItem("autoLikeEnabled")
     );
     if (localStorage.getItem("read") === "true") {
-      console.log("执行正常的滚动和检查逻辑");
-      likePostAndGoNext();
-      if (isAutoLikeEnabled()) {
-        autoLike();
-      }
+      console.log("点赞开始");
+      openSpecificUserPost();
+      likeSpecificPost();
     }
   });
 
@@ -228,48 +244,6 @@
     button.dispatchEvent(event);
   }
 
-  function autoLike() {
-    console.log(`Initial clickCounter: ${clickCounter}`);
-    const buttons = document.querySelectorAll(
-      ".discourse-reactions-reaction-button"
-    );
-    if (buttons.length === 0) {
-      console.error(
-        "No buttons found with the selector '.discourse-reactions-reaction-button'"
-      );
-      return;
-    }
-    console.log(`Found ${buttons.length} buttons.`); // 调试信息
-
-    // 逐个点击找到的按钮
-    buttons.forEach((button, index) => {
-      if (
-        (button.title !== "点赞此帖子" && button.title !== "Like this post") ||
-        clickCounter >= likeLimit
-      ) {
-        return;
-      }
-
-      // 使用setTimeout来错开每次点击的时间，避免同时触发点击
-      autoLikeInterval = setTimeout(() => {
-        // 模拟点击
-        triggerClick(button); // 使用自定义的触发点击方法
-        console.log(`Clicked like button ${index + 1}`);
-        clickCounter++; // 更新点击计数器
-        // 将新的点击计数存储到localStorage
-        localStorage.setItem("clickCounter", clickCounter.toString());
-        // 如果点击次数达到likeLimit次，则设置点赞变量为false
-        if (clickCounter === likeLimit) {
-          console.log(
-            `Reached ${likeLimit} likes, setting the like variable to false.`
-          );
-          localStorage.setItem("autoLikeEnabled", "false"); // 使用localStorage存储点赞变量状态
-        } else {
-          console.log("clickCounter:", clickCounter);
-        }
-      }, index * 1000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
-    });
-  }
   const button = document.createElement("button");
   // 初始化按钮文本基于当前的阅读状态
   button.textContent =
@@ -301,49 +275,47 @@
       }
       localStorage.removeItem("navigatingToNextTopic");
     } else {
-      // 如果是Linuxdo，就导航到我的帖子
       if (BASE_URL == "https://linux.do") {
         window.location.href = "https://linux.do/t/topic/13716/427";
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }
-      likePostAndGoNext();
     }
   };
 
-  //自动点赞按钮
-  // 在页面上添加一个控制自动点赞的按钮
-  const toggleAutoLikeButton = document.createElement("button");
-  toggleAutoLikeButton.textContent = isAutoLikeEnabled()
-    ? "禁用自动点赞"
-    : "启用自动点赞";
-  toggleAutoLikeButton.style.position = "fixed";
-  toggleAutoLikeButton.style.bottom = "50px"; // 之前是 top，且与另一个按钮错开位置
-  toggleAutoLikeButton.style.left = "10px"; // 之前是 right
-  toggleAutoLikeButton.style.zIndex = "1000";
-  toggleAutoLikeButton.style.backgroundColor = "#f0f0f0"; // 浅灰色背景
-  toggleAutoLikeButton.style.color = "#000"; // 黑色文本
-  toggleAutoLikeButton.style.border = "1px solid #ddd"; // 浅灰色边框
-  toggleAutoLikeButton.style.padding = "5px 10px"; // 内边距
-  toggleAutoLikeButton.style.borderRadius = "5px"; // 圆角
-  document.body.appendChild(toggleAutoLikeButton);
+  // 增加specificUser输入框和保存按钮
+  const userInput = document.createElement("input");
+  userInput.type = "text";
+  userInput.placeholder = "输入要点赞的用户ID";
+  userInput.style.position = "fixed";
+  userInput.style.bottom = "90px";
+  userInput.style.left = "10px";
+  userInput.style.zIndex = "1000";
+  userInput.style.padding = "5px";
+  userInput.style.border = "1px solid #ddd";
+  userInput.style.borderRadius = "5px";
+  userInput.style.backgroundColor = "#f0f0f0";
+  document.body.appendChild(userInput);
 
-  // 为按钮添加点击事件处理函数
-  toggleAutoLikeButton.addEventListener("click", () => {
-    const isEnabled = !isAutoLikeEnabled();
-    setAutoLikeEnabled(isEnabled);
-    toggleAutoLikeButton.textContent = isEnabled
-      ? "禁用自动点赞"
-      : "启用自动点赞";
-  });
-  // 判断是否启用自动点赞
-  function isAutoLikeEnabled() {
-    // 从localStorage获取autoLikeEnabled的值，如果未设置，默认为"true"
-    return localStorage.getItem("autoLikeEnabled") !== "false";
-  }
+  const saveUserButton = document.createElement("button");
+  saveUserButton.textContent = "保存用户ID";
+  saveUserButton.style.position = "fixed";
+  saveUserButton.style.bottom = "50px";
+  saveUserButton.style.left = "150px";
+  saveUserButton.style.zIndex = "1000";
+  saveUserButton.style.backgroundColor = "#f0f0f0";
+  saveUserButton.style.color = "#000";
+  saveUserButton.style.border = "1px solid #ddd";
+  saveUserButton.style.padding = "5px 10px";
+  saveUserButton.style.borderRadius = "5px";
+  document.body.appendChild(saveUserButton);
 
-  // 设置自动点赞的启用状态
-  function setAutoLikeEnabled(enabled) {
-    localStorage.setItem("autoLikeEnabled", enabled ? "true" : "false");
-  }
+  saveUserButton.onclick = function () {
+    const newSpecificUser = userInput.value.trim();
+    if (newSpecificUser) {
+      localStorage.setItem("specificUser", newSpecificUser);
+      specificUser = newSpecificUser;
+      console.log(`新的specificUser已保存: ${specificUser}`);
+    }
+  };
 })();

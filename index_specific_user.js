@@ -25,10 +25,11 @@
     "https://community.openai.com",
   ];
   const commentLimit = 1000;
-  const topicListLimit = 100;
+  const specificUserPostListLimit = 100;
   const likeLimit = 50;
   // 获取当前页面的URL
   const currentURL = window.location.href;
+  const specificUser = "14790897";
 
   // 确定当前页面对应的BASE_URL
   let BASE_URL = possibleBaseURLs.find((url) => currentURL.startsWith(url));
@@ -66,45 +67,26 @@
   let checkScrollTimeout = null;
   let autoLikeInterval = null;
 
-  function scrollToBottomSlowly(
-    distancePerStep = 20,
-    delayPerStep = 50
-  ) {
-    if (scrollInterval !== null) {
-      clearInterval(scrollInterval);
-    }
-    scrollInterval = setInterval(() => {
-      window.scrollBy(0, distancePerStep);
-    }, delayPerStep);// 每50毫秒滚动20像素
-  }
-
   function getLatestTopic() {
-    let latestPage = Number(localStorage.getItem("latestPage")) || 0;
-    let topicList = [];
+    let lastOffset = Number(localStorage.getItem("lastOffset")) || 0;
+    let specificUserPostList = [];
     let isDataSufficient = false;
 
     while (!isDataSufficient) {
-      latestPage++;
-      const url = `${BASE_URL}/latest.json?no_definitions=true&page=${latestPage}`;
+      lastOffset++;
+      const url = `${BASE_URL}/user_actions.json?offset=${lastOffset}&username=${specificUser}&filter=5`;
 
       $.ajax({
         url: url,
         async: false,
         success: function (result) {
-          if (
-            result &&
-            result.topic_list &&
-            result.topic_list.topics.length > 0
-          ) {
-            result.topic_list.topics.forEach((topic) => {
-              // 未读且评论数小于 commentLimit
-              if (!topic.unseen && commentLimit > topic.posts_count) {
-                topicList.push(topic);
-              }
+          if (result && result.user_actions && result.user_actions.length > 0) {
+            result.user_actions.forEach((topic) => {
+              specificUserPostList.push(`${topic}/${post_number}`);
             });
 
             // 检查是否已获得足够的 topics
-            if (topicList.length >= topicListLimit) {
+            if (specificUserPostList.length >= specificUserPostListLimit) {
               isDataSufficient = true;
             }
           } else {
@@ -118,51 +100,84 @@
       });
     }
 
-    if (topicList.length > topicListLimit) {
-      topicList = topicList.slice(0, topicListLimit);
+    if (specificUserPostList.length > specificUserPostListLimit) {
+      specificUserPostList = specificUserPostList.slice(
+        0,
+        specificUserPostListLimit
+      );
     }
 
-    // 其实不需要对latestPage操作
-    // localStorage.setItem("latestPage", latestPage);
-    localStorage.setItem("topicList", JSON.stringify(topicList));
+    localStorage.setItem("lastOffset", lastOffset);
+    localStorage.setItem(
+      "specificUserPostList",
+      JSON.stringify(specificUserPostList)
+    );
   }
 
-  function openNewTopic() {
-    let topicListStr = localStorage.getItem("topicList");
-    let topicList = topicListStr ? JSON.parse(topicListStr) : [];
+  function openSpecificUserPost() {
+    let specificUserPostListStr = localStorage.getItem("specificUserPostList");
+    let specificUserPostList = specificUserPostListStr
+      ? JSON.parse(specificUserPostListStr)
+      : [];
 
     // 如果列表为空，则获取最新文章
-    if (topicList.length === 0) {
+    if (specificUserPostList.length === 0) {
       getLatestTopic();
-      topicListStr = localStorage.getItem("topicList");
-      topicList = topicListStr ? JSON.parse(topicListStr) : [];
+      specificUserPostListStr = localStorage.getItem("specificUserPostList");
+      specificUserPostList = specificUserPostListStr
+        ? JSON.parse(specificUserPostListStr)
+        : [];
     }
 
     // 如果获取到新文章，打开第一个
-    if (topicList.length > 0) {
-      const topic = topicList.shift();
-      localStorage.setItem("topicList", JSON.stringify(topicList));
+    if (specificUserPostList.length > 0) {
+      const topic = specificUserPostList.shift();
+      localStorage.setItem(
+        "specificUserPostList",
+        JSON.stringify(specificUserPostList)
+      );
       window.location.href = `${BASE_URL}/t/topic/${topic.id}`;
     }
   }
 
-  // 检查是否已滚动到底部(不断重复执行),到底部时跳转到下一个话题
-  function checkScroll() {
-    if (localStorage.getItem("read")) {
+  // 检查是否点赞
+  function likePostAndGoNext() {
+    const postId = data.post_id;
+
+    const targetId = `discourse-reactions-counter-${postId}-right`;
+
+    const element = document.getElementById(targetId);
+
+    if (element) {
+      const reactionButton = parentElement.querySelector(
+        ".discourse-reactions-reaction-button"
+      );
+
       if (
-        window.innerHeight + window.scrollY >=
-        document.body.offsetHeight - 100
+        (reactionButton.title !== "点赞此帖子" &&
+          reactionButton.title !== "Like this post") ||
+        clickCounter >= likeLimit
       ) {
-        console.log("已滚动到底部");
-        openNewTopic();
-      } else {
-        scrollToBottomSlowly();
-        if (checkScrollTimeout !== null) {
-          clearTimeout(checkScrollTimeout);
-        }
-        checkScrollTimeout = setTimeout(checkScroll, delay);
+        return;
       }
+      triggerClick(reactionButton);
+      clickCounter++;
+      console.log(`Clicked like button ${clickCounter}`);
+      localStorage.setItem("clickCounter", clickCounter.toString());
+      // 如果点击次数达到likeLimit次，则设置点赞变量为false
+      if (clickCounter === likeLimit) {
+        console.log(
+          `Reached ${likeLimit} likes, setting the like variable to false.`
+        );
+        localStorage.setItem("autoLikeEnabled", "false");
+      } else {
+        console.log("clickCounter:", clickCounter);
+      }
+    } else {
+      console.log("未找到对应的元素。");
     }
+    console.log("已点赞用户：");
+    openSpecificUserPost();
   }
 
   // 入口函数
@@ -176,7 +191,7 @@
     );
     if (localStorage.getItem("read") === "true") {
       console.log("执行正常的滚动和检查逻辑");
-      checkScroll();
+      likePostAndGoNext();
       if (isAutoLikeEnabled()) {
         autoLike();
       }
@@ -215,7 +230,6 @@
 
   function autoLike() {
     console.log(`Initial clickCounter: ${clickCounter}`);
-    // 寻找所有的discourse-reactions-reaction-button
     const buttons = document.querySelectorAll(
       ".discourse-reactions-reaction-button"
     );
@@ -293,7 +307,7 @@
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }
-      checkScroll();
+      likePostAndGoNext();
     }
   };
 

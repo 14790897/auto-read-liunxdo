@@ -5,6 +5,23 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+dotenv.config();
+// 读取以分钟为单位的运行时间限制
+const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
+
+// 将分钟转换为毫秒
+const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
+
+console.log(
+  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
+);
+
+// 设置一个定时器，在运行时间到达时终止进程
+const shutdownTimer = setTimeout(() => {
+  console.log("时间到,Reached time limit, shutting down the process...");
+  process.exit(0); // 退出进程
+}, runTimeLimitMillis);
+
 // 截图保存的文件夹
 const screenshotDir = "screenshots";
 if (!fs.existsSync(screenshotDir)) {
@@ -13,7 +30,6 @@ if (!fs.existsSync(screenshotDir)) {
 puppeteer.use(StealthPlugin());
 
 // Load the default .env file
-dotenv.config();
 if (fs.existsSync(".env.local")) {
   console.log("Using .env.local file to supply config environment variables");
   const envConfig = dotenv.parse(fs.readFileSync(".env.local"));
@@ -28,7 +44,7 @@ if (fs.existsSync(".env.local")) {
 // 从环境变量解析用户名和密码
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
-const loginUrl = process.env.WEBSITE;
+const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
 // 每个浏览器实例之间的延迟时间(毫秒)
 const delayBetweenInstances = 10000;
 //随机等待时间
@@ -185,25 +201,25 @@ async function launchBrowserForUser(username, password) {
 }
 async function login(page, username, password) {
   // 使用XPath查询找到包含"登录"或"login"文本的按钮
- let loginButtonFound = await page.evaluate(() => {
-   let loginButton = Array.from(document.querySelectorAll("button")).find(
-     (button) =>
-       button.textContent.includes("登录") ||
-       button.textContent.includes("login")
-   ); // 注意loginButton 变量在外部作用域中是无法被 page.evaluate 内部的代码直接修改的。page.evaluate 的代码是在浏览器环境中执行的，这意味着它们无法直接影响 Node.js 环境中的变量
-   // 如果没有找到，尝试根据类名查找
-   if (!loginButton) {
-     loginButton = document.querySelector(".login-button");
-   }
-   if (loginButton) {
-     loginButton.click();
-     console.log("Login button clicked.");
-     return true; // 返回true表示找到了按钮并点击了
-   } else {
-     console.log("Login button not found.");
-     return false; // 返回false表示没有找到按钮
-   }
- });
+  let loginButtonFound = await page.evaluate(() => {
+    let loginButton = Array.from(document.querySelectorAll("button")).find(
+      (button) =>
+        button.textContent.includes("登录") ||
+        button.textContent.includes("login")
+    ); // 注意loginButton 变量在外部作用域中是无法被 page.evaluate 内部的代码直接修改的。page.evaluate 的代码是在浏览器环境中执行的，这意味着它们无法直接影响 Node.js 环境中的变量
+    // 如果没有找到，尝试根据类名查找
+    if (!loginButton) {
+      loginButton = document.querySelector(".login-button");
+    }
+    if (loginButton) {
+      loginButton.click();
+      console.log("Login button clicked.");
+      return true; // 返回true表示找到了按钮并点击了
+    } else {
+      console.log("Login button not found.");
+      return false; // 返回false表示没有找到按钮
+    }
+  });
   if (!loginButtonFound) {
     if (loginUrl == "https://meta.appinn.net") {
       await page.goto("https://meta.appinn.net/t/topic/52006", {

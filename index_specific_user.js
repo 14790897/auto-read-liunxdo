@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Auto Read
+// @name         Auto Like Specific User
 // @namespace    http://tampermonkey.net/
-// @version      1.0
+// @version      1.0.6
 // @description  自动点赞特定用户，适用于discourse
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
@@ -13,6 +13,7 @@
 // @icon         https://www.google.com/s2/favicons?domain=linux.do
 // @downloadURL https://update.greasyfork.org/scripts/489464/Auto%20Read.user.js
 // @updateURL https://update.greasyfork.org/scripts/489464/Auto%20Read.meta.js
+// @run-at       document-end
 // ==/UserScript==
 
 (function () {
@@ -34,13 +35,45 @@
   // 环境变量：阅读网址，如果没有找到匹配的URL，则默认为第一个
   if (!BASE_URL) {
     BASE_URL = possibleBaseURLs[0];
-    console.log("默认BASE_URL设置为: " + BASE_URL);
+    console.log("当前BASE_URL设置为（默认）: " + BASE_URL);
   } else {
     console.log("当前BASE_URL是: " + BASE_URL);
   }
+  // 获取当前时间戳
+  const currentTime = Date.now();
+  // 获取存储的时间戳
+  const defaultTimestamp = new Date("1999-01-01T00:00:00Z").getTime(); //默认值为1999年
+  const storedTime = parseInt(
+    localStorage.getItem("clickCounterTimestamp") ||
+      defaultTimestamp.toString(),
+    10
+  );
 
-  console.log("脚本正在运行在: " + BASE_URL);
+  // 获取当前的点击计数，如果不存在则初始化为0
+  let clickCounter = parseInt(localStorage.getItem("clickCounter") || "0", 10);
+  // 检查是否超过12小时（12小时 = 12 * 60 * 60 * 1000 毫秒）
+  if (currentTime - storedTime > 12 * 60 * 60 * 1000) {
+    // 超过24小时，清空点击计数器并更新时间戳
+    clickCounter = 0;
+    localStorage.setItem("clickCounter", "0");
+    localStorage.setItem("clickCounterTimestamp", currentTime.toString());
+  }
 
+  console.log(`Initial clickCounter: ${clickCounter}`);
+  // 入口函数
+  window.addEventListener("load", () => {
+    console.log("autoRead", localStorage.getItem("read"));
+    checkFirstRun();
+    if (localStorage.getItem("read") === "true") {
+      console.log("点赞开始");
+      setTimeout(() => {
+        likeSpecificPost();
+      }, 2000);
+      setTimeout(() => {
+        openSpecificUserPost();
+      }, 4000);
+    }
+  });
   function checkFirstRun() {
     if (localStorage.getItem("isFirstRun") === null) {
       console.log("脚本第一次运行，执行初始化操作...");
@@ -53,7 +86,6 @@
 
   function updateInitialData() {
     localStorage.setItem("read", "false"); // 开始时自动滚动关闭
-    localStorage.setItem("autoLikeEnabled", "false"); //默认关闭自动点赞
     console.log("执行了初始数据更新操作");
   }
 
@@ -192,7 +224,7 @@
         console.log(
           `Reached ${likeLimit} likes, setting the like variable to false.`
         );
-        localStorage.setItem("autoLikeEnabled", "false");
+        localStorage.setItem("read", false);
       } else {
         console.log("clickCounter:", clickCounter);
       }
@@ -201,45 +233,6 @@
     }
   }
 
-  // 入口函数
-  window.addEventListener("load", () => {
-    checkFirstRun();
-    console.log(
-      "autoRead",
-      localStorage.getItem("read"),
-      "autoLikeEnabled",
-      localStorage.getItem("autoLikeEnabled")
-    );
-    if (localStorage.getItem("read") === "true") {
-      console.log("点赞开始");
-      likeSpecificPost();
-      setTimeout(() => {
-        openSpecificUserPost();
-      }, 2000);
-    }
-  });
-
-  // 获取当前时间戳
-  const currentTime = Date.now();
-  // 获取存储的时间戳
-  const defaultTimestamp = new Date("1999-01-01T00:00:00Z").getTime(); //默认值为1999年
-  const storedTime = parseInt(
-    localStorage.getItem("clickCounterTimestamp") ||
-      defaultTimestamp.toString(),
-    10
-  );
-
-  // 获取当前的点击计数，如果不存在则初始化为0
-  let clickCounter = parseInt(localStorage.getItem("clickCounter") || "0", 10);
-  // 检查是否超过24小时（24小时 = 24 * 60 * 60 * 1000 毫秒）
-  if (currentTime - storedTime > 24 * 60 * 60 * 1000) {
-    // 超过24小时，清空点击计数器并更新时间戳
-    clickCounter = 0;
-    localStorage.setItem("clickCounter", "0");
-    localStorage.setItem("clickCounterTimestamp", currentTime.toString());
-  }
-
-  console.log(`Initial clickCounter: ${clickCounter}`);
   function triggerClick(button) {
     const event = new MouseEvent("click", {
       bubbles: true,
@@ -250,18 +243,17 @@
   }
 
   const button = document.createElement("button");
-  // 初始化按钮文本基于当前的阅读状态
   button.textContent =
     localStorage.getItem("read") === "true" ? "停止阅读" : "开始阅读";
   button.style.position = "fixed";
-  button.style.bottom = "20px"; // 底部距离调整为20px
-  button.style.left = "20px"; // 左侧距离调整为20px
+  button.style.bottom = "20px";
+  button.style.left = "20px";
   button.style.zIndex = 1000;
-  button.style.backgroundColor = "#e0e0e0"; // 浅灰色背景
-  button.style.color = "#333"; // 深灰色文本
-  button.style.border = "1px solid #aaa"; // 灰色边框
-  button.style.padding = "8px 16px"; // 更大的内边距
-  button.style.borderRadius = "8px"; // 更大的圆角
+  button.style.backgroundColor = "#e0e0e0";
+  button.style.color = "#333";
+  button.style.border = "1px solid #aaa";
+  button.style.padding = "8px 16px";
+  button.style.borderRadius = "8px";
   document.body.appendChild(button);
 
   button.onclick = function () {
@@ -271,14 +263,16 @@
     button.textContent = newReadState ? "停止阅读" : "开始阅读";
     if (newReadState) {
       if (BASE_URL == "https://linux.do") {
-        window.location.href = "https://linux.do/t/topic/13716/427";
+        const maxPostNumber = 600;
+        const randomPostNumber = Math.floor(Math.random() * maxPostNumber) + 1;
+        const newUrl = `https://linux.do/t/topic/13716/${randomPostNumber}`;
+        window.location.href = newUrl;
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }
     }
   };
 
-  // 增加specificUser输入框和保存按钮
   const userInput = document.createElement("input");
   userInput.type = "text";
   userInput.placeholder = "输入要点赞的用户ID";
@@ -320,7 +314,6 @@
     }
   };
 
-  // 增加likeLimit输入框和保存按钮
   const likeLimitInput = document.createElement("input");
   likeLimitInput.type = "number";
   likeLimitInput.placeholder = "输入点赞数量";
@@ -356,5 +349,26 @@
       likeLimit = newLikeLimit;
       console.log(`新的likeLimit已保存: ${likeLimit}`);
     }
+  };
+
+  // 增加清除数据的按钮
+  const clearDataButton = document.createElement("button");
+  clearDataButton.textContent = "清除所有数据";
+  clearDataButton.style.position = "fixed";
+  clearDataButton.style.bottom = "20px";
+  clearDataButton.style.left = "140px";
+  clearDataButton.style.zIndex = "1000";
+  clearDataButton.style.backgroundColor = "#ff6666"; // 红色背景，提示删除操作
+  clearDataButton.style.color = "#fff"; // 白色文本
+  clearDataButton.style.border = "1px solid #ff3333"; // 深红色边框
+  clearDataButton.style.padding = "8px 16px";
+  clearDataButton.style.borderRadius = "8px";
+  document.body.appendChild(clearDataButton);
+
+  clearDataButton.onclick = function () {
+      localStorage.removeItem("lastOffset");
+      localStorage.removeItem("clickCounter");
+      localStorage.removeItem("clickCounterTimestamp");
+    console.log("所有数据已清除，除了 specificUser 和 specificUserPostList");
   };
 })();

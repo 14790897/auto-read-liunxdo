@@ -66,7 +66,7 @@
   let scrollInterval = null;
   let checkScrollTimeout = null;
   let autoLikeInterval = null;
-
+//这里应该是去寻找可以进入的话题
   function scrollToBottomSlowly(
     stopDistance = 9999999999,
     callback = undefined,
@@ -180,12 +180,6 @@
 
     // 筛选出未阅读的链接
     const unreadLinks = Array.from(links).filter((link) => {
-      // 检查链接是否已经被读过
-      // const isAlreadyRead = alreadyReadLinks.includes(link.href);
-      // if (isAlreadyRead) {
-      //   return false; // 如果链接已被读过，直接排除
-      // }
-
       // 向上遍历DOM树，查找包含'visited'类的父级元素，最多查找三次
       let parent = link.parentElement;
       let times = 0; // 查找次数计数器
@@ -209,17 +203,6 @@
       const link = unreadLinks[randomIndex];
       // 打印找到的链接（可选）
       console.log("Found link:", link.href);
-      // // 模拟点击该链接
-      // setTimeout(() => {
-      //   link.click();
-      // }, delay);
-      // 将链接添加到已阅读列表并更新localStorage
-      // alreadyReadLinks.push(link.href);
-      // localStorage.setItem(
-      //   "alreadyReadLinks",
-      //   JSON.stringify(alreadyReadLinks)
-      // );
-
       // 导航到该链接
       window.location.href = link.href;
     } else {

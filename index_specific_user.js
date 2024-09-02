@@ -95,22 +95,29 @@
     let isDataSufficient = false;
 
     while (!isDataSufficient) {
-      lastOffset += 20;
+      //   lastOffset += 20;
+      lastOffset += 1; //对于page来说
       // 举例：https://linux.do/user_actions.json?offset=0&username=14790897&filter=5
-      const url = `${BASE_URL}/user_actions.json?offset=${lastOffset}&username=${specificUser}&filter=5`;
-
+      //   const url = `${BASE_URL}/user_actions.json?offset=${lastOffset}&username=${specificUser}&filter=5`;
+      //举例：https://linux.do/search?q=%4014790897%20in%3Aunseen
+      const url = `${BASE_URL}/search?q=%40${specificUser}%20in%3Aunseen`; //&page=${lastOffset}
       $.ajax({
         url: url,
         async: false,
+        headers: {
+          Accept: "application/json",
+        },
         success: function (result) {
-          if (result && result.user_actions && result.user_actions.length > 0) {
-            result.user_actions.forEach((action) => {
+          //   if (result && result.user_actions && result.user_actions.length > 0) {
+          // result.user_actions.forEach((action) => {
+          if (result && result.posts && result.posts.length > 0) {
+            result.posts.forEach((action) => {
               const topicId = action.topic_id;
-              const postId = action.post_id;
+              //   const postId = action.post_id;
               const postNumber = action.post_number;
               specificUserPostList.push({
                 topic_id: topicId,
-                post_id: postId,
+                // post_id: postId,
                 post_number: postNumber,
               });
             });
@@ -184,55 +191,66 @@
   function likeSpecificPost() {
     const urlParts = window.location.pathname.split("/");
     const lastPart = urlParts[urlParts.length - 1]; // 获取最后一部分
+    let buttons, reactionButton;
     console.log("post number:", lastPart);
-    const buttons = document.querySelectorAll("button[aria-label]");
-
-    let targetButton = null;
-    buttons.forEach((button) => {
-      const ariaLabel = button.getAttribute("aria-label");
-      if (ariaLabel && ariaLabel.includes(`#${lastPart}`)) {
-        targetButton = button;
-        console.log("找到post number按钮:", targetButton);
-        return;
-      }
-    });
-
-    if (targetButton) {
-      // 找到按钮后，获取其父级元素
-      const parentElement = targetButton.parentElement;
-      console.log("父级元素:", parentElement);
-      const reactionButton = parentElement.querySelector(
-        ".discourse-reactions-reaction-button"
+    if (lastPart < 10000) {
+      buttons = document.querySelectorAll(
+        "button[aria-label]" //[class*='reply']
       );
 
-      if (
-        reactionButton.title !== "点赞此帖子" &&
-        reactionButton.title !== "Like this post"
-      ) {
-        console.log("已经点赞过");
-        return "already liked";
-      } else if (clickCounter >= likeLimit) {
-        console.log("已经达到点赞上限");
-        localStorage.setItem("read", false);
-        return;
-      }
-      triggerClick(reactionButton);
-      clickCounter++;
-      console.log(
-        `Clicked like button ${clickCounter},已点赞用户${specificUser}`
-      );
-      localStorage.setItem("clickCounter", clickCounter.toString());
-      // 如果点击次数达到likeLimit次，则设置点赞变量为false
-      if (clickCounter === likeLimit) {
-        console.log(
-          `Reached ${likeLimit} likes, setting the like variable to false.`
+      let targetButton = null;
+      buttons.forEach((button) => {
+        const ariaLabel = button.getAttribute("aria-label");
+        if (
+          ariaLabel &&
+          (ariaLabel.includes(`#${lastPart}`))
+        ) {
+          targetButton = button;
+          console.log("找到post number按钮:", targetButton);
+          return;
+        }
+      });
+
+      if (targetButton) {
+        // 找到按钮后，获取其父级元素
+        const parentElement = targetButton.parentElement;
+        console.log("父级元素:", parentElement);
+        reactionButton = parentElement.querySelector(
+          ".discourse-reactions-reaction-button"
         );
-        localStorage.setItem("read", false);
       } else {
-        console.log("clickCounter:", clickCounter);
+        console.log(`未找到包含 #${lastPart} 的按钮`);
       }
+    } else {//大于10000说明是主题帖，选择第一个
+      reactionButton = document.querySelectorAll(
+        ".discourse-reactions-reaction-button"
+      )[0];
+    }
+    if (
+      reactionButton.title !== "点赞此帖子" &&
+      reactionButton.title !== "Like this post"
+    ) {
+      console.log("已经点赞过");
+      return "already liked";
+    } else if (clickCounter >= likeLimit) {
+      console.log("已经达到点赞上限");
+      localStorage.setItem("read", false);
+      return;
+    }
+    triggerClick(reactionButton);
+    clickCounter++;
+    console.log(
+      `Clicked like button ${clickCounter},已点赞用户${specificUser}`
+    );
+    localStorage.setItem("clickCounter", clickCounter.toString());
+    // 如果点击次数达到likeLimit次，则设置点赞变量为false
+    if (clickCounter === likeLimit) {
+      console.log(
+        `Reached ${likeLimit} likes, setting the like variable to false.`
+      );
+      localStorage.setItem("read", false);
     } else {
-      console.log(`未找到包含 #${lastPart} 的按钮`);
+      console.log("clickCounter:", clickCounter);
     }
   }
 

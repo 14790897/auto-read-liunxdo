@@ -329,7 +329,7 @@
   likeLimitInput.style.borderRadius = "8px";
   likeLimitInput.style.backgroundColor = "#e0e0e0";
   likeLimitInput.style.width = "100px";
-  likeLimitInput.value = localStorage.getItem("likeLimit") || 50;
+  likeLimitInput.value = localStorage.getItem("likeLimit") || 200;
   document.body.appendChild(likeLimitInput);
 
   const saveLikeLimitButton = document.createElement("button");

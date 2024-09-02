@@ -29,7 +29,7 @@
   const specificUserPostListLimit = 100;
   const currentURL = window.location.href;
   let specificUser = localStorage.getItem("specificUser") || "14790897";
-  let likeLimit = parseInt(localStorage.getItem("likeLimit") || 50, 10);
+  let likeLimit = parseInt(localStorage.getItem("likeLimit") || 200, 10);
   let BASE_URL = possibleBaseURLs.find((url) => currentURL.startsWith(url));
 
   // 环境变量：阅读网址，如果没有找到匹配的URL，则默认为第一个
@@ -206,11 +206,14 @@
       );
 
       if (
-        (reactionButton.title !== "点赞此帖子" &&
-          reactionButton.title !== "Like this post") ||
-        clickCounter >= likeLimit
+        reactionButton.title !== "点赞此帖子" &&
+        reactionButton.title !== "Like this post"
       ) {
-        console.log("已经点赞过或者已经达到点赞上限");
+        console.log("已经点赞过");
+        return;
+      } else if (clickCounter >= likeLimit) {
+        console.log("已经达到点赞上限");
+        localStorage.setItem("read", false);
         return;
       }
       triggerClick(reactionButton);
@@ -366,9 +369,9 @@
   document.body.appendChild(clearDataButton);
 
   clearDataButton.onclick = function () {
-      localStorage.removeItem("lastOffset");
-      localStorage.removeItem("clickCounter");
-      localStorage.removeItem("clickCounterTimestamp");
+    localStorage.removeItem("lastOffset");
+    localStorage.removeItem("clickCounter");
+    localStorage.removeItem("clickCounterTimestamp");
     console.log("所有数据已清除，除了 specificUser 和 specificUserPostList");
   };
 })();

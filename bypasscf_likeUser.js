@@ -195,12 +195,17 @@ async function launchBrowserForUser(username, password) {
     const externalScript = fs.readFileSync(externalScriptPath, "utf8");
 
     // 在每个新的文档加载时执行外部脚本
-    await page.evaluateOnNewDocument((...args) => {
-      const [specificUser, scriptToEval] = args;
-      localStorage.setItem("specificUser", specificUser);
-      console.log('当前点赞用户：', specificUser)
-      eval(scriptToEval);
-    },specificUser, externalScript);//变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的
+    await page.evaluateOnNewDocument(
+      (...args) => {
+        const [specificUser, scriptToEval] = args;
+        localStorage.setItem("read", true);
+        localStorage.setItem("specificUser", specificUser);
+        console.log("当前点赞用户：", specificUser);
+        eval(scriptToEval);
+      },
+      specificUser,
+      externalScript
+    ); //变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的
     // 添加一个监听器来监听每次页面加载完成的事件
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用

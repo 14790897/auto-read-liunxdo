@@ -196,6 +196,8 @@ async function launchBrowserForUser(username, password) {
 
     // 在每个新的文档加载时执行外部脚本
     await page.evaluateOnNewDocument((...args) => {
+      localStorage.setItem("read", true);
+      localStorage.setItem("autoLikeEnabled", "true");
       const [scriptToEval] = args;
       eval(scriptToEval);
     }, externalScript);

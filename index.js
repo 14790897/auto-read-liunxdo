@@ -66,16 +66,13 @@
   let checkScrollTimeout = null;
   let autoLikeInterval = null;
 
-  function scrollToBottomSlowly(
-    distancePerStep = 20,
-    delayPerStep = 50
-  ) {
+  function scrollToBottomSlowly(distancePerStep = 20, delayPerStep = 50) {
     if (scrollInterval !== null) {
       clearInterval(scrollInterval);
     }
     scrollInterval = setInterval(() => {
       window.scrollBy(0, distancePerStep);
-    }, delayPerStep);// 每50毫秒滚动20像素
+    }, delayPerStep); // 每50毫秒滚动20像素
   }
 
   function getLatestTopic() {
@@ -98,7 +95,8 @@
           ) {
             result.topic_list.topics.forEach((topic) => {
               // 未读且评论数小于 commentLimit
-              if (!topic.unseen && commentLimit > topic.posts_count) {
+              if (commentLimit > topic.posts_count) {
+                //其实不需要 !topic.unseen &&
                 topicList.push(topic);
               }
             });

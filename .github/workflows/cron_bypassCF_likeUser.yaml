@@ -1,4 +1,4 @@
-name: bypassCF kileUser (点赞特定用户使用这个)
+name: bypassCF likeUser (点赞特定用户使用这个)
 # GitHub.secrets优先级最高，即使没有设置对应的变量，它也会读取，这时变量为空值，导致报错，.env读取的变量无法覆盖这个值,使用了${PASSWORD_ESCAPED//\#/\\#}来对#转义,需要两个\，但是我直接在env文件使用这种方法是不行的，GitHub action是有效
 on:
   schedule:

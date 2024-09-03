@@ -10,7 +10,7 @@ import TelegramBot from "node-telegram-bot-api";
 dotenv.config();
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
-let bot
+let bot;
 if (token && chatId) {
   bot = new TelegramBot(token);
 }
@@ -219,7 +219,9 @@ async function launchBrowserForUser(username, password) {
   } catch (err) {
     // throw new Error(err);
     console.log("Error:", err);
-    sendToTelegram(`${err.message}`);
+    if (token && chatId) {
+      sendToTelegram(`${err.message}`);
+    }
   }
 }
 async function login(page, username, password) {

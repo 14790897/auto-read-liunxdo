@@ -201,10 +201,7 @@
       let targetButton = null;
       buttons.forEach((button) => {
         const ariaLabel = button.getAttribute("aria-label");
-        if (
-          ariaLabel &&
-          (ariaLabel.includes(`#${lastPart}`))
-        ) {
+        if (ariaLabel && ariaLabel.includes(`#${lastPart}`)) {
           targetButton = button;
           console.log("找到post number按钮:", targetButton);
           return;
@@ -221,7 +218,8 @@
       } else {
         console.log(`未找到包含 #${lastPart} 的按钮`);
       }
-    } else {//大于10000说明是主题帖，选择第一个
+    } else {
+      //大于10000说明是主题帖，选择第一个
       reactionButton = document.querySelectorAll(
         ".discourse-reactions-reaction-button"
       )[0];
@@ -390,6 +388,7 @@
     localStorage.removeItem("lastOffset");
     localStorage.removeItem("clickCounter");
     localStorage.removeItem("clickCounterTimestamp");
+    localStorage.removeItem("specificUserPostList");
     console.log("所有数据已清除，除了 specificUser 和 specificUserPostList");
   };
 })();

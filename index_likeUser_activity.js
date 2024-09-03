@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name         Auto Like Specific User
+// @name         Auto Like Specific User base on activity
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.1.1
 // @description  自动点赞特定用户，适用于discourse
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
@@ -25,6 +25,7 @@
     "https://meta.appinn.net",
     "https://community.openai.com",
   ];
+  const commentLimit = 1000;
   const specificUserPostListLimit = 100;
   const currentURL = window.location.href;
   let specificUser = localStorage.getItem("specificUser") || "14790897";
@@ -84,7 +85,7 @@
   }
 
   function updateInitialData() {
-    localStorage.setItem("read", "true"); // 开始时自动滚动关闭
+    localStorage.setItem("read", "false"); // 开始时自动滚动关闭
     console.log("执行了初始数据更新操作");
   }
 
@@ -94,12 +95,12 @@
     let isDataSufficient = false;
 
     while (!isDataSufficient) {
-      //   lastOffset += 20; //对于user_actions
-      lastOffset += 1; //对于page来说
+      lastOffset += 20;
+      // lastOffset += 1; //对于page来说
       // 举例：https://linux.do/user_actions.json?offset=0&username=14790897&filter=5
-      //   const url = `${BASE_URL}/user_actions.json?offset=${lastOffset}&username=${specificUser}&filter=5`;
+      const url = `${BASE_URL}/user_actions.json?offset=${lastOffset}&username=${specificUser}&filter=5`;
       //举例：https://linux.do/search?q=%4014790897%20in%3Aunseen
-      const url = `${BASE_URL}/search?q=%40${specificUser}%20in%3Aunseen`; //&page=${lastOffset}
+      // const url = `${BASE_URL}/search?q=%40${specificUser}%20in%3Aunseen`; //&page=${lastOffset}
       $.ajax({
         url: url,
         async: false,
@@ -107,10 +108,10 @@
           Accept: "application/json",
         },
         success: function (result) {
-          //   if (result && result.user_actions && result.user_actions.length > 0) {
-          // result.user_actions.forEach((action) => {
-          if (result && result.posts && result.posts.length > 0) {
-            result.posts.forEach((action) => {
+          if (result && result.user_actions && result.user_actions.length > 0) {
+            result.user_actions.forEach((action) => {
+              // if (result && result.posts && result.posts.length > 0) {
+              //   result.posts.forEach((action) => {
               const topicId = action.topic_id;
               //   const postId = action.post_id;
               const postNumber = action.post_number;
@@ -181,6 +182,12 @@
     }
   }
 
+  // 检查是否点赞
+  // const postId = data.post_id;
+
+  // const targetId = `discourse-reactions-counter-${postId}-right`;
+
+  // const element = document.getElementById(targetId);
   function likeSpecificPost() {
     const urlParts = window.location.pathname.split("/");
     const lastPart = urlParts[urlParts.length - 1]; // 获取最后一部分
@@ -253,4 +260,135 @@
     });
     button.dispatchEvent(event);
   }
+
+  const button = document.createElement("button");
+  button.textContent =
+    localStorage.getItem("read") === "true" ? "停止阅读" : "开始阅读";
+  button.style.position = "fixed";
+  button.style.bottom = "20px";
+  button.style.left = "20px";
+  button.style.zIndex = 1000;
+  button.style.backgroundColor = "#e0e0e0";
+  button.style.color = "#333";
+  button.style.border = "1px solid #aaa";
+  button.style.padding = "8px 16px";
+  button.style.borderRadius = "8px";
+  document.body.appendChild(button);
+
+  button.onclick = function () {
+    const currentlyReading = localStorage.getItem("read") === "true";
+    const newReadState = !currentlyReading;
+    localStorage.setItem("read", newReadState.toString());
+    button.textContent = newReadState ? "停止阅读" : "开始阅读";
+    if (newReadState) {
+      if (BASE_URL == "https://linux.do") {
+        const maxPostNumber = 600;
+        const randomPostNumber = Math.floor(Math.random() * maxPostNumber) + 1;
+        const newUrl = `https://linux.do/t/topic/13716/${randomPostNumber}`;
+        window.location.href = newUrl;
+      } else {
+        window.location.href = `${BASE_URL}/t/topic/1`;
+      }
+    }
+  };
+
+  const userInput = document.createElement("input");
+  userInput.type = "text";
+  userInput.placeholder = "输入要点赞的用户ID";
+  userInput.style.position = "fixed";
+  userInput.style.bottom = "90px";
+  userInput.style.left = "20px";
+  userInput.style.zIndex = "1000";
+  userInput.style.padding = "6px";
+  userInput.style.border = "1px solid #aaa";
+  userInput.style.borderRadius = "8px";
+  userInput.style.backgroundColor = "#e0e0e0";
+  userInput.style.width = "100px";
+  userInput.value = localStorage.getItem("specificUser") || "14790897";
+
+  document.body.appendChild(userInput);
+
+  const saveUserButton = document.createElement("button");
+  saveUserButton.textContent = "保存用户ID";
+  saveUserButton.style.position = "fixed";
+  saveUserButton.style.bottom = "60px";
+  saveUserButton.style.left = "20px";
+  saveUserButton.style.zIndex = "1000";
+  saveUserButton.style.backgroundColor = "#e0e0e0";
+  saveUserButton.style.color = "#333";
+  saveUserButton.style.border = "1px solid #aaa";
+  saveUserButton.style.padding = "8px 16px";
+  saveUserButton.style.borderRadius = "8px";
+  document.body.appendChild(saveUserButton);
+
+  saveUserButton.onclick = function () {
+    const newSpecificUser = userInput.value.trim();
+    if (newSpecificUser) {
+      localStorage.setItem("specificUser", newSpecificUser);
+      localStorage.removeItem("specificUserPostList");
+      specificUser = newSpecificUser;
+      console.log(
+        `新的specificUser已保存: ${specificUser}，specificUserPostList已重置`
+      );
+    }
+  };
+
+  const likeLimitInput = document.createElement("input");
+  likeLimitInput.type = "number";
+  likeLimitInput.placeholder = "输入点赞数量";
+  likeLimitInput.style.position = "fixed";
+  likeLimitInput.style.bottom = "180px";
+  likeLimitInput.style.left = "20px";
+  likeLimitInput.style.zIndex = "1000";
+  likeLimitInput.style.padding = "6px";
+  likeLimitInput.style.border = "1px solid #aaa";
+  likeLimitInput.style.borderRadius = "8px";
+  likeLimitInput.style.backgroundColor = "#e0e0e0";
+  likeLimitInput.style.width = "100px";
+  likeLimitInput.value = localStorage.getItem("likeLimit") || 200;
+  document.body.appendChild(likeLimitInput);
+
+  const saveLikeLimitButton = document.createElement("button");
+  saveLikeLimitButton.textContent = "保存点赞数量";
+  saveLikeLimitButton.style.position = "fixed";
+  saveLikeLimitButton.style.bottom = "140px";
+  saveLikeLimitButton.style.left = "20px";
+  saveLikeLimitButton.style.zIndex = "1000";
+  saveLikeLimitButton.style.backgroundColor = "#e0e0e0";
+  saveLikeLimitButton.style.color = "#333";
+  saveLikeLimitButton.style.border = "1px solid #aaa";
+  saveLikeLimitButton.style.padding = "8px 16px";
+  saveLikeLimitButton.style.borderRadius = "8px";
+  document.body.appendChild(saveLikeLimitButton);
+
+  saveLikeLimitButton.onclick = function () {
+    const newLikeLimit = parseInt(likeLimitInput.value.trim(), 10);
+    if (newLikeLimit && newLikeLimit > 0) {
+      localStorage.setItem("likeLimit", newLikeLimit);
+      likeLimit = newLikeLimit;
+      console.log(`新的likeLimit已保存: ${likeLimit}`);
+    }
+  };
+
+  // 增加清除数据的按钮
+  const clearDataButton = document.createElement("button");
+  clearDataButton.textContent = "清除所有数据";
+  clearDataButton.style.position = "fixed";
+  clearDataButton.style.bottom = "20px";
+  clearDataButton.style.left = "140px";
+  clearDataButton.style.zIndex = "1000";
+  clearDataButton.style.backgroundColor = "#ff6666"; // 红色背景，提示删除操作
+  clearDataButton.style.color = "#fff"; // 白色文本
+  clearDataButton.style.border = "1px solid #ff3333"; // 深红色边框
+  clearDataButton.style.padding = "8px 16px";
+  clearDataButton.style.borderRadius = "8px";
+  document.body.appendChild(clearDataButton);
+
+  clearDataButton.onclick = function () {
+    localStorage.removeItem("lastOffset");
+    localStorage.removeItem("clickCounter");
+    localStorage.removeItem("clickCounterTimestamp");
+    localStorage.removeItem("specificUserPostList");
+    console.log("所有数据已清除，除了 specificUser 和 specificUserPostList");
+  };
 })();

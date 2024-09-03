@@ -18,6 +18,9 @@ jobs:
       # 在作业级别设置环境变量
       USERNAMES: ${{ secrets.USERNAMES }}
       PASSWORDS: ${{ secrets.PASSWORDS }}
+      RUN_TIME_LIMIT_MINUTES: ${{secrets.RUN_TIME_LIMIT_MINUTES}}
+      TELEGRAM_BOT_TOKEN: ${{secrets.TELEGRAM_BOT_TOKEN}}
+      TELEGRAM_CHAT_ID: ${{secrets.TELEGRAM_CHAT_ID}}
     steps:
       - uses: actions/checkout@v3 # 检出仓库
 

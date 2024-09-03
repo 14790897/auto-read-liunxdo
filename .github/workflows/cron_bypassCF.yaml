@@ -33,7 +33,7 @@ jobs:
         run: |
           npm install
           sudo apt install -y xvfb
-
+      #github action设置的action环境变量会完全替换掉env文件的读取，所以需要在action里手动进行加载env文件
       - name: Load environment variables
         run: |
           echo "Debug: Checking if .env file exists..."

@@ -77,8 +77,7 @@ function delayClick(time) {
   try {
     if (usernames.length !== passwords.length) {
       console.log(usernames.length, usernames, passwords.length, passwords);
-      console.log("用户名和密码的数量不匹配！");
-      return;
+      throw new error("用户名和密码的数量不匹配！");
     }
 
     // 并发启动浏览器实例进行登录
@@ -99,7 +98,7 @@ function delayClick(time) {
     // 错误处理逻辑
     console.error("发生错误：", error);
     if (token && chatId) {
-      sendToTelegram(`发生错误：${error.message}`);
+      sendToTelegram(`${error.message}`);
     }
   }
 })();
@@ -218,7 +217,9 @@ async function launchBrowserForUser(username, password) {
       });
     }
   } catch (err) {
-    throw new Error(err);
+    // throw new Error(err);
+    console.log("Error:", err);
+    sendToTelegram(`${err.message}`);
   }
 }
 async function login(page, username, password) {

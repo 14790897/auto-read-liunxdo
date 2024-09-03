@@ -5,7 +5,26 @@ import StealthPlugin from "puppeteer-extra-plugin-stealth";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
+import TelegramBot from "node-telegram-bot-api";
+
 dotenv.config();
+const token = process.env.TELEGRAM_BOT_TOKEN;
+const chatId = process.env.TELEGRAM_CHAT_ID;
+
+if (token && chatId) {
+  bot = new TelegramBot(token);
+}
+function sendToTelegram(message) {
+  bot
+    .sendMessage(chatId, message)
+    .then(() => {
+      console.log("Telegram message sent successfully");
+    })
+    .catch((error) => {
+      console.error("Error sending Telegram message:", error);
+    });
+}
+
 // 读取以分钟为单位的运行时间限制
 const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
 
@@ -79,6 +98,9 @@ function delayClick(time) {
   } catch (error) {
     // 错误处理逻辑
     console.error("发生错误：", error);
+    if (token && chatId) {
+      sendToTelegram(`发生错误：${error.message}`);
+    }
   }
 })();
 async function launchBrowserForUser(username, password) {
@@ -196,7 +218,7 @@ async function launchBrowserForUser(username, password) {
       });
     }
   } catch (err) {
-    console.log(err);
+    throw new Error(err);
   }
 }
 async function login(page, username, password) {
@@ -246,7 +268,7 @@ async function login(page, username, password) {
   // 等待密码输入框加载
   await page.waitForSelector("#login-account-password");
   // 模拟人类在输入用户名后的短暂停顿
-  delayClick; // 清空输入框并输入密码
+  // delayClick; // 清空输入框并输入密码
   await page.click("#login-account-password", { clickCount: 3 });
   await page.type("#login-account-password", password, {
     delay: 100,
@@ -265,11 +287,10 @@ async function login(page, username, password) {
       page.click("#login-button"), // 点击登录按钮触发跳转
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败 这点四个月之前你就发现了结果今天又遇到（有个用户遇到了https://linux.do/t/topic/169209/82），但是你没有在这个报错你提示我8.5
   } catch (error) {
-    console.error(
-      "Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义), 此外GitHub action似乎不能识别特殊字符，不能登录的话建议改密码",'失败用户：',username,
-      error
+    throw new Error(
+      `Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义), 此外GitHub action似乎不能识别特殊字符，不能登录的话建议改密码,失败用户：,${username},错误信息：,
+      ${error}`
     );
-    throw new Error("Navigation timed out in login.");
   }
   await delayClick(1000);
 }

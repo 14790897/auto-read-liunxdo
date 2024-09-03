@@ -8,22 +8,6 @@ import { dirname, join } from "path";
 import TelegramBot from "node-telegram-bot-api";
 
 dotenv.config();
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const chatId = process.env.TELEGRAM_CHAT_ID;
-let bot;
-if (token && chatId) {
-  bot = new TelegramBot(token);
-}
-function sendToTelegram(message) {
-  bot
-    .sendMessage(chatId, message)
-    .then(() => {
-      console.log("Telegram message sent successfully");
-    })
-    .catch((error) => {
-      console.error("Error sending Telegram message:", error);
-    });
-}
 
 // 读取以分钟为单位的运行时间限制
 const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
@@ -60,6 +44,23 @@ if (fs.existsSync(".env.local")) {
     "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git"
   );
 }
+const token = process.env.TELEGRAM_BOT_TOKEN;
+const chatId = process.env.TELEGRAM_CHAT_ID;
+let bot;
+if (token && chatId) {
+  bot = new TelegramBot(token);
+}
+function sendToTelegram(message) {
+  bot
+    .sendMessage(chatId, message)
+    .then(() => {
+      console.log("Telegram message sent successfully");
+    })
+    .catch((error) => {
+      console.error("Error sending Telegram message:", error);
+    });
+}
+
 // 从环境变量解析用户名和密码
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");

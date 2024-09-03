@@ -8,23 +8,6 @@ import { dirname, join } from "path";
 import TelegramBot from "node-telegram-bot-api";
 
 dotenv.config();
-const token = process.env.TELEGRAM_BOT_TOKEN;
-const chatId = process.env.TELEGRAM_CHAT_ID;
-const specificUser = process.env.SPECIFIC_USER || "14790897";
-let bot;
-if (token && chatId) {
-  bot = new TelegramBot(token);
-}
-function sendToTelegram(message) {
-  bot
-    .sendMessage(chatId, message)
-    .then(() => {
-      console.log("Telegram message sent successfully");
-    })
-    .catch((error) => {
-      console.error("Error sending Telegram message:", error);
-    });
-}
 
 // 读取以分钟为单位的运行时间限制
 const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
@@ -60,6 +43,23 @@ if (fs.existsSync(".env.local")) {
   console.log(
     "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git"
   );
+}
+const token = process.env.TELEGRAM_BOT_TOKEN;
+const chatId = process.env.TELEGRAM_CHAT_ID;
+const specificUser = process.env.SPECIFIC_USER || "14790897";
+let bot;
+if (token && chatId) {
+  bot = new TelegramBot(token);
+}
+function sendToTelegram(message) {
+  bot
+    .sendMessage(chatId, message)
+    .then(() => {
+      console.log("Telegram message sent successfully");
+    })
+    .catch((error) => {
+      console.error("Error sending Telegram message:", error);
+    });
 }
 // 从环境变量解析用户名和密码
 const usernames = process.env.USERNAMES.split(",");
@@ -196,17 +196,18 @@ async function launchBrowserForUser(username, password) {
 
     // 在每个新的文档加载时执行外部脚本
     await page.evaluateOnNewDocument((...args) => {
-      const [scriptToEval] = args;
+      const [specificUser, scriptToEval] = args;
       localStorage.setItem("specificUser", specificUser);
+      console.log('当前点赞用户：', specificUser)
       eval(scriptToEval);
-    }, externalScript);
+    },specificUser, externalScript);//变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的
     // 添加一个监听器来监听每次页面加载完成的事件
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
     });
     // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了
     if (loginUrl == "https://linux.do") {
-      await page.goto("https://linux.do/t/topic/13716/340", {
+      await page.goto("https://linux.do/t/topic/13716/400", {
         waitUntil: "domcontentloaded",
       });
     } else if (loginUrl == "https://meta.appinn.net") {

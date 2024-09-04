@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.3.2
+// @version      1.4
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
@@ -11,6 +11,8 @@
 // @grant        none
 // @license      MIT
 // @icon         https://www.google.com/s2/favicons?domain=linux.do
+// @downloadURL https://update.greasyfork.org/scripts/489464/Auto%20Read.user.js
+// @updateURL https://update.greasyfork.org/scripts/489464/Auto%20Read.meta.js
 // ==/UserScript==
 
 (function () {
@@ -22,7 +24,9 @@
     "https://meta.appinn.net",
     "https://community.openai.com",
   ];
-
+  const commentLimit = 1000;
+  const topicListLimit = 100;
+  const likeLimit = 50;
   // 获取当前页面的URL
   const currentURL = window.location.href;
 
@@ -37,21 +41,16 @@
     console.log("当前BASE_URL是: " + BASE_URL);
   }
 
-  // 以下是脚本的其余部分
   console.log("脚本正在运行在: " + BASE_URL);
   //1.进入网页 https://linux.do/t/topic/数字（1，2，3，4）
   //2.使滚轮均衡的往下移动模拟刷文章
   // 检查是否是第一次运行脚本
   function checkFirstRun() {
     if (localStorage.getItem("isFirstRun") === null) {
-      // 是第一次运行，执行初始化操作
       console.log("脚本第一次运行，执行初始化操作...");
       updateInitialData();
-
-      // 设置 isFirstRun 标记为 false
       localStorage.setItem("isFirstRun", "false");
     } else {
-      // 非第一次运行
       console.log("脚本非第一次运行");
     }
   }
@@ -66,54 +65,86 @@
   let scrollInterval = null;
   let checkScrollTimeout = null;
   let autoLikeInterval = null;
-//在主页去寻找可以进入的话题，同时可以在文章页进行浏览
-  function scrollToBottomSlowly(
-    stopDistance = 9999999999,
-    callback = undefined,
-    distancePerStep = 20,
-    delayPerStep = 50
-  ) {
+
+  function scrollToBottomSlowly(distancePerStep = 20, delayPerStep = 50) {
     if (scrollInterval !== null) {
       clearInterval(scrollInterval);
     }
     scrollInterval = setInterval(() => {
-      if (
-        window.innerHeight + window.scrollY >=
-          document.body.offsetHeight - 100 ||
-        window.innerHeight + window.scrollY >= stopDistance
-      ) {
-        clearInterval(scrollInterval);
-        scrollInterval = null;
-        if (typeof callback === "function") {
-          callback(); // 当滚动结束时调用回调函数
-        }
-      } else {
-        window.scrollBy(0, distancePerStep);
-      }
-    }, delayPerStep);
-  }
-  // 功能：跳转到下一个话题
-
-  function navigateToNextTopic() {
-    // 定义包含文章列表的数组
-    const urls = [
-      `${BASE_URL}/latest`,
-      `${BASE_URL}/top`,
-      `${BASE_URL}/latest?ascending=false&order=posts`,
-      // `${BASE_URL}/unread`, // 示例：如果你想将这个URL启用，只需去掉前面的注释
-    ];
-
-    // 生成一个随机索引
-    const randomIndex = Math.floor(Math.random() * urls.length);
-
-    // 根据随机索引选择一个URL
-    const nextTopicURL = urls[randomIndex]; // 在跳转之前，标记即将跳转到下一个话题
-    localStorage.setItem("navigatingToNextTopic", "true");
-    // 尝试导航到下一个话题
-    window.location.href = nextTopicURL;
+      window.scrollBy(0, distancePerStep);
+    }, delayPerStep); // 每50毫秒滚动20像素
   }
 
-  // 检查是否已滚动到底部(不断重复执行)
+  function getLatestTopic() {
+    let latestPage = Number(localStorage.getItem("latestPage")) || 0;
+    let topicList = [];
+    let isDataSufficient = false;
+
+    while (!isDataSufficient) {
+      latestPage++;
+      const url = `${BASE_URL}/latest.json?no_definitions=true&page=${latestPage}`;
+
+      $.ajax({
+        url: url,
+        async: false,
+        success: function (result) {
+          if (
+            result &&
+            result.topic_list &&
+            result.topic_list.topics.length > 0
+          ) {
+            result.topic_list.topics.forEach((topic) => {
+              // 未读且评论数小于 commentLimit
+              if (commentLimit > topic.posts_count) {
+                //其实不需要 !topic.unseen &&
+                topicList.push(topic);
+              }
+            });
+
+            // 检查是否已获得足够的 topics
+            if (topicList.length >= topicListLimit) {
+              isDataSufficient = true;
+            }
+          } else {
+            isDataSufficient = true; // 没有更多内容时停止请求
+          }
+        },
+        error: function (XMLHttpRequest, textStatus, errorThrown) {
+          console.error(XMLHttpRequest, textStatus, errorThrown);
+          isDataSufficient = true; // 遇到错误时也停止请求
+        },
+      });
+    }
+
+    if (topicList.length > topicListLimit) {
+      topicList = topicList.slice(0, topicListLimit);
+    }
+
+    // 其实不需要对latestPage操作
+    // localStorage.setItem("latestPage", latestPage);
+    localStorage.setItem("topicList", JSON.stringify(topicList));
+  }
+
+  function openNewTopic() {
+    let topicListStr = localStorage.getItem("topicList");
+    let topicList = topicListStr ? JSON.parse(topicListStr) : [];
+
+    // 如果列表为空，则获取最新文章
+    if (topicList.length === 0) {
+      getLatestTopic();
+      topicListStr = localStorage.getItem("topicList");
+      topicList = topicListStr ? JSON.parse(topicListStr) : [];
+    }
+
+    // 如果获取到新文章，打开第一个
+    if (topicList.length > 0) {
+      const topic = topicList.shift();
+      localStorage.setItem("topicList", JSON.stringify(topicList));
+      window.location.href = `${BASE_URL}/t/topic/${topic.id}`;
+    }
+  }
+
+  // 检查是否已滚动到底部(不断重复执行),到底部时跳转到下一个话题
   function checkScroll() {
     if (localStorage.getItem("read")) {
       if (
@@ -121,7 +152,7 @@
         document.body.offsetHeight - 100
       ) {
         console.log("已滚动到底部");
-        navigateToNextTopic();
+        openNewTopic();
       } else {
         scrollToBottomSlowly();
         if (checkScrollTimeout !== null) {
@@ -142,75 +173,14 @@
       localStorage.getItem("autoLikeEnabled")
     );
     if (localStorage.getItem("read") === "true") {
-      // 检查是否正在导航到下一个话题
-      if (localStorage.getItem("navigatingToNextTopic") === "true") {
-        console.log("正在导航到下一个话题");
-        // 等待一段时间或直到页面完全加载
-        // 页面加载完成后，移除标记
-        localStorage.removeItem("navigatingToNextTopic");
-        // 使用setTimeout延迟执行
-        setTimeout(() => {
-          // 先随机滚动一段距离然后再查找链接
-          scrollToBottomSlowly(
-            Math.random() * document.body.offsetHeight * 3,
-            searchLinkClick,
-            20,
-            20
-          );
-        }, 2000); // 延迟2000毫秒（即2秒）
-      } else {
-        console.log("执行正常的滚动和检查逻辑");
-        // 执行正常的滚动和检查逻辑
-        checkScroll();
-        if (isAutoLikeEnabled()) {
-          //自动点赞
-          autoLike();
-        }
+      console.log("执行正常的滚动和检查逻辑");
+      checkScroll();
+      if (isAutoLikeEnabled()) {
+        autoLike();
       }
     }
   });
-  // 创建一个控制滚动的按钮
-  function searchLinkClick() {
-    // 在新页面加载后执行检查
-    // 使用CSS属性选择器寻找href属性符合特定格式的<a>标签
-    const links = document.querySelectorAll('a[href^="/t/"]');
 
-    // 筛选出未阅读的链接
-    const unreadLinks = Array.from(links).filter((link) => {
-      // 向上遍历DOM树，查找包含'visited'类的父级元素，最多查找三次
-      let parent = link.parentElement;
-      let times = 0; // 查找次数计数器
-      while (parent && times < 3) {
-        if (parent.classList.contains("visited")) {
-          // 如果找到包含'visited'类的父级元素，中断循环
-          return false; // 父级元素包含'visited'类，排除这个链接
-        }
-        parent = parent.parentElement; // 继续向上查找
-        times++; // 增加查找次数
-      }
-
-      // 如果链接未被读过，且在向上查找三次内，其父级元素中没有包含'visited'类，则保留这个链接
-      return true;
-    });
-
-    // 如果找到了这样的链接
-    if (unreadLinks.length > 0) {
-      // 从所有匹配的链接中随机选择一个
-      const randomIndex = Math.floor(Math.random() * unreadLinks.length);
-      const link = unreadLinks[randomIndex];
-      // 打印找到的链接（可选）
-      console.log("Found link:", link.href);
-      // 导航到该链接
-      window.location.href = link.href;
-    } else {
-      // 如果没有找到符合条件的链接，打印消息（可选）
-      console.log("No link with the specified format was found.");
-      scrollToBottomSlowly(
-        Math.random() * document.body.offsetHeight * 3,
-        searchLinkClick
-      );
-    }
-  }
   // 获取当前时间戳
   const currentTime = Date.now();
   // 获取存储的时间戳
@@ -259,7 +229,7 @@
     buttons.forEach((button, index) => {
       if (
         (button.title !== "点赞此帖子" && button.title !== "Like this post") ||
-        clickCounter >= 50
+        clickCounter >= likeLimit
       ) {
         return;
       }
@@ -272,14 +242,16 @@
         clickCounter++; // 更新点击计数器
         // 将新的点击计数存储到localStorage
         localStorage.setItem("clickCounter", clickCounter.toString());
-        // 如果点击次数达到50次，则设置点赞变量为false
-        if (clickCounter === 50) {
-          console.log("Reached 50 likes, setting the like variable to false.");
+        // 如果点击次数达到likeLimit次，则设置点赞变量为false
+        if (clickCounter === likeLimit) {
+          console.log(
+            `Reached ${likeLimit} likes, setting the like variable to false.`
+          );
           localStorage.setItem("autoLikeEnabled", "false"); // 使用localStorage存储点赞变量状态
         } else {
           console.log("clickCounter:", clickCounter);
         }
-      }, index * 3000); // 这里的3000毫秒是两次点击之间的间隔，可以根据需要调整
+      }, index * 1000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
     });
   }
   const button = document.createElement("button");
@@ -315,9 +287,7 @@
     } else {
       // 如果是Linuxdo，就导航到我的帖子
       if (BASE_URL == "https://linux.do") {
-        window.location.href = "https://linux.do/t/topic/13716/340";
-      } else if (BASE_URL == "https://meta.appinn.net") {
-        window.location.href = "https://meta.appinn.net/t/topic/52006";
+        window.location.href = "https://linux.do/t/topic/13716/427";
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }

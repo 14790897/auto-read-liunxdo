@@ -46,6 +46,7 @@ if (fs.existsSync(".env.local")) {
 }
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
+const specificUser = process.env.SPECIFIC_USER || "14790897";
 let bot;
 if (token && chatId) {
   bot = new TelegramBot(token);
@@ -60,7 +61,6 @@ function sendToTelegram(message) {
       console.error("Error sending Telegram message:", error);
     });
 }
-
 // 从环境变量解析用户名和密码
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
@@ -190,24 +190,29 @@ async function launchBrowserForUser(username, password) {
     //真正执行阅读脚本
     const externalScriptPath = path.join(
       dirname(fileURLToPath(import.meta.url)),
-      "external.js"
+      "external_likeUser.js"
     );
     const externalScript = fs.readFileSync(externalScriptPath, "utf8");
 
     // 在每个新的文档加载时执行外部脚本
-    await page.evaluateOnNewDocument((...args) => {
-      localStorage.setItem("read", true);
-      localStorage.setItem("autoLikeEnabled", "true");
-      const [scriptToEval] = args;
-      eval(scriptToEval);
-    }, externalScript);
+    await page.evaluateOnNewDocument(
+      (...args) => {
+        const [specificUser, scriptToEval] = args;
+        localStorage.setItem("read", true);
+        localStorage.setItem("specificUser", specificUser);
+        console.log("当前点赞用户：", specificUser);
+        eval(scriptToEval);
+      },
+      specificUser,
+      externalScript
+    ); //变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的
     // 添加一个监听器来监听每次页面加载完成的事件
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
     });
     // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了
     if (loginUrl == "https://linux.do") {
-      await page.goto("https://linux.do/t/topic/13716/340", {
+      await page.goto("https://linux.do/t/topic/13716/400", {
         waitUntil: "domcontentloaded",
       });
     } else if (loginUrl == "https://meta.appinn.net") {
@@ -294,9 +299,9 @@ async function login(page, username, password) {
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败 这点四个月之前你就发现了结果今天又遇到（有个用户遇到了https://linux.do/t/topic/169209/82），但是你没有在这个报错你提示我8.5
   } catch (error) {
     throw new Error(
-      `Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义), 此外GitHub action似乎不能识别特殊字符，不能登录的话建议改密码,失败用户 ${username},错误信息：
+      `Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义), 此外GitHub action似乎不能识别特殊字符，不能登录的话建议改密码,失败用户 ${username}, 密码 $错误信息：,
       ${error}`
-    );
+    ); //{password}
   }
   await delayClick(1000);
 }

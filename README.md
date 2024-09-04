@@ -5,7 +5,7 @@
 油猴脚本代码在 index_passage_list 中，建议在使用前将浏览器页面缩小，这样子可以一次读更多的回复
 油猴：https://greasyfork.org/en/scripts/489464-auto-read
 
-## 使用方法二：后台puppeteer运行（Windows默认有头，Linux默认无头）
+## 使用方法二：后台 puppeteer 运行（Windows 默认有头，Linux 默认无头）
 
 ### 1.设置环境变量
 
@@ -41,13 +41,14 @@ node .\bypasscf.js
 ```
 
 ## 使用方法三：GitHub Action 每天 4 点阅读
+
 #### 每天运行，每次二十分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml)
 
 ### 1. fork 仓库
 
 ### 2.设置环境变量
 
-在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的），未设置则会使用.env文件中定义的
+在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的），未设置则会使用.env 文件中定义的
 ![alt text](image2.png)
 
 ### 3.启动 workflow
@@ -88,7 +89,7 @@ crontab -e
 
 1. 修改 index_passage_list 中的// @match ，根据其它示例网站，填写新的 url，此外在脚本开头的 possibleBaseURLs 中也添加 url
 2. 服务器运行时，还需要修改.env 下的 WEBSITE 变量为对应的网址（如果网址是不存在原先脚本的，需要修改 external.js 中对应的部分，重新构建镜像）
-3. 小众软件论坛只能在Windows下运行，所以需要使用定制版action: [.github\workflows\windows_cron_bypassCF.yaml](https://github.com/14790897/auto-read-liunxdo/blob/main/.github/workflows/windows_cron_bypassCF.yaml)
+3. 小众软件论坛只能在 Windows 下运行，所以需要使用定制版 action: [.github\workflows\windows_cron_bypassCF.yaml](https://github.com/14790897/auto-read-liunxdo/blob/main/.github/workflows/windows_cron_bypassCF.yaml)
 
 #### 其它
 
@@ -113,7 +114,7 @@ external 是作为 puppeteer 的脚本使用的，由 index_passage_list.js 改�
 
 1. TimeoutError 时候可以捕获错误然后关掉当前浏览器重新再开一次
 
-<!-- 
+<!--
 代码：
 https://github.com/14790897/auto-read-liunxdo
 ## 手动运行

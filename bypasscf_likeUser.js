@@ -91,12 +91,16 @@ function delayClick(time) {
     const loginTasks = usernames.map((username, index) => {
       const password = passwords[index];
       const delay = index * delayBetweenInstances;
-      return new Promise((resolve, reject) => {
-        //其实直接使用await就可以了
-        setTimeout(() => {
-          launchBrowserForUser(username, password).then(resolve).catch(reject);
-        }, delay);
-      });
+      return () => {
+        // 确保这里返回的是函数
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            launchBrowserForUser(username, password)
+              .then(resolve)
+              .catch(reject);
+          }, delay);
+        });
+      };
     });
     // 依次执行每个批次的任务
     for (let i = 0; i < totalAccounts; i += maxConcurrentAccounts) {

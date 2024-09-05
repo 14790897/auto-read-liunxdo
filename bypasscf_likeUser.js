@@ -262,7 +262,7 @@ async function launchBrowserForUser(username, password) {
         waitUntil: "domcontentloaded",
       });
     }
-    return browser;
+    return { browser };
   } catch (err) {
     // throw new Error(err);
     console.log("Error:", err);

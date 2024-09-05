@@ -48,6 +48,10 @@ const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 const specificUser = process.env.SPECIFIC_USER || "14790897";
 const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
+const usernames = process.env.USERNAMES.split(",");
+const passwords = process.env.PASSWORDS.split(",");
+const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
+const delayBetweenInstances = 10000;
 const totalAccounts = usernames.length; // 总的账号数
 const delayBetweenBatches =
   runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
@@ -57,6 +61,8 @@ if (token && chatId) {
   bot = new TelegramBot(token);
 }
 function sendToTelegram(message) {
+  if (!bot) return;
+
   bot
     .sendMessage(chatId, message)
     .then(() => {
@@ -66,12 +72,7 @@ function sendToTelegram(message) {
       console.error("Error sending Telegram message:", error);
     });
 }
-// 从环境变量解析用户名和密码
-const usernames = process.env.USERNAMES.split(",");
-const passwords = process.env.PASSWORDS.split(",");
-const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
-// 每个浏览器实例之间的延迟时间(毫秒)
-const delayBetweenInstances = 10000;
+
 //随机等待时间
 function delayClick(time) {
   return new Promise(function (resolve) {

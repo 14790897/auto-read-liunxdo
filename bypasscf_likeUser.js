@@ -14,10 +14,6 @@ const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
 
 // 将分钟转换为毫秒
 const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
-const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
-const totalAccounts = usernames.length; // 总的账号数
-const delayBetweenBatches =
-  runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
 
 console.log(
   `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
@@ -51,6 +47,11 @@ if (fs.existsSync(".env.local")) {
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 const specificUser = process.env.SPECIFIC_USER || "14790897";
+const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
+const totalAccounts = usernames.length; // 总的账号数
+const delayBetweenBatches =
+  runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
+
 let bot;
 if (token && chatId) {
   bot = new TelegramBot(token);
@@ -82,7 +83,7 @@ function delayClick(time) {
   try {
     if (usernames.length !== passwords.length) {
       console.log(usernames.length, usernames, passwords.length, passwords);
-      throw new error("用户名和密码的数量不匹配！");
+      throw new Error("用户名和密码的数量不匹配！");
     }
 
     // 并发启动浏览器实例进行登录
@@ -256,7 +257,7 @@ async function launchBrowserForUser(username, password) {
         waitUntil: "domcontentloaded",
       });
     }
-    return browser
+    return browser;
   } catch (err) {
     // throw new Error(err);
     console.log("Error:", err);

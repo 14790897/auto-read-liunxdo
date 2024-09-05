@@ -14,6 +14,10 @@ const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
 
 // 将分钟转换为毫秒
 const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
+const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
+const totalAccounts = usernames.length; // 总的账号数
+const delayBetweenBatches =
+  runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
 
 console.log(
   `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
@@ -82,7 +86,7 @@ function delayClick(time) {
     }
 
     // 并发启动浏览器实例进行登录
-    const loginPromises = usernames.map((username, index) => {
+    const loginTasks = usernames.map((username, index) => {
       const password = passwords[index];
       const delay = index * delayBetweenInstances;
       return new Promise((resolve, reject) => {
@@ -92,9 +96,37 @@ function delayClick(time) {
         }, delay);
       });
     });
+    // 依次执行每个批次的任务
+    for (let i = 0; i < totalAccounts; i += maxConcurrentAccounts) {
+      // 执行每批次最多 6 个账号
+      const batch = loginTasks
+        .slice(i, i + maxConcurrentAccounts)
+        .map(async (task) => {
+          const { browser } = await task(); // 运行任务并获取浏览器实例
+          return browser;
+        }); // 等待当前批次的任务完成
+      const browsers = await Promise.all(batch);
+      console.log(
+        `批次 ${Math.floor(i / maxConcurrentAccounts) + 1} 完成，关闭浏览器...`
+      );
 
+      // 关闭所有浏览器实例
+      for (const browser of browsers) {
+        await browser.close();
+      }
+
+      // 如果还有下一个批次，等待指定的时间
+      if (i + maxConcurrentAccounts < totalAccounts) {
+        console.log(`等待 ${delayBetweenBatches / 1000} 秒`);
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayBetweenBatches)
+        );
+      }
+    }
+
+    console.log("所有账号登录操作已完成");
     // 等待所有登录操作完成
-    // await Promise.all(loginPromises);
+    // await Promise.all(loginTasks);
   } catch (error) {
     // 错误处理逻辑
     console.error("发生错误：", error);
@@ -224,6 +256,7 @@ async function launchBrowserForUser(username, password) {
         waitUntil: "domcontentloaded",
       });
     }
+    return browser
   } catch (err) {
     // throw new Error(err);
     console.log("Error:", err);

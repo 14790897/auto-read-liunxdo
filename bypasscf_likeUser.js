@@ -47,11 +47,22 @@ if (fs.existsSync(".env.local")) {
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 const specificUser = process.env.SPECIFIC_USER || "14790897";
+const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
+const usernames = process.env.USERNAMES.split(",");
+const passwords = process.env.PASSWORDS.split(",");
+const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
+const delayBetweenInstances = 10000;
+const totalAccounts = usernames.length; // 总的账号数
+const delayBetweenBatches =
+  runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
+
 let bot;
 if (token && chatId) {
   bot = new TelegramBot(token);
 }
 function sendToTelegram(message) {
+  if (!bot) return;
+
   bot
     .sendMessage(chatId, message)
     .then(() => {
@@ -61,12 +72,7 @@ function sendToTelegram(message) {
       console.error("Error sending Telegram message:", error);
     });
 }
-// 从环境变量解析用户名和密码
-const usernames = process.env.USERNAMES.split(",");
-const passwords = process.env.PASSWORDS.split(",");
-const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
-// 每个浏览器实例之间的延迟时间(毫秒)
-const delayBetweenInstances = 10000;
+
 //随机等待时间
 function delayClick(time) {
   return new Promise(function (resolve) {
@@ -78,23 +84,55 @@ function delayClick(time) {
   try {
     if (usernames.length !== passwords.length) {
       console.log(usernames.length, usernames, passwords.length, passwords);
-      throw new error("用户名和密码的数量不匹配！");
+      throw new Error("用户名和密码的数量不匹配！");
     }
 
     // 并发启动浏览器实例进行登录
-    const loginPromises = usernames.map((username, index) => {
+    const loginTasks = usernames.map((username, index) => {
       const password = passwords[index];
       const delay = index * delayBetweenInstances;
-      return new Promise((resolve, reject) => {
-        //其实直接使用await就可以了
-        setTimeout(() => {
-          launchBrowserForUser(username, password).then(resolve).catch(reject);
-        }, delay);
-      });
+      return () => {
+        // 确保这里返回的是函数
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            launchBrowserForUser(username, password)
+              .then(resolve)
+              .catch(reject);
+          }, delay);
+        });
+      };
     });
+    // 依次执行每个批次的任务
+    for (let i = 0; i < totalAccounts; i += maxConcurrentAccounts) {
+      // 执行每批次最多 6 个账号
+      const batch = loginTasks
+        .slice(i, i + maxConcurrentAccounts)
+        .map(async (task) => {
+          const { browser } = await task(); // 运行任务并获取浏览器实例
+          return browser;
+        }); // 等待当前批次的任务完成
+      const browsers = await Promise.all(batch);
+      console.log(
+        `批次 ${Math.floor(i / maxConcurrentAccounts) + 1} 完成，关闭浏览器...`
+      );
 
+      // 关闭所有浏览器实例
+      for (const browser of browsers) {
+        await browser.close();
+      }
+
+      // 如果还有下一个批次，等待指定的时间
+      if (i + maxConcurrentAccounts < totalAccounts) {
+        console.log(`等待 ${delayBetweenBatches / 1000} 秒`);
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayBetweenBatches)
+        );
+      }
+    }
+
+    console.log("所有账号登录操作已完成");
     // 等待所有登录操作完成
-    // await Promise.all(loginPromises);
+    // await Promise.all(loginTasks);
   } catch (error) {
     // 错误处理逻辑
     console.error("发生错误：", error);
@@ -224,6 +262,7 @@ async function launchBrowserForUser(username, password) {
         waitUntil: "domcontentloaded",
       });
     }
+    return { browser };
   } catch (err) {
     // throw new Error(err);
     console.log("Error:", err);

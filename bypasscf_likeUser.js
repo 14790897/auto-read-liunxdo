@@ -9,22 +9,6 @@ import TelegramBot from "node-telegram-bot-api";
 
 dotenv.config();
 
-// 读取以分钟为单位的运行时间限制
-const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
-
-// 将分钟转换为毫秒
-const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
-
-console.log(
-  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
-);
-
-// 设置一个定时器，在运行时间到达时终止进程
-const shutdownTimer = setTimeout(() => {
-  console.log("时间到,Reached time limit, shutting down the process...");
-  process.exit(0); // 退出进程
-}, runTimeLimitMillis);
-
 // 截图保存的文件夹
 const screenshotDir = "screenshots";
 if (!fs.existsSync(screenshotDir)) {
@@ -44,6 +28,23 @@ if (fs.existsSync(".env.local")) {
     "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git"
   );
 }
+
+// 读取以分钟为单位的运行时间限制
+const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
+
+// 将分钟转换为毫秒
+const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
+
+console.log(
+  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
+);
+
+// 设置一个定时器，在运行时间到达时终止进程
+const shutdownTimer = setTimeout(() => {
+  console.log("时间到,Reached time limit, shutting down the process...");
+  process.exit(0); // 退出进程
+}, runTimeLimitMillis);
+
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 const specificUser = process.env.SPECIFIC_USER || "14790897";
@@ -104,7 +105,8 @@ function delayClick(time) {
     });
     // 依次执行每个批次的任务
     for (let i = 0; i < totalAccounts; i += maxConcurrentAccounts) {
-      // 执行每批次最多 6 个账号
+      console.log(`当前批次：${i + 1} - ${i + maxConcurrentAccounts}`);
+      // 执行每批次最多 4 个账号
       const batch = loginTasks
         .slice(i, i + maxConcurrentAccounts)
         .map(async (task) => {
@@ -119,11 +121,13 @@ function delayClick(time) {
         await new Promise((resolve) =>
           setTimeout(resolve, delayBetweenBatches)
         );
+      } else {
+        console.log("没有下一个批次，即将结束");
       }
       console.log(
         `批次 ${
           Math.floor(i / maxConcurrentAccounts) + 1
-        } 完成，关闭浏览器...,浏览器对象：${browsers[0]}`
+        } 完成，关闭浏览器...,浏览器对象：${browsers}`
       );
       // 关闭所有浏览器实例
       for (const browser of browsers) {
@@ -143,7 +147,9 @@ function delayClick(time) {
   }
 })();
 async function launchBrowserForUser(username, password) {
+  let browser = null; // 在 try 之外声明 browser 变量
   try {
+    console.log("当前用户:", username);
     const browserOptions = {
       headless: "auto",
       args: ["--no-sandbox", "--disable-setuid-sandbox"], // Linux 需要的安全设置
@@ -160,9 +166,8 @@ async function launchBrowserForUser(username, password) {
     // }
 
     var { connect } = await import("puppeteer-real-browser");
-    const { page, browser } = await connect(browserOptions);
-    // 设置导航超时时间为60秒
-    page.setDefaultNavigationTimeout(60000);
+    const { page, browser: newBrowser } = await connect(browserOptions);
+    browser = newBrowser; // 将 browser 初始化
     // 启动截图功能
     // takeScreenshots(page);
     //登录操作
@@ -205,6 +210,7 @@ async function launchBrowserForUser(username, password) {
         page._isReloaded = true;
         //由于油候脚本它这个时候可能会导航到新的网页,会导致直接执行代码报错,所以使用这个来在每个新网页加载之前来执行
         await page.evaluateOnNewDocument(() => {
+          localStorage.setItem("isFirstRun", "false");
           localStorage.setItem("autoLikeEnabled", "false");
         });
         // 等待一段时间，比如 3 秒
@@ -229,7 +235,7 @@ async function launchBrowserForUser(username, password) {
     //真正执行阅读脚本
     const externalScriptPath = path.join(
       dirname(fileURLToPath(import.meta.url)),
-      "external_likeUser.js"
+      "index_likeUser.js"
     );
     const externalScript = fs.readFileSync(externalScriptPath, "utf8");
 
@@ -266,10 +272,11 @@ async function launchBrowserForUser(username, password) {
     return { browser };
   } catch (err) {
     // throw new Error(err);
-    console.log("Error:", err);
+    console.log("Error in launchBrowserForUser:", err);
     if (token && chatId) {
       sendToTelegram(`${err.message}`);
     }
+    return { browser }; // 错误时仍然返回 browser
   }
 }
 async function login(page, username, password) {

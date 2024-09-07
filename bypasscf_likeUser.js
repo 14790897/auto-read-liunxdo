@@ -112,21 +112,22 @@ function delayClick(time) {
           return browser;
         }); // 等待当前批次的任务完成
       const browsers = await Promise.all(batch);
-      console.log(
-        `批次 ${Math.floor(i / maxConcurrentAccounts) + 1} 完成，关闭浏览器...`
-      );
 
-      // 关闭所有浏览器实例
-      for (const browser of browsers) {
-        await browser.close();
-      }
-
-      // 如果还有下一个批次，等待指定的时间
-      if (i + maxConcurrentAccounts < totalAccounts) {
+      // 如果还有下一个批次，等待指定的时间,同时，如果总共只有一个账号，也需要继续运行
+      if (i + maxConcurrentAccounts < totalAccounts || i === 0) {
         console.log(`等待 ${delayBetweenBatches / 1000} 秒`);
         await new Promise((resolve) =>
           setTimeout(resolve, delayBetweenBatches)
         );
+      }
+      console.log(
+        `批次 ${
+          Math.floor(i / maxConcurrentAccounts) + 1
+        } 完成，关闭浏览器...,浏览器对象：${browsers[0]}`
+      );
+      // 关闭所有浏览器实例
+      for (const browser of browsers) {
+        await browser.close();
       }
     }
 

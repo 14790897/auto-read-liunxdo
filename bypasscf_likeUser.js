@@ -210,7 +210,6 @@ async function launchBrowserForUser(username, password) {
         page._isReloaded = true;
         //由于油候脚本它这个时候可能会导航到新的网页,会导致直接执行代码报错,所以使用这个来在每个新网页加载之前来执行
         await page.evaluateOnNewDocument(() => {
-          localStorage.setItem("isFirstRun", "false");
           localStorage.setItem("autoLikeEnabled", "false");
         });
         // 等待一段时间，比如 3 秒
@@ -245,6 +244,7 @@ async function launchBrowserForUser(username, password) {
         const [specificUser, scriptToEval] = args;
         localStorage.setItem("read", true);
         localStorage.setItem("specificUser", specificUser);
+        localStorage.setItem("isFirstRun", "false");
         console.log("当前点赞用户：", specificUser);
         eval(scriptToEval);
       },

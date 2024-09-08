@@ -326,6 +326,7 @@
     if (newSpecificUser) {
       localStorage.setItem("specificUser", newSpecificUser);
       localStorage.removeItem("specificUserPostList");
+      localStorage.removeItem("lastOffset");
       specificUser = newSpecificUser;
       console.log(
         `新的specificUser已保存: ${specificUser}，specificUserPostList已重置`

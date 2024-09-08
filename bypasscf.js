@@ -9,22 +9,6 @@ import TelegramBot from "node-telegram-bot-api";
 
 dotenv.config();
 
-// 读取以分钟为单位的运行时间限制
-const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
-
-// 将分钟转换为毫秒
-const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
-
-console.log(
-  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
-);
-
-// 设置一个定时器，在运行时间到达时终止进程
-const shutdownTimer = setTimeout(() => {
-  console.log("时间到,Reached time limit, shutting down the process...");
-  process.exit(0); // 退出进程
-}, runTimeLimitMillis);
-
 // 截图保存的文件夹
 const screenshotDir = "screenshots";
 if (!fs.existsSync(screenshotDir)) {
@@ -44,13 +28,42 @@ if (fs.existsSync(".env.local")) {
     "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git"
   );
 }
+
+// 读取以分钟为单位的运行时间限制
+const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 15;
+
+// 将分钟转换为毫秒
+const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
+
+console.log(
+  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
+);
+
+// 设置一个定时器，在运行时间到达时终止进程
+const shutdownTimer = setTimeout(() => {
+  console.log("时间到,Reached time limit, shutting down the process...");
+  process.exit(0); // 退出进程
+}, runTimeLimitMillis);
+
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
+const specificUser = process.env.SPECIFIC_USER || "14790897";
+const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
+const usernames = process.env.USERNAMES.split(",");
+const passwords = process.env.PASSWORDS.split(",");
+const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
+const delayBetweenInstances = 10000;
+const totalAccounts = usernames.length; // 总的账号数
+const delayBetweenBatches =
+  runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
+
 let bot;
 if (token && chatId) {
   bot = new TelegramBot(token);
 }
 function sendToTelegram(message) {
+  if (!bot) return;
+
   bot
     .sendMessage(chatId, message)
     .then(() => {
@@ -61,12 +74,6 @@ function sendToTelegram(message) {
     });
 }
 
-// 从环境变量解析用户名和密码
-const usernames = process.env.USERNAMES.split(",");
-const passwords = process.env.PASSWORDS.split(",");
-const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
-// 每个浏览器实例之间的延迟时间(毫秒)
-const delayBetweenInstances = 10000;
 //随机等待时间
 function delayClick(time) {
   return new Promise(function (resolve) {
@@ -78,23 +85,59 @@ function delayClick(time) {
   try {
     if (usernames.length !== passwords.length) {
       console.log(usernames.length, usernames, passwords.length, passwords);
-      throw new error("用户名和密码的数量不匹配！");
+      throw new Error("用户名和密码的数量不匹配！");
     }
 
     // 并发启动浏览器实例进行登录
-    const loginPromises = usernames.map((username, index) => {
+    const loginTasks = usernames.map((username, index) => {
       const password = passwords[index];
       const delay = index * delayBetweenInstances;
-      return new Promise((resolve, reject) => {
-        //其实直接使用await就可以了
-        setTimeout(() => {
-          launchBrowserForUser(username, password).then(resolve).catch(reject);
-        }, delay);
-      });
+      return () => {
+        // 确保这里返回的是函数
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            launchBrowserForUser(username, password)
+              .then(resolve)
+              .catch(reject);
+          }, delay);
+        });
+      };
     });
+    // 依次执行每个批次的任务
+    for (let i = 0; i < totalAccounts; i += maxConcurrentAccounts) {
+      console.log(`当前批次：${i + 1} - ${i + maxConcurrentAccounts}`);
+      // 执行每批次最多 4 个账号
+      const batch = loginTasks
+        .slice(i, i + maxConcurrentAccounts)
+        .map(async (task) => {
+          const { browser } = await task(); // 运行任务并获取浏览器实例
+          return browser;
+        }); // 等待当前批次的任务完成
+      const browsers = await Promise.all(batch);
 
+      // 如果还有下一个批次，等待指定的时间,同时，如果总共只有一个账号，也需要继续运行
+      if (i + maxConcurrentAccounts < totalAccounts || i === 0) {
+        console.log(`等待 ${delayBetweenBatches / 1000} 秒`);
+        await new Promise((resolve) =>
+          setTimeout(resolve, delayBetweenBatches)
+        );
+      } else {
+        console.log("没有下一个批次，即将结束");
+      }
+      console.log(
+        `批次 ${
+          Math.floor(i / maxConcurrentAccounts) + 1
+        } 完成，关闭浏览器...,浏览器对象：${browsers}`
+      );
+      // 关闭所有浏览器实例
+      for (const browser of browsers) {
+        await browser.close();
+      }
+    }
+
+    console.log("所有账号登录操作已完成");
     // 等待所有登录操作完成
-    // await Promise.all(loginPromises);
+    // await Promise.all(loginTasks);
   } catch (error) {
     // 错误处理逻辑
     console.error("发生错误：", error);
@@ -104,7 +147,9 @@ function delayClick(time) {
   }
 })();
 async function launchBrowserForUser(username, password) {
+  let browser = null; // 在 try 之外声明 browser 变量
   try {
+    console.log("当前用户:", username);
     const browserOptions = {
       headless: "auto",
       args: ["--no-sandbox", "--disable-setuid-sandbox"], // Linux 需要的安全设置
@@ -121,9 +166,8 @@ async function launchBrowserForUser(username, password) {
     // }
 
     var { connect } = await import("puppeteer-real-browser");
-    const { page, browser } = await connect(browserOptions);
-    // 设置导航超时时间为60秒
-    page.setDefaultNavigationTimeout(60000);
+    const { page, browser: newBrowser } = await connect(browserOptions);
+    browser = newBrowser; // 将 browser 初始化
     // 启动截图功能
     // takeScreenshots(page);
     //登录操作
@@ -190,24 +234,30 @@ async function launchBrowserForUser(username, password) {
     //真正执行阅读脚本
     const externalScriptPath = path.join(
       dirname(fileURLToPath(import.meta.url)),
-      "external.js"
+      "index.js"
     );
     const externalScript = fs.readFileSync(externalScriptPath, "utf8");
 
     // 在每个新的文档加载时执行外部脚本
-    await page.evaluateOnNewDocument((...args) => {
-      localStorage.setItem("read", true);
-      localStorage.setItem("autoLikeEnabled", "true");
-      const [scriptToEval] = args;
-      eval(scriptToEval);
-    }, externalScript);
+    await page.evaluateOnNewDocument(
+      (...args) => {
+        const [specificUser, scriptToEval] = args;
+        localStorage.setItem("read", true);
+        localStorage.setItem("specificUser", specificUser);
+        localStorage.setItem("isFirstRun", "false");
+        console.log("当前点赞用户：", specificUser);
+        eval(scriptToEval);
+      },
+      specificUser,
+      externalScript
+    ); //变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的
     // 添加一个监听器来监听每次页面加载完成的事件
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
     });
     // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了
     if (loginUrl == "https://linux.do") {
-      await page.goto("https://linux.do/t/topic/13716/340", {
+      await page.goto("https://linux.do/t/topic/13716/400", {
         waitUntil: "domcontentloaded",
       });
     } else if (loginUrl == "https://meta.appinn.net") {
@@ -219,12 +269,14 @@ async function launchBrowserForUser(username, password) {
         waitUntil: "domcontentloaded",
       });
     }
+    return { browser };
   } catch (err) {
     // throw new Error(err);
-    console.log("Error:", err);
+    console.log("Error in launchBrowserForUser:", err);
     if (token && chatId) {
       sendToTelegram(`${err.message}`);
     }
+    return { browser }; // 错误时仍然返回 browser
   }
 }
 async function login(page, username, password) {
@@ -294,9 +346,9 @@ async function login(page, username, password) {
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败 这点四个月之前你就发现了结果今天又遇到（有个用户遇到了https://linux.do/t/topic/169209/82），但是你没有在这个报错你提示我8.5
   } catch (error) {
     throw new Error(
-      `Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义), 此外GitHub action似乎不能识别特殊字符，不能登录的话建议改密码,失败用户 ${username},错误信息：
+      `Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义), 此外GitHub action似乎不能识别特殊字符，不能登录的话建议改密码,失败用户 ${username}, 密码 $错误信息：,
       ${error}`
-    );
+    ); //{password}
   }
   await delayClick(1000);
 }

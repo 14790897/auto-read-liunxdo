@@ -251,7 +251,7 @@
         } else {
           console.log("clickCounter:", clickCounter);
         }
-      }, index * 1000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
+      }, index * 3000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
     });
   }
   const button = document.createElement("button");

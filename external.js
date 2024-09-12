@@ -17,10 +17,10 @@
   ("use strict");
   // 定义可能的基本URL
   const possibleBaseURLs = [
-    "https://meta.discourse.org",
+    //"https://meta.discourse.org",
     "https://linux.do",
-    "https://meta.appinn.net",
-    "https://community.openai.com",
+    //"https://meta.appinn.net",
+    //"https://community.openai.com",
   ];
 
   // 获取当前页面的URL

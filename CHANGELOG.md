@@ -1,5 +1,49 @@
 # Changelog
 
+## [1.5.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.4.0...v1.5.0) (2024-09-12)
+
+
+### Features
+
+* bypasscf使用更好的脚本 ([0fd5340](https://www.github.com/14790897/auto-read-liunxdo/commit/0fd534051629d85f9a7f31d106abf42ca4743576))
+* 优化dockercompose 使得它可以直接读取env文件 ([08a9a4f](https://www.github.com/14790897/auto-read-liunxdo/commit/08a9a4fb044350d72b939531b9398fc6467cdcff))
+* 使用api获得文章列表 ([ccca920](https://www.github.com/14790897/auto-read-liunxdo/commit/ccca9208b28f155af58c2513e2a0040b26b77905))
+* 使用search获得不重复的post ([046e1e6](https://www.github.com/14790897/auto-read-liunxdo/commit/046e1e6026a6484ccfab4fea134f7893782c1dd5))
+* 可以设置结束时间，避免action报错，默认15分钟 ([8f19e92](https://www.github.com/14790897/auto-read-liunxdo/commit/8f19e92adb2ce422787be6a4bf0abece9c385b4d))
+* 多账号分批处理 ([26e516f](https://www.github.com/14790897/auto-read-liunxdo/commit/26e516fbb451769383a31804739a80786ff5c563))
+* 多账号分批处理 ([a5002fb](https://www.github.com/14790897/auto-read-liunxdo/commit/a5002fb9bb104013dd5094f0a32ae37d67107e03))
+* 多账号分批处理 ([500c34e](https://www.github.com/14790897/auto-read-liunxdo/commit/500c34e840c3781f6ce3236e22b5d7a2649639de))
+* 点赞特定用户cron ([214b3b9](https://www.github.com/14790897/auto-read-liunxdo/commit/214b3b9507d74df9a30da8df3db0fe1459d3853f))
+* 电报机器人消息推送 ([43f1f42](https://www.github.com/14790897/auto-read-liunxdo/commit/43f1f425a94589267bc716e144549088359c0ff4))
+* 自动点赞特定用户 ([e2340d4](https://www.github.com/14790897/auto-read-liunxdo/commit/e2340d4433fdd8b4a05af782e89dcd6285f9b9ef))
+
+
+### Bug Fixes
+
+* cron中变量的默认值 ([10499e2](https://www.github.com/14790897/auto-read-liunxdo/commit/10499e2aa7fb02075ee7925cbeb2125a59a2d922))
+* cron中变量的默认值 ([9d0302a](https://www.github.com/14790897/auto-read-liunxdo/commit/9d0302a9098267ea587456a7f607e547cd004d86))
+* cron中变量的默认值 ([09fd9bd](https://www.github.com/14790897/auto-read-liunxdo/commit/09fd9bd7a0f0e2b047d3c02bd7f4d93df22503dd))
+* cron中变量的默认值 ([c1c07ca](https://www.github.com/14790897/auto-read-liunxdo/commit/c1c07cae1bd109f8785907b35ebc63b28dce6e93))
+* cron中变量的默认值 ([6bc8bce](https://www.github.com/14790897/auto-read-liunxdo/commit/6bc8bce2a42bbb414450454f9bd36c5a07da8fc5))
+* cron中变量的默认值 ([b2227b6](https://www.github.com/14790897/auto-read-liunxdo/commit/b2227b60a0fd3af4e5abe0dbe19b85bc42ba855c))
+* cron中变量的默认值 ([b9b72fc](https://www.github.com/14790897/auto-read-liunxdo/commit/b9b72fce05be1046b7f917d9820ba3d9260ab476))
+* cron中变量的默认值 ([4cc640a](https://www.github.com/14790897/auto-read-liunxdo/commit/4cc640a7c15f30c0f6455a2e6343fd4681960a67))
+* cron中变量的默认值 ([3b044c1](https://www.github.com/14790897/auto-read-liunxdo/commit/3b044c1cbc57cb043e53a0de15287cbd35f0fce1))
+* cron中变量的默认值 ([72af582](https://www.github.com/14790897/auto-read-liunxdo/commit/72af5821a782b3eb6174372d89dbff5a78656ecf))
+* cron中变量的默认值 ([8fedb7b](https://www.github.com/14790897/auto-read-liunxdo/commit/8fedb7be3930f02fa2b89a49a35484e0f8cfd273))
+* env.local后才能读取环境变量，page.evaluate变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的 ([f57d512](https://www.github.com/14790897/auto-read-liunxdo/commit/f57d5128dae5e3cffc9928589cf9c427e84d648c))
+* env写错了 ([19d3b64](https://www.github.com/14790897/auto-read-liunxdo/commit/19d3b644445bdd26bb4a3e5a5ebc480ed085cbee))
+* run-at  document-end可以修复有时候脚本不运行的问题 ([a0c35f2](https://www.github.com/14790897/auto-read-liunxdo/commit/a0c35f26a2fb187950d4a220ed096fd419e59c88))
+* throw error导致无法运行 ([67811e3](https://www.github.com/14790897/auto-read-liunxdo/commit/67811e35394bf02ef1af6850dffd6b888c4091ae))
+* 保存用户的时候需要清除      localStorage.removeItem("lastOffset"); ([edb72ac](https://www.github.com/14790897/auto-read-liunxdo/commit/edb72ac66ac6bcd864781d2c85d7795bc15881d9))
+* 其实不需要 !topic.unseen ([d2a0ab3](https://www.github.com/14790897/auto-read-liunxdo/commit/d2a0ab3342fcd26498fab9c0e6ebac815b4c353c))
+* 只有一个账号会立刻停止的问题 ([672ebee](https://www.github.com/14790897/auto-read-liunxdo/commit/672ebee00c954cd41661751a35a08868eb3d239d))
+* 密码转义 ([e5802ab](https://www.github.com/14790897/auto-read-liunxdo/commit/e5802abbf770c5a65cfaee3515529d75558b8068))
+* 直接使用油猴脚本 ([d429ca9](https://www.github.com/14790897/auto-read-liunxdo/commit/d429ca931cf8bddfbd14788a451e0c6d2cf05313))
+* 返回 ([9f5d398](https://www.github.com/14790897/auto-read-liunxdo/commit/9f5d39814940c88628bdd648b7766143734f0201))
+* 通过在主进程直接设置localstorage变量，避免单独设置 ([99b6725](https://www.github.com/14790897/auto-read-liunxdo/commit/99b67252ba7536a75708b6eb19956ace04a71122))
+* 重置用户的时候需要清空post列表 ([5980c9a](https://www.github.com/14790897/auto-read-liunxdo/commit/5980c9a3b205af32fbceedc157400330eb77f3b0))
+
 ## [1.4.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.3.0...v1.4.0) (2024-08-08)
 
 

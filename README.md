@@ -3,7 +3,11 @@
 ## 使用方法一：油猴脚本
 
 油猴脚本代码在 index_passage_list 中，建议在使用前将浏览器页面缩小，这样子可以一次读更多的回复
-油猴：https://greasyfork.org/en/scripts/489464-auto-read
+油猴：
+
+1. https://greasyfork.org/en/scripts/489464-auto-read 自动阅读随机点赞
+2. https://greasyfork.org/en/scripts/506371-auto-like-specific-user 自动点赞特定用户
+3. https://greasyfork.org/zh-CN/scripts/506567-auto-like-specific-user-base-on-activity 基于用户的活动自动点赞特定用户
 
 ## 使用方法二：后台 puppeteer 运行（Windows 默认有头，Linux 默认无头）
 
@@ -17,7 +21,10 @@
 
 ```sh
 npm install
+# 自动阅读随机点赞
 node .\bypasscf.js
+# 自动点赞特定用户
+node .\bypasscf_likeUser.js
 ```
 
 #### Linux 额外安装以下包，运行命令相同
@@ -37,12 +44,15 @@ sudo snap install chromium
 
 ```sh
 npm install
+# 自动阅读随机点赞
 node .\bypasscf.js
+# 自动点赞特定用户
+node .\bypasscf_likeUser.js
 ```
 
 ## 使用方法三：GitHub Action 每天 4 点阅读
 
-#### 每天运行，每次二十分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml)
+#### 每天运行，每次十五分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml和cron_bypassCF_likeUser.yaml)
 
 ### 1. fork 仓库
 

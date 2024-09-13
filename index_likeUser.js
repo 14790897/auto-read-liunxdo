@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Like Specific User
 // @namespace    http://tampermonkey.net/
-// @version      1.1
+// @version      1.1.2
 // @description  自动点赞特定用户，适用于discourse
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*

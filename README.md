@@ -72,7 +72,10 @@ node .\bypasscf_likeUser.js
 克隆仓库，在`docker-compose.yml`里面设置环境变量，然后运行
 
 ```sh
+# 自动阅读随机点赞
  docker-compose up -d
+ # 自动点赞特定用户
+ docker-compose -f docker-compose-like-user.yml up -d
 ```
 
 查看日志

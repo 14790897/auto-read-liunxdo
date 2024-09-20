@@ -4,4 +4,5 @@ services:
     container_name: auto-like-user
     env_file:
       - ./.env
+      - ./.env.local
     restart: unless-stopped # 容器退出时重启策略

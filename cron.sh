@@ -14,8 +14,8 @@ cd $WORKDIR
 # 重新启动 Docker Compose
 /usr/local/bin/docker-compose up -d >> ./cron.log 2>&1
 
-# 等待10分钟
-sleep 10m
+# 等待20分钟
+sleep 20m
 /usr/local/bin/docker-compose logs >> ./cron.log 2>&1
 
 # 停止 Docker Compose

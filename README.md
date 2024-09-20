@@ -2,7 +2,7 @@
 
 ## 使用方法一：油猴脚本
 
-油猴脚本代码在 index开头的文件 中，建议在使用前将浏览器页面缩小，这样子可以一次滚动更多页面，读更多的回复
+油猴脚本代码在 index 开头的文件 中，建议在使用前将浏览器页面缩小，这样子可以一次滚动更多页面，读更多的回复
 油猴脚本安装地址：
 
 1. https://greasyfork.org/en/scripts/489464-auto-read 自动阅读随机点赞
@@ -48,7 +48,7 @@ node .\bypasscf_likeUser.js
 
 ## 使用方法三：GitHub Action 每天 4 点阅读
 
-#### 每天运行，每次十五分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml 和 cron_bypassCF_likeUser.yaml)
+#### 说明： 每天运行，每次二十分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml)
 
 ### 1. fork 仓库
 
@@ -116,10 +116,11 @@ external 是作为 puppeteer 的脚本使用的，由 index_passage_list.js 改�
 
 开发中遇到的问题：
 问：TimeoutError: Navigation timeout of 30000 ms exceeded 为什么 puppeteer 经常出现这个错误?
-答：linux 使用{waitUntil: 'domcontentloaded'}后，情况大大好转，但还是有时出现，Windows 未曾出现此问题
+答：linux 使用{waitUntil: 'domcontentloaded'}后，情况大大好转，但还是有时出现，Windows 未曾出现此问题 [见文章分析](随笔.md)
+
 这个也可能是因为登陆太频繁导致的，太快的登陆太多的账号
+
 更少见的情况其实是密码错误
-[见文章分析](随笔.md)
 
 #### 待做
 

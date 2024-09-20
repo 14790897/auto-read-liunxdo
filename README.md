@@ -2,18 +2,18 @@
 
 ## 使用方法一：油猴脚本
 
-油猴脚本代码在 index_passage_list 中，建议在使用前将浏览器页面缩小，这样子可以一次读更多的回复
-油猴：
+油猴脚本代码在 index开头的文件 中，建议在使用前将浏览器页面缩小，这样子可以一次滚动更多页面，读更多的回复
+油猴脚本安装地址：
 
 1. https://greasyfork.org/en/scripts/489464-auto-read 自动阅读随机点赞
-2. https://greasyfork.org/en/scripts/506371-auto-like-specific-user 自动点赞特定用户
+2. https://greasyfork.org/en/scripts/506371-auto-like-specific-user 基于搜索到的帖子自动点赞特定用户
 3. https://greasyfork.org/zh-CN/scripts/506567-auto-like-specific-user-base-on-activity 基于用户的活动自动点赞特定用户
 
-## 使用方法二：后台 puppeteer 运行（Windows 默认有头，Linux 默认无头）
+## 使用方法二：本地运行（Windows 默认有头浏览器，Linux 默认无头浏览器）
 
 ### 1.设置环境变量
 
-.env 里面设置用户名 密码
+.env 里面设置用户名 密码 以及其它 env 里面指明的信息
 
 ### 2.运行
 
@@ -38,10 +38,6 @@ sudo snap install chromium
 
 ```
 
-使用方法 2.1：puppeteer 有头运行（有浏览器界面）
-
-在目录新建.env.local，添加 ENVIRONMENT=dev，就可以有头运行
-
 ```sh
 npm install
 # 自动阅读随机点赞
@@ -52,13 +48,13 @@ node .\bypasscf_likeUser.js
 
 ## 使用方法三：GitHub Action 每天 4 点阅读
 
-#### 每天运行，每次十五分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml和cron_bypassCF_likeUser.yaml)
+#### 每天运行，每次十五分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml 和 cron_bypassCF_likeUser.yaml)
 
 ### 1. fork 仓库
 
 ### 2.设置环境变量
 
-在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的），未设置则会使用.env 文件中定义的
+在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的），这里无法读取.env 变量
 ![alt text](image2.png)
 
 ### 3.启动 workflow
@@ -121,6 +117,8 @@ external 是作为 puppeteer 的脚本使用的，由 index_passage_list.js 改�
 开发中遇到的问题：
 问：TimeoutError: Navigation timeout of 30000 ms exceeded 为什么 puppeteer 经常出现这个错误?
 答：linux 使用{waitUntil: 'domcontentloaded'}后，情况大大好转，但还是有时出现，Windows 未曾出现此问题
+这个也可能是因为登陆太频繁导致的，太快的登陆太多的账号
+更少见的情况其实是密码错误
 [见文章分析](随笔.md)
 
 #### 待做

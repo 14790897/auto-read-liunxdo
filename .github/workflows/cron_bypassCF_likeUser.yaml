@@ -9,7 +9,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # 设置作业超时时间为20分钟
+    timeout-minutes: 25 # 设置作业超时时间为20分钟
 
     strategy:
       matrix:

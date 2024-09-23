@@ -3,14 +3,14 @@ name: bypassCF cron (使用这个,需要取消schedule栏注释)
 on:
   schedule:
     # 每天 UTC 时间 0:00 运行
-    - cron: "0 0,8 * * *"
+    - cron: "0 0,8,16 * * *"
 
   workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # 设置作业超时时间为20分钟
+    timeout-minutes: 10 # 设置作业超时时间为20分钟
 
     strategy:
       matrix:

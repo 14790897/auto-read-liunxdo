@@ -269,6 +269,9 @@ async function launchBrowserForUser(username, password) {
         waitUntil: "domcontentloaded",
       });
     }
+    if (token && chatId) {
+      sendToTelegram(`${username} 登录成功`);
+    }
     return { browser };
   } catch (err) {
     // throw new Error(err);

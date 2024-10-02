@@ -91,7 +91,7 @@ function delayClick(time) {
     // 并发启动浏览器实例进行登录
     const loginTasks = usernames.map((username, index) => {
       const password = passwords[index];
-      const delay = index * delayBetweenInstances;
+      const delay = (index % maxConcurrentAccounts) * delayBetweenInstances; // 使得每一组内的浏览器可以分开启动
       return () => {
         // 确保这里返回的是函数
         return new Promise((resolve, reject) => {
@@ -113,7 +113,7 @@ function delayClick(time) {
           const { browser } = await task(); // 运行任务并获取浏览器实例
           return browser;
         }); // 等待当前批次的任务完成
-      const browsers = await Promise.all(batch);
+      const browsers = await Promise.all(batch); // Task里面的任务本身是没有进行await的, 所以会继续执行下面的代码
 
       // 如果还有下一个批次，等待指定的时间,同时，如果总共只有一个账号，也需要继续运行
       if (i + maxConcurrentAccounts < totalAccounts || i === 0) {
@@ -255,7 +255,7 @@ async function launchBrowserForUser(username, password) {
     page.on("load", async () => {
       // await page.evaluate(externalScript); //因为这个是在页面加载好之后执行的,而脚本是在页面加载好时刻来判断是否要执行，由于已经加载好了，脚本就不会起作用
     });
-    // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了
+    // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了，不对，这里不会点击按钮，所以不会跳转，需要手动跳转
     if (loginUrl == "https://linux.do") {
       await page.goto("https://linux.do/t/topic/13716/400", {
         waitUntil: "domcontentloaded",

@@ -126,6 +126,46 @@ external 是作为 puppeteer 的脚本使用的，由 index_passage_list.js 改�
 
 1. TimeoutError 时候可以捕获错误然后关掉当前浏览器重新再开一次
 
+#### 使用index_likeUser点赞记录
+
+9.2 handsome
+9.3 lwyt
+9.4 hindex
+9.5 endercat
+9.6 mrliushaopu
+9.6 MonsterKing
+9.7 zhiyang
+9.8 xibalama
+9.9 seeyourface LangYnn
+9.10 YYWD
+9.11 zhong_little
+9.12 LangYnn
+9.13 YYWD
+9.14 wii
+9.15 RunningSnail
+9.16 ll0， mojihua，ywxh
+9.17 GlycoProtein
+9.18 Clarke.L Vyvx
+9.19 azrael
+9.20 Philippa shenchong
+9.21lllyz hwang
+9.22 include Unique
+9.24 taobug
+9.25 CoolMan
+9.26 Madara jonty
+9.27 jonty(不小心点了两次)
+9.29 haoc louis miku8miku
+9.30 horrZzz zxcv
+10.1 bbb
+10.2 zyzcom
+jeff0319
+Game0526
+LeoMeng
+kobe1
+pangbaibai
+xfgb
+lentikr
+
 <!--
 代码：
 https://github.com/14790897/auto-read-liunxdo

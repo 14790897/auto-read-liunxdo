@@ -52,7 +52,7 @@ const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
 const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
-const delayBetweenInstances = 10000;
+const delayBetweenInstances = 5000;
 const totalAccounts = usernames.length; // 总的账号数
 const delayBetweenBatches =
   runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);

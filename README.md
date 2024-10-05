@@ -159,8 +159,7 @@ external 是作为 puppeteer 的脚本使用的，由 index_passage_list.js 改�
 10.1 bbb
 10.2 zyzcom
 10.4 jeff0319 Game0526 LeoMeng
-kobe1
-pangbaibai
+10.5 kobe1 pangbaibai
 xfgb
 lentikr
 

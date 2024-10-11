@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.6.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.5.0...v1.6.0) (2024-10-10)
+
+
+### Features
+
+* last_read_post_number完善自动阅读跳转 ([f872df4](https://www.github.com/14790897/auto-read-liunxdo/commit/f872df46d04c5726c023a6f1a3d464bf21607cc1))
+* 先点赞再阅读 ([a9f016b](https://www.github.com/14790897/auto-read-liunxdo/commit/a9f016be196074d75f549ed408892ed0809e6095))
+* 增加登录成功通知 ([7d4c96d](https://www.github.com/14790897/auto-read-liunxdo/commit/7d4c96dd78f7d5332a8d9d36729f46d0746c83ef))
+* 自动点赞的docker ([d4b7195](https://www.github.com/14790897/auto-read-liunxdo/commit/d4b7195047ca12f4991583d93bd1a514d56a960a))
+
+
+### Bug Fixes
+
+* action不能指定点赞用户 ([4fb63a3](https://www.github.com/14790897/auto-read-liunxdo/commit/4fb63a3b035f01f05316c3b37b4cc1c305e1b933))
+* docker读取.env.local变量 ([c5a61bf](https://www.github.com/14790897/auto-read-liunxdo/commit/c5a61bf5ac38cd05fbde5204976d52541f3c6dfb))
+* 启动间隔时间修复 ([3d32bba](https://www.github.com/14790897/auto-read-liunxdo/commit/3d32bba8c471750b7e0e9b508eaca9e49f258c52))
+
 ## [1.5.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.4.0...v1.5.0) (2024-09-12)
 
 

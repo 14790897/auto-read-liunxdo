@@ -125,6 +125,7 @@ external 是作为 puppeteer 的脚本使用的，由 index_passage_list.js 改�
 #### 待做
 
 1. TimeoutError 时候可以捕获错误然后关掉当前浏览器重新再开一次
+2. 自动阅读脚本可以加一个阅读速度选项（快，慢，始终），因为有用户反应读的太快了（应该是他们屏幕太小）
 
 ## 感谢
 
@@ -167,7 +168,8 @@ https://linux.do/t/topic/106471
 10.6 xfgb lentikr
 10.7 PlayMcBKuwu Tim88
 10.10 elfmaid
-yu_sheng orxvan l444736 time-wanderer OrangeQiu Timmy_0
+10.11 yu_sheng orxvan l444736 time-wanderer
+ time-wanderer OrangeQiu Timmy_0
 SINOPEC
 onePiece HelShiJiasi delph1s
 

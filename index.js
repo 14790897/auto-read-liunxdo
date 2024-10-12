@@ -19,8 +19,8 @@
   ("use strict");
   // 定义可能的基本URL
   const possibleBaseURLs = [
-    "https://meta.discourse.org",
     "https://linux.do",
+    "https://meta.discourse.org",
     "https://meta.appinn.net",
     "https://community.openai.com",
   ];
@@ -32,7 +32,7 @@
 
   // 确定当前页面对应的BASE_URL
   let BASE_URL = possibleBaseURLs.find((url) => currentURL.startsWith(url));
-
+  console.log("currentURL:", currentURL);
   // 环境变量：阅读网址，如果没有找到匹配的URL，则默认为第一个
   if (!BASE_URL) {
     BASE_URL = possibleBaseURLs[0];

@@ -10,10 +10,10 @@ import TelegramBot from "node-telegram-bot-api";
 dotenv.config();
 
 // 截图保存的文件夹
-const screenshotDir = "screenshots";
-if (!fs.existsSync(screenshotDir)) {
-  fs.mkdirSync(screenshotDir);
-}
+// const screenshotDir = "screenshots";
+// if (!fs.existsSync(screenshotDir)) {
+//   fs.mkdirSync(screenshotDir);
+// }
 puppeteer.use(StealthPlugin());
 
 // Load the default .env file

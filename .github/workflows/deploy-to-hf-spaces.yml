@@ -55,4 +55,4 @@ jobs:
           git lfs track "*.ttf"
           git add .
           git commit -m "GitHub deploy: ${{ github.sha }}"
-          git push --force https://auto:${HF_TOKEN}@huggingface.co/spaces/14790897/auto main
+          git push --force https://auto:${HF_TOKEN}@huggingface.co/spaces/14790897abc/auto main

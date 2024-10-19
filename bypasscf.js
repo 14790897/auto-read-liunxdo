@@ -409,7 +409,7 @@ async function takeScreenshots(page) {
 import express from "express";
 
 const healthApp = express();
-const HEALTH_PORT = process.env.HEALTH_PORT || 8081;
+const HEALTH_PORT = process.env.HEALTH_PORT || 7860;
 
 // 健康探针路由
 healthApp.get("/health", (req, res) => {

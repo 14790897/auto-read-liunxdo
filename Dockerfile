@@ -1,16 +1,13 @@
-# 使用官方 Node.js 作为父镜像
 FROM node:22-slim
 
-# 设置工作目录
 WORKDIR /app
 
-# 复制 package.json 和 package-lock.json (如果存在)
 COPY package*.json ./
 
-# 安装 Puppeteer 依赖
 RUN apt update && apt install -y \
-    cron\
+    cron \
     wget \
+    gnupg2 \
     ca-certificates \
     fonts-liberation \
     libappindicator3-1 \
@@ -48,18 +45,23 @@ RUN apt update && apt install -y \
     libxtst6 \
     lsb-release \
     xdg-utils \
-    --no-install-recommends \
-    xvfb \
-    && rm -rf /var/lib/apt/lists/*
+    xvfb && \
+    rm -rf /var/lib/apt/lists/*
 
-#时区为中国
+RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-linux-signing-key.gpg && \
+    echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-key.gpg] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list && \
+    apt update && apt install -y google-chrome-stable && \
+    rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome
+
 ENV TZ=Asia/Shanghai
 
-# 安装 Node.js 依赖
 RUN npm install
 
-# 将根目录复制到容器中
 COPY . .
 
-# 设置容器启动时运行的命令
+RUN chmod -R 777 /app
+
 CMD ["node", "/app/bypasscf.js"]

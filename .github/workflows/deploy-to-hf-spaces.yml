@@ -53,7 +53,6 @@ jobs:
         run: |
           git init --initial-branch=main
           git lfs track "*.ttf"
-          rm demo.gif
           git add .
           git commit -m "GitHub deploy: ${{ github.sha }}"
           git push --force https://auto:${HF_TOKEN}@huggingface.co/spaces/auto/auto main

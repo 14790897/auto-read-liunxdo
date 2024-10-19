@@ -406,3 +406,36 @@ async function takeScreenshots(page) {
     }
   });
 }
+import express from "express";
+
+const healthApp = express();
+const HEALTH_PORT = process.env.HEALTH_PORT || 8081;
+
+// 健康探针路由
+healthApp.get("/health", (req, res) => {
+  const memoryUsage = process.memoryUsage();
+
+  // 将字节转换为MB
+  const memoryUsageMB = {
+    rss: (memoryUsage.rss / (1024 * 1024)).toFixed(2), // 转换为MB并保留两位小数
+    heapTotal: (memoryUsage.heapTotal / (1024 * 1024)).toFixed(2),
+    heapUsed: (memoryUsage.heapUsed / (1024 * 1024)).toFixed(2),
+    external: (memoryUsage.external / (1024 * 1024)).toFixed(2),
+    arrayBuffers: (memoryUsage.arrayBuffers / (1024 * 1024)).toFixed(2),
+  };
+
+  const healthData = {
+    status: "OK",
+    timestamp: new Date().toISOString(),
+    memoryUsage: memoryUsageMB,
+    uptime: process.uptime().toFixed(2), // 保留两位小数
+  };
+
+  res.status(200).json(healthData);
+});
+
+healthApp.listen(HEALTH_PORT, () => {
+  console.log(
+    `Health check endpoint is running at http://localhost:${HEALTH_PORT}/health`
+  );
+});

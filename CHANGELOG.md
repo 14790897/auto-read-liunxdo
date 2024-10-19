@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.6.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.6.0...v1.6.1) (2024-10-19)
+
+
+### Bug Fixes
+
+* 尝试改进dockerfile ([533a5c9](https://www.github.com/14790897/auto-read-liunxdo/commit/533a5c9d21c35c1b3c8d2d3d2c46a0dedd070493))
+
 ## [1.6.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.5.0...v1.6.0) (2024-10-10)
 
 

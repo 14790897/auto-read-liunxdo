@@ -25,6 +25,8 @@ jobs:
     if: needs.check-secret.outputs.token-set == 'true'
     env:
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_REPO: ${{ secrets.HF_REPO }}
+      HF_USER: ${{ secrets.HF_USER }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -55,4 +57,4 @@ jobs:
           git lfs track "*.ttf"
           git add .
           git commit -m "GitHub deploy: ${{ github.sha }}"
-          git push --force https://auto:${HF_TOKEN}@huggingface.co/spaces/14790897abc/auto main
+          git push --force https://${HF_USER}:${HF_TOKEN}@huggingface.co/spaces/${HF_USER}/${HF_REPO} main

@@ -417,11 +417,11 @@ healthApp.get("/health", (req, res) => {
 
   // 将字节转换为MB
   const memoryUsageMB = {
-    rss: (memoryUsage.rss / (1024 * 1024)).toFixed(2), // 转换为MB并保留两位小数
-    heapTotal: (memoryUsage.heapTotal / (1024 * 1024)).toFixed(2),
-    heapUsed: (memoryUsage.heapUsed / (1024 * 1024)).toFixed(2),
-    external: (memoryUsage.external / (1024 * 1024)).toFixed(2),
-    arrayBuffers: (memoryUsage.arrayBuffers / (1024 * 1024)).toFixed(2),
+    rss: `${(memoryUsage.rss / (1024 * 1024)).toFixed(2)} MB`, // 转换为MB并保留两位小数
+    heapTotal: `${(memoryUsage.heapTotal / (1024 * 1024)).toFixed(2)} MB`,
+    heapUsed: `${(memoryUsage.heapUsed / (1024 * 1024)).toFixed(2)} MB`,
+    external: `${(memoryUsage.external / (1024 * 1024)).toFixed(2)} MB`,
+    arrayBuffers: `${(memoryUsage.arrayBuffers / (1024 * 1024)).toFixed(2)} MB`,
   };
 
   const healthData = {
@@ -433,7 +433,64 @@ healthApp.get("/health", (req, res) => {
 
   res.status(200).json(healthData);
 });
-
+healthApp.get("/", (req, res) => {
+  res.send(`
+    <html>
+      <head>
+        <title>Auto Read</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+          }
+          .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            text-align: center;
+          }
+          h1 {
+            color: #007bff;
+          }
+          p {
+            font-size: 18px;
+            margin: 15px 0;
+          }
+          a {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+          }
+          a:hover {
+            text-decoration: underline;
+          }
+          footer {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #555;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Welcome to the Auto Read App</h1>
+          <p>You can check the server's health at <a href="/health">/health</a>.</p>
+          <p>GitHub: <a href="https://github.com/14790897/auto-read-liunxdo" target="_blank">https://github.com/14790897/auto-read-liunxdo</a></p>
+          <footer>&copy; 2024 Auto Read App</footer>
+        </div>
+      </body>
+    </html>
+  `);
+});
 healthApp.listen(HEALTH_PORT, () => {
   console.log(
     `Health check endpoint is running at http://localhost:${HEALTH_PORT}/health`

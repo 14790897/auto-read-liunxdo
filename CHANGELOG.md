@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.7.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.6.0...v1.7.0) (2024-11-29)
+
+
+### Features
+
+* 健康探针 ([0768f30](https://www.github.com/14790897/auto-read-liunxdo/commit/0768f303e6c4a4074f3528970f5329c53d55ae07))
+* 加上首页 ([b561fde](https://www.github.com/14790897/auto-read-liunxdo/commit/b561fde351ad031f4e0e1396aa4683ea0572ab1a))
+
+
+### Bug Fixes
+
+* 尝试改进dockerfile ([533a5c9](https://www.github.com/14790897/auto-read-liunxdo/commit/533a5c9d21c35c1b3c8d2d3d2c46a0dedd070493))
+* 暴露端口问题 ([78a1aca](https://www.github.com/14790897/auto-read-liunxdo/commit/78a1aca637909f65909eadd85b45a36704646020))
+
 ## [1.6.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.5.0...v1.6.0) (2024-10-10)
 
 

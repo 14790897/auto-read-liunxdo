@@ -1,32 +1,66 @@
-# 专门给小众软件论坛使用，要取消schedule的注释才能每日运行
-name: bypassCF cron windows(小众软件论坛专用，要取消schedule的注释才能每日运行)
+name: readLike windows（自动阅读随机点赞）
+# GitHub.secrets优先级最高，即使没有设置对应的变量，它也会读取，这时变量为空值，导致报错，.env读取的变量无法覆盖这个值,使用了${PASSWORD_ESCAPED//\#/\\#}来对#转义,需要两个\，但是我直接在env文件使用这种方法是不行的，GitHub action是有效
 on:
   # schedule:
-  #   - cron: "0 18 * * *"
-  workflow_dispatch:
+    # 每天 UTC 时间 18:40 运行
+    # - cron: "40 18 * * *"
+  workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 20
+    timeout-minutes: 35 # 设置作业超时时间为20分钟
 
     strategy:
       matrix:
         node-version: [20.x]
-
     env:
       # 在作业级别设置环境变量
-      USERNAMES: ${{ secrets.USERNAMES_APPIN }}
-      PASSWORDS: ${{ secrets.PASSWORDS_APPIN }}
-      WEBSITE: ${{ secrets.WEBSITE_APPIN }}
-
+      USERNAMES: ${{ secrets.USERNAMES }}
+      PASSWORDS: ${{ secrets.PASSWORDS }}
+      RUN_TIME_LIMIT_MINUTES: ${{secrets.RUN_TIME_LIMIT_MINUTES}}
+      TELEGRAM_BOT_TOKEN: ${{secrets.TELEGRAM_BOT_TOKEN}}
+      TELEGRAM_CHAT_ID: ${{secrets.TELEGRAM_CHAT_ID}}
     steps:
-      - uses: actions/checkout@v3 # 检出你的仓库
+      - uses: actions/checkout@v3 # 检出仓库
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
+
       - name: Install dependencies
-        run: npm install # 安装 package.json 中的依赖项
+        run: |
+          npm install
+          sudo apt install -y xvfb
+      #github action设置的action环境变量会完全替换掉env文件的读取，所以需要在action里手动进行加载env文件
+      - name: Load environment variables
+        run: |
+          echo "Debug: Checking if .env file exists..."
+
+          # 检查 .env 文件是否存在
+          if [ -f .env ]; then
+            echo ".env file found. Loading environment variables from .env file"
+            
+            # 加载 .env 文件中的默认值
+            set -a
+            source .env
+            set +a
+            
+            echo "Loaded .env variables:"
+          else
+            echo ".env file not found. Skipping loading."
+          fi
+
+
+          if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then
+            echo "Using GitHub Secret for WEBSITE"
+            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
+          else
+            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
+          fi
+
+        shell: bash
+
       - name: Run a script
-        run: node bypasscf.js # 替换为你想运行的脚本的实际名称
+        run: node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"

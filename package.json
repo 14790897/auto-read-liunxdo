@@ -2,7 +2,7 @@
   "type": "module",
   "dependencies": {
     "dotenv": "^16.4.5",
-    "express": "^4.21.1",
+    "express": "^4.21.2",
     "node-telegram-bot-api": "^0.66.0",
     "puppeteer": "^22.15.0",
     "puppeteer-extra": "^3.3.6",

@@ -187,7 +187,7 @@ async function launchBrowserForUser(username, password) {
       console.error(`Page error: ${error.message}`);
     });
     page.on("error", async (error) => {
-      console.error(`Error: ${error.message}`);
+      // console.error(`Error: ${error.message}`);
       // 检查是否是 localStorage 的访问权限错误
       if (
         error.message.includes(
@@ -200,7 +200,7 @@ async function launchBrowserForUser(username, password) {
       }
     });
     page.on("console", async (msg) => {
-      console.log("PAGE LOG:", msg.text());
+      // console.log("PAGE LOG:", msg.text());
       // 使用一个标志变量来检测是否已经刷新过页面
       if (
         !page._isReloaded &&

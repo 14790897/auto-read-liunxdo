@@ -257,7 +257,7 @@ async function launchBrowserForUser(username, password) {
     });
     // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了，不对，这里不会点击按钮，所以不会跳转，需要手动跳转
     if (loginUrl == "https://linux.do") {
-      await page.goto("https://linux.do/t/topic/13716/400", {
+      await page.goto("https://linux.do/t/topic/13716/630", {
         waitUntil: "domcontentloaded",
       });
     } else if (loginUrl == "https://meta.appinn.net") {

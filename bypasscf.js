@@ -352,7 +352,7 @@ async function login(page, username, password, retryCount = 3) {
     if (retryCount > 0) {
       console.log("Retrying login...");
       await delayClick(2000); // 增加重试前的延迟
-      return login(page, username, password, retryCount - 1);
+      return await login(page, username, password, retryCount - 1);
     } else {
       throw new Error(
         `Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义)(注意GitHub action不需要增加处理,也不需要加引号),失败用户 ${username}, 密码 $错误信息：,

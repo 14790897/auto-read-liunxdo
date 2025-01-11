@@ -229,6 +229,7 @@ async function launchBrowserForUser(username, password) {
       console.log("找到avatarImg，登录成功");
     } else {
       console.log("未找到avatarImg，登录失败");
+      throw new Error("登录失败");
     }
 
     //真正执行阅读脚本

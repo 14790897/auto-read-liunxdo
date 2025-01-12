@@ -349,11 +349,14 @@ async function login(page, username, password, retryCount = 3) {
       page.click("#login-button", { force: true }), // 点击登录按钮触发跳转
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败 这点四个月之前你就发现了结果今天又遇到（有个用户遇到了https://linux.do/t/topic/169209/82），但是你没有在这个报错你提示我8.5
   } catch (error) {
-    if (await page.locator(".alert.alert-error")) {
-      throw new Error(
-        `非超时错误，请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义)(注意GitHub action不需要增加处理,也不需要加引号),失败用户 ${username}, 密码 $错误信息：,
-      ${error}`
-      );
+    const alertError = await page.locator(".alert.alert-error");
+    if ((await alertError.count()) > 0) {
+      const alertText = await alertError.innerText();
+      if (alertText.includes("incorrect") || alertText.includes("不正确")) {
+        throw new Error(
+          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 密码 ${password}, 错误信息：${alertText}`
+        );
+      }
     } else {
       if (retryCount > 0) {
         console.log("Retrying login...");

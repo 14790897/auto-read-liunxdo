@@ -52,7 +52,7 @@ const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
 const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
-const delayBetweenInstances = 5000;
+const delayBetweenInstances = 10000;
 const totalAccounts = usernames.length; // 总的账号数
 const delayBetweenBatches =
   runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
@@ -229,6 +229,7 @@ async function launchBrowserForUser(username, password) {
       console.log("找到avatarImg，登录成功");
     } else {
       console.log("未找到avatarImg，登录失败");
+      throw new Error("登录失败");
     }
 
     //真正执行阅读脚本
@@ -282,7 +283,7 @@ async function launchBrowserForUser(username, password) {
     return { browser }; // 错误时仍然返回 browser
   }
 }
-async function login(page, username, password) {
+async function login(page, username, password, retryCount = 3) {
   // 使用XPath查询找到包含"登录"或"login"文本的按钮
   let loginButtonFound = await page.evaluate(() => {
     let loginButton = Array.from(document.querySelectorAll("button")).find(
@@ -348,10 +349,17 @@ async function login(page, username, password) {
       page.click("#login-button"), // 点击登录按钮触发跳转
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败 这点四个月之前你就发现了结果今天又遇到（有个用户遇到了https://linux.do/t/topic/169209/82），但是你没有在这个报错你提示我8.5
   } catch (error) {
-    throw new Error(
-      `Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义)(注意GitHub action不需要增加处理,也不需要加引号),失败用户 ${username}, 密码 $错误信息：,
+    console.error(`Error during login: ${error.message}`);
+    if (retryCount > 0) {
+      console.log("Retrying login...");
+      await delayClick(2000); // 增加重试前的延迟
+      return await login(page, username, password, retryCount - 1);
+    } else {
+      throw new Error(
+        `Navigation timed out in login.请检查用户名密码是否正确(注意密码中是否有特殊字符,需要外面加上双引号指明这是字符串，如果密码里面有双引号则需要转义)(注意GitHub action不需要增加处理,也不需要加引号),失败用户 ${username}, 密码 $错误信息：,
       ${error}`
-    ); //{password}
+      ); //{password}
+    }
   }
   await delayClick(1000);
 }

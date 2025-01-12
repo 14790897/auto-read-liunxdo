@@ -350,7 +350,7 @@ async function login(page, username, password, retryCount = 3) {
     ]); //注意如果登录失败，这里会一直等待跳转，导致脚本执行失败 这点四个月之前你就发现了结果今天又遇到（有个用户遇到了https://linux.do/t/topic/169209/82），但是你没有在这个报错你提示我8.5
   } catch (error) {
     const alertError = await page.locator(".alert.alert-error");
-    if ((await alertError.count()) > 0) {
+    if ((await alertError.isVisible()) > 0) {
       const alertText = await alertError.innerText();
       if (alertText.includes("incorrect") || alertText.includes("不正确")) {
         throw new Error(

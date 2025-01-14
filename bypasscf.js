@@ -366,7 +366,7 @@ async function login(page, username, password, retryCount = 3) {
         return await login(page, username, password, retryCount - 1);
       } else {
         throw new Error(
-          `Navigation timed out in login.超时了,
+          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${username}, 
       ${error}`
         ); //{password}
       }

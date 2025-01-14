@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.8.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.7.0...v1.8.0) (2025-01-14)
+
+
+### Features
+
+* 登录失败重试三次 ([2fdee4e](https://www.github.com/14790897/auto-read-liunxdo/commit/2fdee4e6f23f16ae565594a35008101596400b36))
+* 超时和密码错误逻辑分开 ([c2f61e3](https://www.github.com/14790897/auto-read-liunxdo/commit/c2f61e35f16b8fb055aa3b612c2b3c1de85194e8))
+
+
+### Bug Fixes
+
+* error ([cff54ac](https://www.github.com/14790897/auto-read-liunxdo/commit/cff54ac99fe95466b7e7b5fd2f5356193465fcec))
+* error ([a106c34](https://www.github.com/14790897/auto-read-liunxdo/commit/a106c34866588a0e401c5c3e8abe0619422e349c))
+* error ([e689db0](https://www.github.com/14790897/auto-read-liunxdo/commit/e689db064937e9527d6208f009c5f85b2a2ae1ce))
+* xvfb包 ([da5549a](https://www.github.com/14790897/auto-read-liunxdo/commit/da5549abfb71f0651ea51dc502b039c5375ef094))
+* 未使用await ([2505906](https://www.github.com/14790897/auto-read-liunxdo/commit/2505906771302de2a7f1f49abd5f7e9b75421f53))
+* 检测密码错误提示 ([22d3766](https://www.github.com/14790897/auto-read-liunxdo/commit/22d3766248481d1290b83e7e3c0eddd34def4573))
+* 登录失败throw error ([2880de3](https://www.github.com/14790897/auto-read-liunxdo/commit/2880de320a1829b6cb070ab8f1f647c2e2e35356))
+
 ## [1.7.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.6.0...v1.7.0) (2024-11-29)
 
 

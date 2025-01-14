@@ -10,5 +10,5 @@
     "puppeteer-real-browser": "^1.2.31",
     "xvfb": "^0.4.0"
   },
-  "version": "1.7.0"
+  "version": "1.8.0"
 }

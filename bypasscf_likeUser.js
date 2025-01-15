@@ -352,12 +352,18 @@ async function login(page, username, password, retryCount = 3) {
     const alertError = await page.$(".alert.alert-error");
     if (alertError) {
       const alertText = await page.evaluate((el) => el.innerText, alertError); // 使用 evaluate 获取 innerText
-      if (alertText.includes("incorrect") || alertText.includes("不正确")) {
+      if (
+        alertText.includes("incorrect") ||
+        alertText.includes("Incorrect ") ||
+        alertText.includes("不正确")
+      ) {
         throw new Error(
-          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 密码 ${password}, 错误信息：${alertText}`
+          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 错误信息：${alertText}`
         );
       } else {
-        console.log("非超时错误，也不是密码错误，错误信息：", alertText);
+        throw new Error(
+          `非超时错误，也不是密码错误，失败用户 ${username}，错误信息：${alertText}`
+        );
       }
     } else {
       if (retryCount > 0) {

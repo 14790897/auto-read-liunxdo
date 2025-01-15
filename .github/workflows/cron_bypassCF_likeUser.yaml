@@ -64,4 +64,4 @@ jobs:
         shell: bash
 
       - name: Run a script
-        run: node bypasscf_likeUser.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"
+        run: LIKE_SPECIFIC_USER=true node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"

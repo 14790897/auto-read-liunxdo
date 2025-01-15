@@ -34,7 +34,13 @@ npm install
 # 自动阅读随机点赞
 node .\bypasscf.js
 # 自动点赞特定用户
-node .\bypasscf_likeUser.js
+## windows
+set LIKE_SPECIFIC_USER=true && node .\bypasscf.js
+## powershell
+$env:LIKE_SPECIFIC_USER = "true"
+node .\bypasscf.js
+## linux
+LIKE_SPECIFIC_USER=true node ./bypasscf.js
 ```
 
 #### Linux 额外安装以下包，运行命令相同

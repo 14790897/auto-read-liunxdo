@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.8.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.0...v1.8.1) (2025-01-15)
+
+
+### Bug Fixes
+
+* 展示信息 ([27ffc94](https://www.github.com/14790897/auto-read-liunxdo/commit/27ffc94610e88df9d06e847461cddb5faff27b6b))
+
 ## [1.8.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.7.0...v1.8.0) (2025-01-14)
 
 

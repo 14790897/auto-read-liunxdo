@@ -1,8 +1,0 @@
-blank_issues_enabled: false
-contact_links:
-  - name: Bug Report
-    url: https://github.com/14790897/auto-read-liunxdo/issues/new?template=bug_report_template.md
-    about: 用于报告 bug。
-  - name: Feature Request
-    url: https://github.com/14790897/auto-read-liunxdo/issues/new?template=feature_request_template.md
-    about: 用于提出新功能需求。

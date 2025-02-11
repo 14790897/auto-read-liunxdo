@@ -334,7 +334,7 @@ async function login(page, username, password, retryCount = 3) {
   await page.type("#login-account-name", username, {
     delay: 100,
   }); // 输入时在每个按键之间添加额外的延迟
-
+  await delayClick(1000);
   // 等待密码输入框加载
   await page.waitForSelector("#login-account-password");
   // 模拟人类在输入用户名后的短暂停顿
@@ -349,6 +349,7 @@ async function login(page, username, password, retryCount = 3) {
 
   // 假设登录按钮的ID是'login-button'，点击登录按钮
   await page.waitForSelector("#login-button");
+  await page.click("#login-button");
   await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
   try {
     await Promise.all([

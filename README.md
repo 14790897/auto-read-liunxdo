@@ -8,7 +8,7 @@ app_port: 7860
 ---
 [英文文档](./README_en.md)
 ### 
-新的依赖不能显示脚本运行日志了，只显示网页的429日志
+新的依赖不能显示脚本运行日志了
 
 ## 使用方法一：油猴脚本(火狐不兼容,谷歌可以用)
 
@@ -120,11 +120,11 @@ crontab -e
 
 开发中遇到的问题：
 问：TimeoutError: Navigation timeout of 30000 ms exceeded 为什么 puppeteer 经常出现这个错误?
-答：linux 使用{waitUntil: 'domcontentloaded'}后，情况大大好转，但还是有时出现，Windows 未曾出现此问题 [见文章分析](随笔.md)
+答：linux 使用{waitUntil: 'domcontentloaded'}后，情况大大好转，但还是有时出现，Windows 未曾出现此问题 [见文章分析](随笔.md) 目前发现存在不点击登录按钮导致超时，已解决（原因未知）
 
 这个也可能是因为登陆太频繁导致的，太快的登陆太多的账号
 
-更少见的情况其实是密码错误
+更少见的情况其实是密码错误，还有账户未激活
 
 #### 待做
 

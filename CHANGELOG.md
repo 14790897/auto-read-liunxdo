@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.2...v1.9.0) (2025-02-12)
+
+
+### Features
+
+* 支持禁用自动点赞 ([f6f5e26](https://www.github.com/14790897/auto-read-liunxdo/commit/f6f5e2692eb6974117f0720c0be0623105c656b4))
+
 ### [1.8.2](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.1...v1.8.2) (2025-02-12)
 
 

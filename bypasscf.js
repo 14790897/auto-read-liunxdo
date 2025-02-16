@@ -374,7 +374,7 @@ async function login(page, username, password, retryCount = 3) {
         );
       } else {
         throw new Error(
-          `非超时错误，也不是密码错误，可能是IP导致，需使用中国或美国IP，失败用户 ${username}，错误信息：${alertText}`
+          `非超时错误，也不是密码错误，可能是IP导致，需使用中国美国香港台湾IP，失败用户 ${username}，错误信息：${alertText}`
         );
       }
     } else {

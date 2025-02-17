@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.9.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.9.0...v1.9.1) (2025-02-17)
+
+
+### Bug Fixes
+
+* hg ([8b7f5a0](https://www.github.com/14790897/auto-read-liunxdo/commit/8b7f5a09ec89e3bb1285974fa85fe3446e0e20fc))
+* 伪装huggingface ([a9856dc](https://www.github.com/14790897/auto-read-liunxdo/commit/a9856dce85f062ce8867def16f7acfe8937ca1d8))
+
 ## [1.9.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.2...v1.9.0) (2025-02-12)
 
 

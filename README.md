@@ -1,11 +1,4 @@
----
-title: Auto Read
-emoji: 🐳
-colorFrom: purple
-colorTo: gray
-sdk: docker
-app_port: 7860
----
+
 [英文文档](./README_en.md)
 ### 
 新的依赖不能显示脚本运行日志了

@@ -57,6 +57,7 @@ const totalAccounts = usernames.length; // 总的账号数
 const delayBetweenBatches =
   runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
 const isLikeSpecificUser = process.env.LIKE_SPECIFIC_USER || "false";
+const isAutoLike = process.env.AUTO_LIKE || "true";
 let bot;
 if (token && chatId) {
   bot = new TelegramBot(token);
@@ -250,15 +251,17 @@ async function launchBrowserForUser(username, password) {
     // 在每个新的文档加载时执行外部脚本
     await page.evaluateOnNewDocument(
       (...args) => {
-        const [specificUser, scriptToEval] = args;
+        const [specificUser, scriptToEval, isAutoLike] = args;
         localStorage.setItem("read", true);
         localStorage.setItem("specificUser", specificUser);
         localStorage.setItem("isFirstRun", "false");
+        localStorage.setItem("autoLikeEnabled", isAutoLike);
         console.log("当前点赞用户：", specificUser);
         eval(scriptToEval);
       },
       specificUser,
-      externalScript
+      externalScript,
+      isAutoLike
     ); //变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的
     // 添加一个监听器来监听每次页面加载完成的事件
     page.on("load", async () => {
@@ -328,15 +331,15 @@ async function login(page, username, password, retryCount = 3) {
   // 等待用户名输入框加载
   await page.waitForSelector("#login-account-name");
   // 模拟人类在找到输入框后的短暂停顿
-  await delayClick(500); // 延迟500毫秒
+  await delayClick(1000); // 延迟500毫秒
   // 清空输入框并输入用户名
   await page.click("#login-account-name", { clickCount: 3 });
   await page.type("#login-account-name", username, {
     delay: 100,
   }); // 输入时在每个按键之间添加额外的延迟
-
+  await delayClick(1000);
   // 等待密码输入框加载
-  await page.waitForSelector("#login-account-password");
+  // await page.waitForSelector("#login-account-password");
   // 模拟人类在输入用户名后的短暂停顿
   // delayClick; // 清空输入框并输入密码
   await page.click("#login-account-password", { clickCount: 3 });
@@ -349,7 +352,8 @@ async function login(page, username, password, retryCount = 3) {
 
   // 假设登录按钮的ID是'login-button'，点击登录按钮
   await page.waitForSelector("#login-button");
-  await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
+  await delayClick(1000); // 模拟在点击登录按钮前的短暂停顿
+  await page.click("#login-button");
   try {
     await Promise.all([
       page.waitForNavigation({ waitUntil: "domcontentloaded" }), // 等待 页面跳转 DOMContentLoaded 事件
@@ -370,7 +374,7 @@ async function login(page, username, password, retryCount = 3) {
         );
       } else {
         throw new Error(
-          `非超时错误，也不是密码错误，失败用户 ${username}，错误信息：${alertText}`
+          `非超时错误，也不是密码错误，可能是IP导致，需使用中国美国香港台湾IP，失败用户 ${username}，错误信息：${alertText}`
         );
       }
     } else {

@@ -37,9 +37,9 @@ jobs:
       - name: Prepend YAML front matter to README.md
         run: |
           echo "---" > temp_readme.md
-          echo "title: Auto Read" >> temp_readme.md
+          echo "title: yolo_track_inference" >> temp_readme.md
           echo "emoji: 🐳" >> temp_readme.md
-          echo "colorFrom: purple" >> temp_readme.md
+          echo "colorFrom: red" >> temp_readme.md
           echo "colorTo: gray" >> temp_readme.md
           echo "sdk: docker" >> temp_readme.md
           echo "app_port: 7860" >> temp_readme.md
@@ -49,12 +49,12 @@ jobs:
 
       - name: Configure git
         run: |
-          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git config --global user.name "github-actions[bot]"
+          git config --global user.email "liuweiqing147@gmail.com"
+          git config --global user.name "14790897"
       - name: Set up Git and push to Space
         run: |
           git init --initial-branch=main
           git lfs track "*.ttf"
           git add .
-          git commit -m "GitHub deploy: ${{ github.sha }}"
+          git commit -m "yolo: ${{ github.sha }}"
           git push --force https://${HF_USER}:${HF_TOKEN}@huggingface.co/spaces/${HF_USER}/${HF_REPO} main

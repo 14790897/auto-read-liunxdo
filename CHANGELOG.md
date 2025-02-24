@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.9.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.2...v1.9.0) (2025-02-12)
+
+
+### Features
+
+* 支持禁用自动点赞 ([f6f5e26](https://www.github.com/14790897/auto-read-liunxdo/commit/f6f5e2692eb6974117f0720c0be0623105c656b4))
+
+### [1.8.2](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.1...v1.8.2) (2025-02-12)
+
+
+### Bug Fixes
+
+* 存在无法点击登录按钮的情况,原因未知,在等待跳转前,加入按钮点击 ([1d67b5e](https://www.github.com/14790897/auto-read-liunxdo/commit/1d67b5e0fa531148ceff3c8c3f083d253a98db75))
+
 ### [1.8.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.0...v1.8.1) (2025-01-15)
 
 

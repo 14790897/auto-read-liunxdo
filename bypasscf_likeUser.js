@@ -341,6 +341,7 @@ async function login(page, username, password, retryCount = 3) {
 
   // 假设登录按钮的ID是'login-button'，点击登录按钮
   await page.waitForSelector("#login-button");
+  await page.click("#login-button");
   await delayClick(500); // 模拟在点击登录按钮前的短暂停顿
   try {
     await Promise.all([

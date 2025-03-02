@@ -71,7 +71,7 @@
       clearInterval(scrollInterval);
     }
     scrollInterval = setInterval(() => {
-      window.scrollBy(0, distancePerStep);
+      window.scrollBy({ top: distancePerStep, behavior: 'smooth' });
     }, delayPerStep); // 每50毫秒滚动20像素
   }
 

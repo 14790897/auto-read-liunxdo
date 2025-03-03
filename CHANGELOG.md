@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.10.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.9.0...v1.10.0) (2025-03-03)
+
+
+### Features
+
+* 定时清理容器的/tmp ([4265354](https://www.github.com/14790897/auto-read-liunxdo/commit/42653542540bb3ae96c77cbf701967c1e1b9941f))
+
+
+### Bug Fixes
+
+* hg ([8b7f5a0](https://www.github.com/14790897/auto-read-liunxdo/commit/8b7f5a09ec89e3bb1285974fa85fe3446e0e20fc))
+* 伪装huggingface ([a9856dc](https://www.github.com/14790897/auto-read-liunxdo/commit/a9856dce85f062ce8867def16f7acfe8937ca1d8))
+
 ## [1.9.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.2...v1.9.0) (2025-02-12)
 
 

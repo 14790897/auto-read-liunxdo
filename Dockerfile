@@ -45,7 +45,8 @@ RUN apt update && apt install -y \
     libxtst6 \
     lsb-release \
     xdg-utils \
-    xvfb && \
+    xvfb \
+    findutils && \
     rm -rf /var/lib/apt/lists/*
 
 RUN wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | gpg --dearmor -o /usr/share/keyrings/google-linux-signing-key.gpg && \
@@ -64,4 +65,12 @@ COPY . .
 
 RUN chmod -R 777 /app
 
-CMD ["node", "/app/bypasscf.js"]
+# 创建清理脚本
+RUN echo '#!/bin/bash\nfind /tmp -type f -atime +1 -delete' > /usr/local/bin/clean_tmp.sh && \
+    chmod +x /usr/local/bin/clean_tmp.sh
+
+# 设置 cron 任务 (每天凌晨 3:00 执行)
+RUN (crontab -l ; echo "0 3 * * * /usr/local/bin/clean_tmp.sh") | crontab -
+
+# 启动 cron 并运行主程序 (使用 CMD 作为入口点)
+CMD ["sh", "-c", "service cron start && node /app/bypasscf.js"]

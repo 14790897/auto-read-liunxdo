@@ -3,7 +3,7 @@ name: read cron (勿动)
 on:
   # schedule:
   #   # 每天 UTC 时间 18:00 运行
-  #   - cron: "0 18 * * *"
+  #   - cron: "*/10 * * * *"
   workflow_dispatch: # 添加这行以允许手动触发
 
 jobs:

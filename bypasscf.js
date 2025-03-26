@@ -236,10 +236,20 @@ async function launchBrowserForUser(username, password) {
     //真正执行阅读脚本
     let externalScriptPath;
     if (isLikeSpecificUser === "true") {
-      externalScriptPath = path.join(
-        dirname(fileURLToPath(import.meta.url)),
-        "index_likeUser.js"
-      );
+      const randomChoice = Math.random() < 0.5; // 生成一个随机数，50% 概率为 true
+      if (randomChoice) {
+        externalScriptPath = path.join(
+          dirname(fileURLToPath(import.meta.url)),
+          "index_likeUser_activity.js"
+        );
+        console.log("使用index_likeUser_activity");
+      } else {
+        externalScriptPath = path.join(
+          dirname(fileURLToPath(import.meta.url)),
+          "index_likeUser.js"
+        );
+        console.log("使用index_likeUser");
+      }
     } else {
       externalScriptPath = path.join(
         dirname(fileURLToPath(import.meta.url)),

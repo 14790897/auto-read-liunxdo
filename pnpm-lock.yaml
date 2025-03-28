@@ -29,6 +29,9 @@ importers:
       puppeteer-real-browser:
         specifier: ^1.2.31
         version: 1.3.18(puppeteer-core@22.15.0)(puppeteer@22.15.0)
+      xvfb:
+        specifier: ^0.4.0
+        version: 0.4.0
 
 packages:
 

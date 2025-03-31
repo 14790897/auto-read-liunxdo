@@ -1,5 +1,62 @@
 # Changelog
 
+## [1.10.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.9.0...v1.10.0) (2025-03-26)
+
+
+### Features
+
+* docker 端口 映射 ([83cd9f2](https://www.github.com/14790897/auto-read-liunxdo/commit/83cd9f26d8991101907c66ae774f48932ee09a67))
+* 定时清理容器的/tmp ([4265354](https://www.github.com/14790897/auto-read-liunxdo/commit/42653542540bb3ae96c77cbf701967c1e1b9941f))
+* 随机加载点赞脚本 ([1878a94](https://www.github.com/14790897/auto-read-liunxdo/commit/1878a94065dda661977919606c5a7c037cb74e58))
+
+
+### Bug Fixes
+
+* env端口错误 ([4fd5d39](https://www.github.com/14790897/auto-read-liunxdo/commit/4fd5d39404a369c9b1b9ac216d7fd06a78183be3))
+* hg ([8b7f5a0](https://www.github.com/14790897/auto-read-liunxdo/commit/8b7f5a09ec89e3bb1285974fa85fe3446e0e20fc))
+* 伪装huggingface ([a9856dc](https://www.github.com/14790897/auto-read-liunxdo/commit/a9856dce85f062ce8867def16f7acfe8937ca1d8))
+* 禁止生成core dump ([895760e](https://www.github.com/14790897/auto-read-liunxdo/commit/895760e11d493df9aa70065059e0a2f6197ca632))
+
+## [1.9.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.2...v1.9.0) (2025-02-12)
+
+
+### Features
+
+* 支持禁用自动点赞 ([f6f5e26](https://www.github.com/14790897/auto-read-liunxdo/commit/f6f5e2692eb6974117f0720c0be0623105c656b4))
+
+### [1.8.2](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.1...v1.8.2) (2025-02-12)
+
+
+### Bug Fixes
+
+* 存在无法点击登录按钮的情况,原因未知,在等待跳转前,加入按钮点击 ([1d67b5e](https://www.github.com/14790897/auto-read-liunxdo/commit/1d67b5e0fa531148ceff3c8c3f083d253a98db75))
+
+### [1.8.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.0...v1.8.1) (2025-01-15)
+
+
+### Bug Fixes
+
+* 展示信息 ([27ffc94](https://www.github.com/14790897/auto-read-liunxdo/commit/27ffc94610e88df9d06e847461cddb5faff27b6b))
+
+## [1.8.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.7.0...v1.8.0) (2025-01-14)
+
+
+### Features
+
+* 登录失败重试三次 ([2fdee4e](https://www.github.com/14790897/auto-read-liunxdo/commit/2fdee4e6f23f16ae565594a35008101596400b36))
+* 超时和密码错误逻辑分开 ([c2f61e3](https://www.github.com/14790897/auto-read-liunxdo/commit/c2f61e35f16b8fb055aa3b612c2b3c1de85194e8))
+
+
+### Bug Fixes
+
+* error ([cff54ac](https://www.github.com/14790897/auto-read-liunxdo/commit/cff54ac99fe95466b7e7b5fd2f5356193465fcec))
+* error ([a106c34](https://www.github.com/14790897/auto-read-liunxdo/commit/a106c34866588a0e401c5c3e8abe0619422e349c))
+* error ([e689db0](https://www.github.com/14790897/auto-read-liunxdo/commit/e689db064937e9527d6208f009c5f85b2a2ae1ce))
+* xvfb包 ([da5549a](https://www.github.com/14790897/auto-read-liunxdo/commit/da5549abfb71f0651ea51dc502b039c5375ef094))
+* 未使用await ([2505906](https://www.github.com/14790897/auto-read-liunxdo/commit/2505906771302de2a7f1f49abd5f7e9b75421f53))
+* 检测密码错误提示 ([22d3766](https://www.github.com/14790897/auto-read-liunxdo/commit/22d3766248481d1290b83e7e3c0eddd34def4573))
+* 登录失败throw error ([2880de3](https://www.github.com/14790897/auto-read-liunxdo/commit/2880de320a1829b6cb070ab8f1f647c2e2e35356))
+
 ## [1.7.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.6.0...v1.7.0) (2024-11-29)
 
 

@@ -73,4 +73,4 @@ RUN echo '#!/bin/bash\nfind /tmp -type f -atime +1 -delete' > /usr/local/bin/cle
 RUN (crontab -l ; echo "0 3 * * * /usr/local/bin/clean_tmp.sh") | crontab -
 
 # 启动 cron 并运行主程序 (使用 CMD 作为入口点)
-CMD ["sh", "-c", "service cron start && node /app/bypasscf.js"]
+CMD ["sh", "-c", "ulimit -c 0 && service cron start && node /app/bypasscf.js"]

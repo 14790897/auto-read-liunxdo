@@ -236,10 +236,20 @@ async function launchBrowserForUser(username, password) {
     //真正执行阅读脚本
     let externalScriptPath;
     if (isLikeSpecificUser === "true") {
-      externalScriptPath = path.join(
-        dirname(fileURLToPath(import.meta.url)),
-        "index_likeUser.js"
-      );
+      const randomChoice = Math.random() < 0.5; // 生成一个随机数，50% 概率为 true
+      if (randomChoice) {
+        externalScriptPath = path.join(
+          dirname(fileURLToPath(import.meta.url)),
+          "index_likeUser_activity.js"
+        );
+        console.log("使用index_likeUser_activity");
+      } else {
+        externalScriptPath = path.join(
+          dirname(fileURLToPath(import.meta.url)),
+          "index_likeUser.js"
+        );
+        console.log("使用index_likeUser");
+      }
     } else {
       externalScriptPath = path.join(
         dirname(fileURLToPath(import.meta.url)),
@@ -269,7 +279,7 @@ async function launchBrowserForUser(username, password) {
     });
     // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了，不对，这里不会点击按钮，所以不会跳转，需要手动跳转
     if (loginUrl == "https://linux.do") {
-      await page.goto("https://linux.do/t/topic/13716/630", {
+      await page.goto("https://linux.do/t/topic/13716/700", {
         waitUntil: "domcontentloaded",
       });
     } else if (loginUrl == "https://meta.appinn.net") {

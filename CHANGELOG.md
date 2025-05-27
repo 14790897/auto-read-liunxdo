@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.10.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.9.0...v1.10.0) (2025-03-26)
+
+
+### Features
+
+* docker 端口 映射 ([83cd9f2](https://www.github.com/14790897/auto-read-liunxdo/commit/83cd9f26d8991101907c66ae774f48932ee09a67))
+* 定时清理容器的/tmp ([4265354](https://www.github.com/14790897/auto-read-liunxdo/commit/42653542540bb3ae96c77cbf701967c1e1b9941f))
+* 随机加载点赞脚本 ([1878a94](https://www.github.com/14790897/auto-read-liunxdo/commit/1878a94065dda661977919606c5a7c037cb74e58))
+
+
+### Bug Fixes
+
+* env端口错误 ([4fd5d39](https://www.github.com/14790897/auto-read-liunxdo/commit/4fd5d39404a369c9b1b9ac216d7fd06a78183be3))
+* hg ([8b7f5a0](https://www.github.com/14790897/auto-read-liunxdo/commit/8b7f5a09ec89e3bb1285974fa85fe3446e0e20fc))
+* 伪装huggingface ([a9856dc](https://www.github.com/14790897/auto-read-liunxdo/commit/a9856dce85f062ce8867def16f7acfe8937ca1d8))
+* 禁止生成core dump ([895760e](https://www.github.com/14790897/auto-read-liunxdo/commit/895760e11d493df9aa70065059e0a2f6197ca632))
+
 ## [1.9.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.8.2...v1.9.0) (2025-02-12)
 
 

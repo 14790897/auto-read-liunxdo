@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.10.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.10.0...v1.10.1) (2025-05-30)
+
+
+### Bug Fixes
+
+* remove apt ([9dbea4c](https://www.github.com/14790897/auto-read-liunxdo/commit/9dbea4c00cd3a78d9ba03c3ae3511858ed2da721))
+
 ## [1.10.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.9.0...v1.10.0) (2025-03-26)
 
 

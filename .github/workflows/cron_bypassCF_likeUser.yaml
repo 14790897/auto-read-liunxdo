@@ -30,6 +30,14 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Install dependencies
         run: |
           npm install
@@ -62,5 +70,11 @@ jobs:
 
         shell: bash
 
-      - name: Run a script
-        run: LIKE_SPECIFIC_USER=true node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"
+      # - name: Run a script(linux)
+      #   run: LIKE_SPECIFIC_USER=true node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"
+
+      - name: Run a script(windows)
+        run: |
+          $env:LIKE_SPECIFIC_USER="true"
+          node bypasscf.js --USERNAMES "$env:USERNAMES" --PASSWORDS "$env:PASSWORDS" --WEBSITE "$env:WEBSITE"
+        shell: pwsh

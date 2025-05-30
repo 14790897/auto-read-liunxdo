@@ -224,6 +224,10 @@
         ".discourse-reactions-reaction-button"
       )[0];
     }
+    if (!reactionButton) {
+      console.log("未找到点赞按钮");
+      return;
+    }
     if (
       reactionButton.title !== "点赞此帖子" &&
       reactionButton.title !== "Like this post"

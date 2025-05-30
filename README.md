@@ -1,4 +1,3 @@
-
 [英文文档](./README_en.md)
 
 ## 注意事项
@@ -29,16 +28,14 @@ npm install
 # 自动阅读随机点赞
 node .\bypasscf.js
 # 自动点赞特定用户
-## windows
+## Windows cmd
 set LIKE_SPECIFIC_USER=true && node .\bypasscf.js
-## powershell
+## Windows powershell
 $env:LIKE_SPECIFIC_USER = "true"
 node .\bypasscf.js
-## linux
-LIKE_SPECIFIC_USER=true node ./bypasscf.js
 ```
 
-#### Linux 额外安装以下包，运行命令相同
+<!-- #### Linux 额外安装以下包，运行命令相同
 
 ```sh
 sudo apt update
@@ -54,8 +51,8 @@ npm install
 # 自动阅读随机点赞
 node .\bypasscf.js
 # 自动点赞特定用户
-node .\bypasscf_likeUser.js
-```
+LIKE_SPECIFIC_USER=true node ./bypasscf.js
+``` -->
 
 ## 使用方法三：GitHub Action 每天 4 点阅读
 
@@ -73,6 +70,8 @@ node .\bypasscf_likeUser.js
 教程：https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates
 以下两个任务用于阅读
 readLike（自动阅读随机点赞）和 likeUser (点赞特定用户)
+
+<!--
 ## 使用方法四：docker 运行
 
 ### 1.立刻执行
@@ -105,6 +104,7 @@ crontab -e
 ```sh
 0 6 * * *  /root/auto-read-liunxdo/cron.sh  # 注意这是示例目录，要改为所在仓库目录的cron.sh（使用pwd查看所在目录）
 ```
+-->
 
 ## 如何增加基于 discourse 的其它网站的支持？
 

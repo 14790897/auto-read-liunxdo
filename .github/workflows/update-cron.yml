@@ -3,9 +3,9 @@ name: Update Workflow Cron
 on:
   schedule:
     - cron: '0 0 * * *' 
-  push:
-    branches:
-      - main
+#   push:
+#     branches:
+#       - main
 env:
   PAT_TOKEN: ${{ secrets.PAT_TOKEN }} # Workflows Update GitHub Action workflow files. Learn more.  read and write access to the repository contents.  classic s
 permissions:

@@ -1,0 +1,44 @@
+name: Update Workflow Cron
+
+on:
+  schedule:
+    - cron: '0 0 * * *' 
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write  
+  actions: write
+
+jobs:
+  update-cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
+        # formula: RANDOM_NUM=$((RANDOM % (B - A + 1) + A))
+      - name: generate random time
+        id: random
+        run: |
+          HOUR=$((RANDOM % 17 + 7))
+          MIN=$((RANDOM % 60))
+          UTC_HOUR=$(( (HOUR + 24 - 8) % 24 ))
+          echo "hour=$HOUR" >> $GITHUB_OUTPUT
+          echo "min=$MIN" >> $GITHUB_OUTPUT
+          echo "utc_hour=$UTC_HOUR" >> $GITHUB_OUTPUT
+          echo "北京时间 $HOUR:$MIN, UTC 时间 $UTC_HOUR:$MIN"
+
+      - name: replace cron expression
+        run: |
+          sed -i "s/cron: '[^']*'/cron: '${{ steps.random.outputs.min }} ${{ steps.random.outputs.hour }} * * *'/" .github/workflows/main.yml
+
+      - name: commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/workflows/main.yml
+          git commit -m "自动更新 cron 表达式为 ${{ steps.random.outputs.min }} ${{ steps.random.outputs.hour }} * * *"
+          git push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

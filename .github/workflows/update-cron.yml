@@ -42,4 +42,4 @@ jobs:
            git diff --cached --quiet || git commit -m "update cron ${{ steps.random.outputs.min }} ${{ steps.random.outputs.hour }} * * *"
           git push
         env:
-          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # Workflows Update GitHub Action workflow files. Learn more.
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }} # Workflows Update GitHub Action workflow files. Learn more.  read and write access to the repository contents.

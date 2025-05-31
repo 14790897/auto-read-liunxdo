@@ -34,9 +34,10 @@ jobs:
         run: |
           sed -i "s/cron: '[^']*'/cron: '${{ steps.random.outputs.min }} ${{ steps.random.outputs.hour }} * * *'/" .github/workflows/cron_bypassCF_likeUser.yaml
           sed -i "s/cron: '[^']*'/cron: '${{ steps.random.outputs.min }} ${{ steps.random.outputs.utc_hour }} * * *'/" .github/workflows/cron_bypassCF.yaml
+
       - name: Check PAT
         run: |
-            echo "PAT_TOKEN starts with: ${PAT_TOKEN:0:4}"
+            echo "PAT_TOKEN starts with: ${PAT_TOKEN:0:5}"
 
       - name: commit and push changes
         run: |

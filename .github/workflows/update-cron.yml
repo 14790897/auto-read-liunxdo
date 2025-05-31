@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
+        with:
+            token: ${{ secrets.PAT_TOKEN }}
         # formula: RANDOM_NUM=$((RANDOM % (B - A + 1) + A))
       - name: generate random time
         id: random

@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.12.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.11.0...v1.12.0) (2025-05-31)
+
+
+### Features
+
+* random time ([42253d7](https://www.github.com/14790897/auto-read-liunxdo/commit/42253d72cd4f9f5f385a2058a34afac1b7d5d1a7))
+
+
+### Bug Fixes
+
+* add 错误 ([29106ab](https://www.github.com/14790897/auto-read-liunxdo/commit/29106ab6f76fac997f25b2533b63ffc776535b5c))
+* 文件名错误 ([e58bc8f](https://www.github.com/14790897/auto-read-liunxdo/commit/e58bc8f54ed107308c3327f6e89d21962ac8ad83))
+* 文件名错误 ([f02dcdb](https://www.github.com/14790897/auto-read-liunxdo/commit/f02dcdb9d7d60dd7b7f7bfb383b29a6e7f50e3dd))
+* 无写入权限 ([e10a452](https://www.github.com/14790897/auto-read-liunxdo/commit/e10a452297d886d6cbc1507278ee1eb9b6035fe8))
+* 未使用单引号 ([1089f3d](https://www.github.com/14790897/auto-read-liunxdo/commit/1089f3dcd2ddfb8b416fb4ada24aa42a9223269e))
+* 权限问题 ([975f842](https://www.github.com/14790897/auto-read-liunxdo/commit/975f842556341a83c3f0cfcde2633fe47f811bf4))
+* 权限问题 ([0a3890b](https://www.github.com/14790897/auto-read-liunxdo/commit/0a3890bfc079222b566ded7ee07839a74e303bb0))
+* 权限问题 ([ab0d35a](https://www.github.com/14790897/auto-read-liunxdo/commit/ab0d35ab84229146dacee3ed5bfe2ffd618882d0))
+* 权限问题 ([a2be5de](https://www.github.com/14790897/auto-read-liunxdo/commit/a2be5de1f25fff8b13b4970174bc608fa2058643))
+* 权限问题 ([9bedc0c](https://www.github.com/14790897/auto-read-liunxdo/commit/9bedc0cbe2f06b90aab2a451f2abf5daddc1aecc))
+* 权限问题 ([391f6c1](https://www.github.com/14790897/auto-read-liunxdo/commit/391f6c16fcabd4a8172128341914e0b0f490d59e))
+* 权限问题 ([367e805](https://www.github.com/14790897/auto-read-liunxdo/commit/367e805f8085422fd49a9f4d4af57f7d294a7747))
+* 权限问题 ([c046c1d](https://www.github.com/14790897/auto-read-liunxdo/commit/c046c1d47c299d0e991d3219fd3c6f68c8dd0b6a))
+* 权限问题 ([da69937](https://www.github.com/14790897/auto-read-liunxdo/commit/da69937f6b52721223c961e74e8ea238413aa331))
+* 权限问题 ([4a99c19](https://www.github.com/14790897/auto-read-liunxdo/commit/4a99c193afe05a96950ac82e61351ba845992641))
+* 权限问题 ([ee6115e](https://www.github.com/14790897/auto-read-liunxdo/commit/ee6115e240e0ee717b0b4c535961a8c74f7ef22b))
+* 权限问题 ([8aa6061](https://www.github.com/14790897/auto-read-liunxdo/commit/8aa6061d74d105cf1ca96aedf9d85186faffb22c))
+
 ## [1.11.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.10.0...v1.11.0) (2025-05-30)
 
 

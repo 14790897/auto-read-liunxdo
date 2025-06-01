@@ -54,7 +54,7 @@ node .\bypasscf.js
 LIKE_SPECIFIC_USER=true node ./bypasscf.js
 ``` -->
 
-## 使用方法三：GitHub Action 每天 4 点阅读
+## 使用方法三：GitHub Action 每天 随机时间 阅读
 
 #### 说明： 每天运行，每次三十分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml)
 

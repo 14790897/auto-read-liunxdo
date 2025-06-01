@@ -58,12 +58,16 @@ LIKE_SPECIFIC_USER=true node ./bypasscf.js
 
 #### 说明： 每天运行，每次二十分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml)
 
+**目前需要一个额外变量 `PAT_TOKEN`，用于随机时间执行阅读任务。教程：**
+
+在 https://github.com/settings/tokens 生成一个 classic token，**需要包含 workflow 权限**，然后加入 actions 的 secrets 中，和 README 中添加其它 secrets 的过程一致。
+
 ### 1. fork 仓库
 
 ### 2.设置环境变量
 
 在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的），这里无法读取.env 变量
-![alt text](image2.png)
+![设置环境变量教程](image2.png)
 
 ### 3.启动 workflow
 

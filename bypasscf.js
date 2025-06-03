@@ -83,14 +83,37 @@ function sendToTelegramGroup(message) {
     console.error("sendToTelegramGroup: bot 或 groupId 不存在");
     return;
   }
-  bot
-    .sendMessage(groupId, message)
-    .then(() => {
-      console.log("Telegram group message sent successfully");
-    })
-    .catch((error) => {
-      console.error("Error sending Telegram group message:", error);
-    });
+  // 分割长消息，Telegram单条最大4096字符
+  const MAX_LEN = 4000;
+  if (typeof message === "string" && message.length > MAX_LEN) {
+    let start = 0;
+    let part = 1;
+    while (start < message.length) {
+      const chunk = message.slice(start, start + MAX_LEN);
+      bot
+        .sendMessage(groupId, chunk)
+        .then(() => {
+          console.log(`Telegram group message part ${part} sent successfully`);
+        })
+        .catch((error) => {
+          console.error(
+            `Error sending Telegram group message part ${part}:`,
+            error
+          );
+        });
+      start += MAX_LEN;
+      part++;
+    }
+  } else {
+    bot
+      .sendMessage(groupId, message)
+      .then(() => {
+        console.log("Telegram group message sent successfully");
+      })
+      .catch((error) => {
+        console.error("Error sending Telegram group message:", error);
+      });
+  }
 }
 
 //随机等待时间
@@ -316,35 +339,47 @@ async function launchBrowserForUser(username, password) {
     // 记录已推送过的 topicId，防止重复推送
     if (enableRssFetch) {
       const pushedTopicIds = new Set();
+      let rssFetchLock = false;
       page.on("framenavigated", async (frame) => {
         try {
           if (frame.parentFrame() !== null) return;
+          if (rssFetchLock) return; // 避免并发
+          rssFetchLock = true;
           const url = frame.url();
           const match = url.match(/https:\/\/linux\.do\/t\/topic\/(\d+)/);
           if (match && username === usernames[0]) {
             const topicId = match[1];
-            if (pushedTopicIds.has(topicId)) return; // 已推送过则跳过
+            if (pushedTopicIds.has(topicId)) {
+              rssFetchLock = false;
+              return; // 已推送过则跳过
+            }
             pushedTopicIds.add(topicId);
             const rssUrl = `https://linux.do/t/topic/${topicId}.rss`;
             console.log("检测到话题跳转，抓取RSS：", rssUrl);
             try {
-              // 用 puppeteer 新开一个页面直接访问 RSS 链接
+              // 停顿1.5秒再抓取
+              await new Promise((r) => setTimeout(r, 1500));
               const rssPage = await browser.newPage();
               await rssPage.goto(rssUrl, {
                 waitUntil: "domcontentloaded",
                 timeout: 20000,
               });
+              // 停顿0.5秒再获取内容，确保页面渲染完成
+              await new Promise((r) => setTimeout(r, 1000));
               const xml = await rssPage.evaluate(() => document.body.innerText);
               await rssPage.close();
               const parsedData = await parseRss(xml);
-              // 发送到 Telegram 群组，并显示发送结果
-              sendToTelegramGroup(parsedData)
+              sendToTelegramGroup(parsedData);
             } catch (e) {
-              console.error("抓取或发送RSS失败：", e);
+              console.error("抓取或发送RSS失败：", e, "可能是非公开话题");
             }
           }
+          // 停顿0.5秒后允许下次抓取
+          await new Promise((r) => setTimeout(r, 500));
+          rssFetchLock = false;
         } catch (e) {
           console.error("framenavigated 监听异常：", e);
+          rssFetchLock = false;
         }
       });
     }

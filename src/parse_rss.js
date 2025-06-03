@@ -38,18 +38,20 @@ export async function parseRss(xmlData) {
       sourceUrl: items.source?.$?.url,
     });
   }
+  // items反转，最新的内容排在最前面
+  const reversedItems = extractedItems.reverse();
   // 生成适合Telegram的文本内容，去掉“阅读完整话题”和“Read full topic”内容
   function cleanDescription(desc) {
     if (!desc) return "无内容";
-    let text = desc.replace(/<[^>]+>/g, "").trim();
-    text = text.replace(/阅读完整话题/g, "");
+    // let text = desc.replace(/<[^>]+>/g, "").trim();
+    let text = desc.replace(/阅读完整话题/g, "");
     text = text.replace(/Read full topic/gi, "");
     return text.trim() || "无内容";
   }
-  const textContent = extractedItems
+  const textContent = reversedItems
     .map((item, idx) => {
       const isFirst = idx === 0;
-      const isLast = idx === extractedItems.length - 1;
+      const isLast = idx === reversedItems.length - 1;
       return [
         isFirst ? `标题: ${item.title}` : "",
         `作者: ${item.creator}`,

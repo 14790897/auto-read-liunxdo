@@ -6,7 +6,9 @@ import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import { dirname, join } from "path";
 import TelegramBot from "node-telegram-bot-api";
-
+import fetch from "node-fetch";
+import { parseStringPromise } from "xml2js";
+import { parseRss } from "./src/parse_rss.js";
 dotenv.config();
 
 // 截图保存的文件夹
@@ -47,6 +49,7 @@ const shutdownTimer = setTimeout(() => {
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
+const groupId = process.env.TELEGRAM_GROUP_ID;
 const specificUser = process.env.SPECIFIC_USER || "14790897";
 const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
 const usernames = process.env.USERNAMES.split(",");
@@ -58,12 +61,13 @@ const delayBetweenBatches =
   runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
 const isLikeSpecificUser = process.env.LIKE_SPECIFIC_USER || "false";
 const isAutoLike = process.env.AUTO_LIKE || "true";
+const enableRssFetch = process.env.ENABLE_RSS_FETCH || "false"; // 是否开启抓取RSS
 let bot;
-if (token && chatId) {
+if (token && (chatId || groupId)) {
   bot = new TelegramBot(token);
 }
 function sendToTelegram(message) {
-  if (!bot) return;
+  if (!bot || !chatId) return;
 
   bot
     .sendMessage(chatId, message)
@@ -72,6 +76,20 @@ function sendToTelegram(message) {
     })
     .catch((error) => {
       console.error("Error sending Telegram message:", error);
+    });
+}
+function sendToTelegramGroup(message) {
+  if (!bot || !groupId) {
+    console.error("sendToTelegramGroup: bot 或 groupId 不存在");
+    return;
+  }
+  bot
+    .sendMessage(groupId, message)
+    .then(() => {
+      console.log("Telegram group message sent successfully");
+    })
+    .catch((error) => {
+      console.error("Error sending Telegram group message:", error);
     });
 }
 
@@ -279,7 +297,7 @@ async function launchBrowserForUser(username, password) {
     });
     // 如果是Linuxdo，就导航到我的帖子，但我感觉这里写没什么用，因为外部脚本已经定义好了，不对，这里不会点击按钮，所以不会跳转，需要手动跳转
     if (loginUrl == "https://linux.do") {
-      await page.goto("https://linux.do/t/topic/13716/700", {
+      await page.goto("https://linux.do/t/topic/13716/790", {
         waitUntil: "domcontentloaded",
       });
     } else if (loginUrl == "https://meta.appinn.net") {
@@ -293,6 +311,42 @@ async function launchBrowserForUser(username, password) {
     }
     if (token && chatId) {
       sendToTelegram(`${username} 登录成功`);
+    }
+    // 监听页面跳转到新话题，自动推送RSS example：https://linux.do/t/topic/525305.rss
+    // 记录已推送过的 topicId，防止重复推送
+    if (enableRssFetch) {
+      const pushedTopicIds = new Set();
+      page.on("framenavigated", async (frame) => {
+        try {
+          if (frame.parentFrame() !== null) return;
+          const url = frame.url();
+          const match = url.match(/https:\/\/linux\.do\/t\/topic\/(\d+)/);
+          if (match && username === usernames[0]) {
+            const topicId = match[1];
+            if (pushedTopicIds.has(topicId)) return; // 已推送过则跳过
+            pushedTopicIds.add(topicId);
+            const rssUrl = `https://linux.do/t/topic/${topicId}.rss`;
+            console.log("检测到话题跳转，抓取RSS：", rssUrl);
+            try {
+              // 用 puppeteer 新开一个页面直接访问 RSS 链接
+              const rssPage = await browser.newPage();
+              await rssPage.goto(rssUrl, {
+                waitUntil: "domcontentloaded",
+                timeout: 20000,
+              });
+              const xml = await rssPage.evaluate(() => document.body.innerText);
+              await rssPage.close();
+              const parsedData = await parseRss(xml);
+              // 发送到 Telegram 群组，并显示发送结果
+              sendToTelegramGroup(parsedData)
+            } catch (e) {
+              console.error("抓取或发送RSS失败：", e);
+            }
+          }
+        } catch (e) {
+          console.error("framenavigated 监听异常：", e);
+        }
+      });
     }
     return { browser };
   } catch (err) {

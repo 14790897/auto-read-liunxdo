@@ -39,34 +39,6 @@ jobs:
       - name: Install dependencies
         run: |
           npm install
-      #github action设置的action环境变量会完全替换掉env文件的读取，所以需要在action里手动进行加载env文件
-      - name: Load environment variables
-        run: |
-          echo "Debug: Checking if .env file exists..."
-
-          # 检查 .env 文件是否存在
-          if [ -f .env ]; then
-            echo ".env file found. Loading environment variables from .env file"
-            
-            # 加载 .env 文件中的默认值
-            set -a
-            source .env
-            set +a
-            
-            echo "Loaded .env variables:"
-          else
-            echo ".env file not found. Skipping loading."
-          fi
-
-
-          if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then
-            echo "Using GitHub Secret for WEBSITE"
-            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
-          else
-            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
-          fi
-
-        shell: bash
 
       - name: Run a script
-        run: node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"
+        run: node bypasscf.js

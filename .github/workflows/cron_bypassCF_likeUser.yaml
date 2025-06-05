@@ -15,13 +15,24 @@ jobs:
       matrix:
         node-version: [20.x]
     env:
-      # 在作业级别设置环境变量
-      USERNAMES: ${{ secrets.USERNAMES }}
-      PASSWORDS: ${{ secrets.PASSWORDS }}
-      RUN_TIME_LIMIT_MINUTES: ${{secrets.RUN_TIME_LIMIT_MINUTES}}
-      TELEGRAM_BOT_TOKEN: ${{secrets.TELEGRAM_BOT_TOKEN}}
-      TELEGRAM_CHAT_ID: ${{secrets.TELEGRAM_CHAT_ID}}
-      SPECIFIC_USER: ${{secrets.SPECIFIC_USER}}
+        # 在作业级别设置环境变量
+        USERNAMES: ${{ secrets.USERNAMES }}
+        PASSWORDS: ${{ secrets.PASSWORDS }}
+        WEBSITE: ${{ secrets.WEBSITE }}
+        RUN_TIME_LIMIT_MINUTES: ${{ secrets.RUN_TIME_LIMIT_MINUTES }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_GROUP_ID: ${{ secrets.TELEGRAM_GROUP_ID }}
+        SPECIFIC_USER: ${{ secrets.SPECIFIC_USER }}
+        HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        LIKE_SPECIFIC_USER: ${{ secrets.LIKE_SPECIFIC_USER }}
+        ENABLE_RSS_FETCH: ${{ secrets.ENABLE_RSS_FETCH }}
+        POSTGRES_URI: ${{ secrets.POSTGRES_URI }}
+        POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+        POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+        POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+        POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+        POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
     steps:
       - uses: actions/checkout@v3 # 检出仓库
 
@@ -42,33 +53,33 @@ jobs:
         run: |
           npm install
       #github action设置的action环境变量会完全替换掉env文件的读取，所以需要在action里手动进行加载env文件
-      - name: Load environment variables
-        run: |
-          echo "Debug: Checking if .env file exists..."
+      # - name: Load environment variables
+      #   run: |
+      #     echo "Debug: Checking if .env file exists..."
 
-          # 检查 .env 文件是否存在
-          if [ -f .env ]; then
-            echo ".env file found. Loading environment variables from .env file"
+      #     # 检查 .env 文件是否存在
+      #     if [ -f .env ]; then
+      #       echo ".env file found. Loading environment variables from .env file"
             
-            # 加载 .env 文件中的默认值
-            set -a
-            source .env
-            set +a
+      #       # 加载 .env 文件中的默认值
+      #       set -a
+      #       source .env
+      #       set +a
             
-            echo "Loaded .env variables:"
-          else
-            echo ".env file not found. Skipping loading."
-          fi
+      #       echo "Loaded .env variables:"
+      #     else
+      #       echo ".env file not found. Skipping loading."
+      #     fi
 
 
-          if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then
-            echo "Using GitHub Secret for WEBSITE"
-            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
-          else
-            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
-          fi
+      #     if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then
+      #       echo "Using GitHub Secret for WEBSITE"
+      #       echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
+      #     else
+      #       echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
+      #     fi
 
-        shell: bash
+      #   shell: bash
 
       # - name: Run a script(linux)
       #   run: LIKE_SPECIFIC_USER=true node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"
@@ -76,5 +87,5 @@ jobs:
       - name: Run a script(windows)
         run: |
           $env:LIKE_SPECIFIC_USER="true"
-          node bypasscf.js --USERNAMES "$env:USERNAMES" --PASSWORDS "$env:PASSWORDS" --WEBSITE "$env:WEBSITE"
+          node bypasscf.js 
         shell: pwsh

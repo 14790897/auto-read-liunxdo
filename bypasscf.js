@@ -102,7 +102,7 @@ function sendToTelegramGroup(message) {
     while (start < message.length) {
       const chunk = message.slice(start, start + MAX_LEN);
       bot
-        .sendMessage(groupId, chunk)
+        .sendMessage(groupId, chunk, { parse_mode: "HTML" })
         .then(() => {
           console.log(`Telegram group message part ${part} sent successfully`);
         })

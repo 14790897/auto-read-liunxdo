@@ -350,50 +350,38 @@ async function launchBrowserForUser(username, password) {
     // 记录已推送过的 topicId，防止重复推送
     if (enableRssFetch) {
       const pushedTopicIds = new Set();
-      let rssFetchLock = false;
       page.on("framenavigated", async (frame) => {
         if (frame.parentFrame() !== null) return;
-        if (rssFetchLock) {
-          console.log("RSS抓取锁定中，跳过当前跳转");
-          return;
-        } // 避免并发
-        rssFetchLock = true;
-        try {
-          const url = frame.url();
-          const match = url.match(/https:\/\/linux\.do\/t\/topic\/(\d+)/);
-          if (match && username === usernames[0]) {
-            const topicId = match[1];
-            if (pushedTopicIds.has(topicId)) {
-              return; // 已推送过则跳过
-            }
-            pushedTopicIds.add(topicId);
-            const rssUrl = `https://linux.do/t/topic/${topicId}.rss`;
-            console.log("检测到话题跳转，抓取RSS：", rssUrl);
-            try {
-              // 停顿1.5秒再抓取
-              await new Promise((r) => setTimeout(r, 1500));
-              const rssPage = await browser.newPage();
-              await rssPage.goto(rssUrl, {
-                waitUntil: "domcontentloaded",
-                timeout: 20000,
-              });
-              // 停顿0.5秒再获取内容，确保页面渲染完成
-              await new Promise((r) => setTimeout(r, 1000));
-              const xml = await rssPage.evaluate(() => document.body.innerText);
-              await rssPage.close();
-              const parsedData = await parseRss(xml);
-              sendToTelegramGroup(parsedData);
-            } catch (e) {
-              console.error("抓取或发送RSS失败：", e, "可能是非公开话题");
-            }
+        const url = frame.url();
+        const match = url.match(/https:\/\/linux\.do\/t\/topic\/(\d+)/);
+        if (match && username === usernames[0]) {
+          const topicId = match[1];
+          if (pushedTopicIds.has(topicId)) {
+            return; // 已推送过则跳过
           }
-          // 停顿0.5秒后允许下次抓取
-          await new Promise((r) => setTimeout(r, 500));
-        } catch (e) {
-          console.error("framenavigated 监听异常：", e);
-        } finally {
-          rssFetchLock = false;
+          pushedTopicIds.add(topicId);
+          const rssUrl = `https://linux.do/t/topic/${topicId}.rss`;
+          console.log("检测到话题跳转，抓取RSS：", rssUrl);
+          try {
+            // 停顿1.5秒再抓取
+            await new Promise((r) => setTimeout(r, 1500));
+            const rssPage = await browser.newPage();
+            await rssPage.goto(rssUrl, {
+              waitUntil: "domcontentloaded",
+              timeout: 20000,
+            });
+            // 停顿0.5秒再获取内容，确保页面渲染完成
+            await new Promise((r) => setTimeout(r, 1000));
+            const xml = await rssPage.evaluate(() => document.body.innerText);
+            await rssPage.close();
+            const parsedData = await parseRss(xml);
+            sendToTelegramGroup(parsedData);
+          } catch (e) {
+            console.error("抓取或发送RSS失败：", e, "可能是非公开话题");
+          }
         }
+        // 停顿0.5秒后允许下次抓取
+        await new Promise((r) => setTimeout(r, 500));
       });
     }
     return { browser };

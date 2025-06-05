@@ -70,7 +70,7 @@ function sendToTelegram(message) {
   if (!bot || !chatId) return;
 
   bot
-    .sendMessage(chatId, message)
+    .sendMessage(chatId, message, { parse_mode: "HTML" })
     .then(() => {
       console.log("Telegram message sent successfully");
     })

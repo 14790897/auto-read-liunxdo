@@ -1,5 +1,8 @@
 name: db-test
 on:
+  push:
+    branches:
+      - '**'
   workflow_dispatch:
 jobs:
   db-test:

@@ -89,6 +89,11 @@ function sendToTelegramGroup(message) {
     console.error("sendToTelegramGroup: bot 或 groupId 不存在");
     return;
   }
+  // 过滤空内容，避免 Telegram 400 错误
+  if (!message || !String(message).trim()) {
+    console.warn("Telegram 群组推送内容为空，跳过发送");
+    return;
+  }
   // 分割长消息，Telegram单条最大4096字符
   const MAX_LEN = 4000;
   if (typeof message === "string" && message.length > MAX_LEN) {
@@ -347,16 +352,18 @@ async function launchBrowserForUser(username, password) {
       const pushedTopicIds = new Set();
       let rssFetchLock = false;
       page.on("framenavigated", async (frame) => {
+        if (frame.parentFrame() !== null) return;
+        if (rssFetchLock) {
+          console.log("RSS抓取锁定中，跳过当前跳转");
+          return;
+        } // 避免并发
+        rssFetchLock = true;
         try {
-          if (frame.parentFrame() !== null) return;
-          if (rssFetchLock) return; // 避免并发
-          rssFetchLock = true;
           const url = frame.url();
           const match = url.match(/https:\/\/linux\.do\/t\/topic\/(\d+)/);
           if (match && username === usernames[0]) {
             const topicId = match[1];
             if (pushedTopicIds.has(topicId)) {
-              rssFetchLock = false;
               return; // 已推送过则跳过
             }
             pushedTopicIds.add(topicId);
@@ -382,9 +389,9 @@ async function launchBrowserForUser(username, password) {
           }
           // 停顿0.5秒后允许下次抓取
           await new Promise((r) => setTimeout(r, 500));
-          rssFetchLock = false;
         } catch (e) {
           console.error("framenavigated 监听异常：", e);
+        } finally {
           rssFetchLock = false;
         }
       });

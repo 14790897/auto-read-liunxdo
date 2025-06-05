@@ -1,4 +1,5 @@
 import xml2js from "xml2js";
+import { savePosts, isGuidExists } from "./db.js";
 
 /**
  * 解析RSS XML并返回适合Telegram的文本内容
@@ -40,31 +41,49 @@ export async function parseRss(xmlData) {
   }
   // items反转，最新的内容排在最前面
   const reversedItems = extractedItems.reverse();
+  // 存入数据库
+  try {
+    await savePosts(reversedItems);
+  } catch (e) {
+    console.error("保存帖子到数据库失败:", e);
+  }
   // 生成适合Telegram的文本内容，去掉“阅读完整话题”和“Read full topic”内容
   function cleanDescription(desc) {
     if (!desc) return "无内容";
-    // let text = desc.replace(/<[^>]+>/g, "").trim();
     let text = desc.replace(/阅读完整话题/g, "");
     text = text.replace(/Read full topic/gi, "");
     return text.trim() || "无内容";
   }
-  const textContent = reversedItems
-    .map((item, idx) => {
-      const isFirst = idx === 0;
-      const isLast = idx === reversedItems.length - 1;
-      return [
-        isFirst ? `标题: ${item.title}` : "",
-        `作者: ${item.creator}`,
-        isFirst
-          ? `内容: ${cleanDescription(item.description)}`
-          : `回复: ${cleanDescription(item.description)}`,
-        `时间: ${item.pubDate}`,
-        isLast ? `链接: ${item.link}` : "",
-        "",
-      ]
-        .filter(Boolean)
-        .join("\n");
-    })
-    .join("\n");
+  // 用于存储要推送的内容
+  let textContentArr = [];
+  for (let idx = 0; idx < reversedItems.length; idx++) {
+    const item = reversedItems[idx];
+    if (item.guid) {
+      const exists = await isGuidExists(item.guid);
+      if (exists) {
+        console.warn(`GUID ${item.guid} 已存在，跳过保存。`);
+        continue;
+      }
+    }
+    const isFirst = idx === 0;
+    const isLast = idx === reversedItems.length - 1;
+    const msg = [
+      isFirst ? `标题: ${item.title}` : "",
+      `作者: ${item.creator}`,
+      isFirst
+        ? `内容: ${cleanDescription(item.description)}`
+        : `回复: ${cleanDescription(item.description)}`,
+      `时间: ${item.pubDate}`,
+      isLast ? `链接: ${item.link}` : "",
+      "",
+    ]
+      .filter(Boolean)
+      .join("\n")
+      .trim();
+    if (msg) {
+      textContentArr.push(msg);
+    }
+  }
+  const textContent = textContentArr.filter(Boolean).join("\n");
   return textContent;
 }

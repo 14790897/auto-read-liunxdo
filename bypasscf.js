@@ -75,7 +75,13 @@ function sendToTelegram(message) {
       console.log("Telegram message sent successfully");
     })
     .catch((error) => {
-      console.error("Error sending Telegram message:", error);
+      console.error(
+        "Error sending Telegram message:",
+        error && error.code ? error.code : "",
+        error && error.message
+          ? error.message.slice(0, 100)
+          : String(error).slice(0, 100)
+      );
     });
 }
 function sendToTelegramGroup(message) {

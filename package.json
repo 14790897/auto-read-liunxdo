@@ -6,6 +6,7 @@
     "express": "^4.21.2",
     "node-fetch": "^3.3.2",
     "node-telegram-bot-api": "^0.66.0",
+    "pg": "^8.16.0",
     "playwright": "^1.52.0",
     "playwright-extra": "^4.3.6",
     "playwright-extra-plugin-stealth": "^0.0.1",

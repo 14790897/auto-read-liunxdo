@@ -69,6 +69,6 @@ export async function isGuidExists(guid) {
   const res = await pool.query("SELECT 1 FROM posts WHERE guid = $1 LIMIT 1", [
     guid,
   ]);
-  // console.log("isGuidExists查询结果:", res.rows);
+  // console.log("isGuidExists查询结果:", res.rows); 存在的返回[ { '?column?': 1 } ]
   return res.rowCount > 0;
 }

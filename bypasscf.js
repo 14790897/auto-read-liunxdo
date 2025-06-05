@@ -41,7 +41,6 @@ console.log(
   `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
 );
 
-console.log(`RSS抓取功能状态: ${enableRssFetch ? '开启' : '关闭'} (ENABLE_RSS_FETCH=${process.env.ENABLE_RSS_FETCH})`);
 
 // 设置一个定时器，在运行时间到达时终止进程
 const shutdownTimer = setTimeout(() => {
@@ -64,6 +63,13 @@ const delayBetweenBatches =
 const isLikeSpecificUser = process.env.LIKE_SPECIFIC_USER || "false";
 const isAutoLike = process.env.AUTO_LIKE || "true";
 const enableRssFetch = process.env.ENABLE_RSS_FETCH === "true"; // 是否开启抓取RSS，只有显式设置为 "true" 才开启
+
+console.log(
+  `RSS抓取功能状态: ${enableRssFetch ? "开启" : "关闭"} (ENABLE_RSS_FETCH=${
+    process.env.ENABLE_RSS_FETCH
+  })`
+);
+
 let bot;
 if (token && (chatId || groupId)) {
   bot = new TelegramBot(token);

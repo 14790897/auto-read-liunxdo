@@ -66,6 +66,9 @@ export async function savePosts(posts) {
 }
 
 export async function isGuidExists(guid) {
-  const res = await pool.query('SELECT 1 FROM posts WHERE guid = $1 LIMIT 1', [guid]);
+  const res = await pool.query("SELECT 1 FROM posts WHERE guid = $1 LIMIT 1", [
+    guid,
+  ]);
+  // console.log("isGuidExists查询结果:", res.rows);
   return res.rowCount > 0;
 }

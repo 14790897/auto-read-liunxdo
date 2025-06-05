@@ -70,7 +70,7 @@ function sendToTelegram(message) {
   if (!bot || !chatId) return;
 
   bot
-    .sendMessage(chatId, message, { parse_mode: "HTML" })
+    .sendMessage(chatId, message)
     .then(() => {
       console.log("Telegram message sent successfully");
     })
@@ -102,7 +102,7 @@ function sendToTelegramGroup(message) {
     while (start < message.length) {
       const chunk = message.slice(start, start + MAX_LEN);
       bot
-        .sendMessage(groupId, chunk, { parse_mode: "HTML" })
+        .sendMessage(groupId, chunk)
         .then(() => {
           console.log(`Telegram group message part ${part} sent successfully`);
         })

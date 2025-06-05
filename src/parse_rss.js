@@ -1,6 +1,19 @@
 import xml2js from "xml2js";
 import { savePosts, isGuidExists } from "./db.js";
 
+// 生成适合Telegram的文本内容，去掉“阅读完整话题”和“Read full topic”内容
+function cleanDescription(desc) {
+  if (!desc) return "无内容";
+  // 去掉HTML标签
+  let text = desc.replace(/<[^>]+>/g, "");
+  // 去掉特定内容
+  text = text.replace(/阅读完整话题/g, "");
+  text = text.replace(/Read full topic/gi, "");
+  // 去掉多余的空白字符
+  text = text.replace(/\s+/g, " ");
+  return text.trim() || "无内容";
+}
+
 /**
  * 解析RSS XML并返回适合Telegram的文本内容
  * @param {string} xmlData - RSS XML字符串
@@ -41,19 +54,7 @@ export async function parseRss(xmlData) {
   }
   // items反转，最新的内容排在最前面
   const reversedItems = extractedItems.reverse();
-  // 存入数据库
-  try {
-    await savePosts(reversedItems);
-  } catch (e) {
-    console.error("保存帖子到数据库失败:", e);
-  }
-  // 生成适合Telegram的文本内容，去掉“阅读完整话题”和“Read full topic”内容
-  function cleanDescription(desc) {
-    if (!desc) return "无内容";
-    let text = desc.replace(/阅读完整话题/g, "");
-    text = text.replace(/Read full topic/gi, "");
-    return text.trim() || "无内容";
-  }
+
   // 用于存储要推送的内容
   let textContentArr = [];
   for (let idx = 0; idx < reversedItems.length; idx++) {
@@ -84,6 +85,13 @@ export async function parseRss(xmlData) {
       textContentArr.push(msg);
     }
   }
+  // 存入数据库
+  try {
+    await savePosts(reversedItems);
+  } catch (e) {
+    console.error("保存帖子到数据库失败:", e);
+  }
+
   const textContent = textContentArr.filter(Boolean).join("\n");
   return textContent;
 }

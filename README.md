@@ -1,9 +1,12 @@
-
 [英文文档](./README_en.md)
 
 ## 注意事项
 1. 不能显示脚本运行日志，只有登录结果
 2. 阅读量统计有延迟，建议看点赞记录
+
+## 彩蛋
+https://t.me/linuxdoSQL
+每天随机抓取帖子发布在此频道
 
 ## 使用方法一：油猴脚本(火狐不兼容,谷歌可以用)
 
@@ -29,16 +32,14 @@ npm install
 # 自动阅读随机点赞
 node .\bypasscf.js
 # 自动点赞特定用户
-## windows
+## Windows cmd
 set LIKE_SPECIFIC_USER=true && node .\bypasscf.js
-## powershell
+## Windows powershell
 $env:LIKE_SPECIFIC_USER = "true"
 node .\bypasscf.js
-## linux
-LIKE_SPECIFIC_USER=true node ./bypasscf.js
 ```
 
-#### Linux 额外安装以下包，运行命令相同
+<!-- #### Linux 额外安装以下包，运行命令相同
 
 ```sh
 sudo apt update
@@ -54,25 +55,31 @@ npm install
 # 自动阅读随机点赞
 node .\bypasscf.js
 # 自动点赞特定用户
-node .\bypasscf_likeUser.js
-```
+LIKE_SPECIFIC_USER=true node ./bypasscf.js
+``` -->
 
-## 使用方法三：GitHub Action 每天 4 点阅读
+## 使用方法三：GitHub Action 每天 随机时间 阅读
 
-#### 说明： 每天运行，每次二十分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml)
+#### 说明： 每天运行，每次三十分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml)
+
+**目前需要一个额外变量 `PAT_TOKEN`，用于随机时间执行阅读任务。教程：**
+
+在 https://github.com/settings/tokens 生成一个 classic token，**需要包含 workflow 权限**，然后加入 actions 的 secrets 中，和 README 中添加其它 secrets 的过程一致。
 
 ### 1. fork 仓库
 
 ### 2.设置环境变量
 
 在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的），这里无法读取.env 变量
-![alt text](image2.png)
+![设置环境变量教程](image2.png)
 
 ### 3.启动 workflow
 
 教程：https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates
 以下两个任务用于阅读
 readLike（自动阅读随机点赞）和 likeUser (点赞特定用户)
+
+<!--
 ## 使用方法四：docker 运行
 
 ### 1.立刻执行
@@ -105,6 +112,7 @@ crontab -e
 ```sh
 0 6 * * *  /root/auto-read-liunxdo/cron.sh  # 注意这是示例目录，要改为所在仓库目录的cron.sh（使用pwd查看所在目录）
 ```
+-->
 
 ## 如何增加基于 discourse 的其它网站的支持？
 

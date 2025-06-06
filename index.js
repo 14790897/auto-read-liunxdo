@@ -238,7 +238,16 @@
         return;
       }
 
-      // 使用setTimeout来错开每次点击的时间，避免同时触发点击
+      // 新增：点赞前加一个随机概率判断（如30%概率）
+      const likeProbability = 0.3; // 0~1之间，0.3表示30%概率
+      if (Math.random() > likeProbability) {
+        console.log(`跳过第${index + 1}个按钮（未通过概率判断）`);
+        return;
+      }
+
+      // 点赞间隔时间也随机（2~5秒之间）
+      const randomDelay = 2000 + Math.floor(Math.random() * 3000);
+
       autoLikeInterval = setTimeout(() => {
         // 模拟点击
         triggerClick(button); // 使用自定义的触发点击方法
@@ -255,7 +264,7 @@
         } else {
           console.log("clickCounter:", clickCounter);
         }
-      }, index * 3000); // 这里的1000毫秒是两次点击之间的间隔，可以根据需要调整
+      }, index * randomDelay); // 每次点赞的延迟为随机值
     });
   }
   const button = document.createElement("button");

@@ -2,7 +2,7 @@ name: readLike（自动阅读随机点赞）
 # GitHub.secrets优先级最高，即使没有设置对应的变量，它也会读取，这时变量为空值，导致报错，.env读取的变量无法覆盖这个值,使用了${PASSWORD_ESCAPED//\#/\\#}来对#转义,需要两个\，但是我直接在env文件使用这种方法是不行的，GitHub action是有效
 on:
   schedule:
-    - cron: '24 2 * * *'
+    - cron: '25 11 * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:

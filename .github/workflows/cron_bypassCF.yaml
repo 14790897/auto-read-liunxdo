@@ -2,13 +2,12 @@ name: readLike（自动阅读随机点赞）
 # GitHub.secrets优先级最高，即使没有设置对应的变量，它也会读取，这时变量为空值，导致报错，.env读取的变量无法覆盖这个值,使用了${PASSWORD_ESCAPED//\#/\\#}来对#转义,需要两个\，但是我直接在env文件使用这种方法是不行的，GitHub action是有效
 on:
   schedule:
-    # 每天 UTC 时间 19:40 运行
-    - cron: "30 3 * * *"
+    - cron: '24 2 * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     timeout-minutes: 35 # 设置作业超时时间为20分钟
 
     strategy:
@@ -18,9 +17,21 @@ jobs:
       # 在作业级别设置环境变量
       USERNAMES: ${{ secrets.USERNAMES }}
       PASSWORDS: ${{ secrets.PASSWORDS }}
-      RUN_TIME_LIMIT_MINUTES: ${{secrets.RUN_TIME_LIMIT_MINUTES}}
-      TELEGRAM_BOT_TOKEN: ${{secrets.TELEGRAM_BOT_TOKEN}}
-      TELEGRAM_CHAT_ID: ${{secrets.TELEGRAM_CHAT_ID}}
+      WEBSITE: ${{ secrets.WEBSITE }}
+      RUN_TIME_LIMIT_MINUTES: ${{ secrets.RUN_TIME_LIMIT_MINUTES }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      TELEGRAM_GROUP_ID: ${{ secrets.TELEGRAM_GROUP_ID }}
+      SPECIFIC_USER: ${{ secrets.SPECIFIC_USER }}
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      LIKE_SPECIFIC_USER: ${{ secrets.LIKE_SPECIFIC_USER }}
+      ENABLE_RSS_FETCH: ${{ secrets.ENABLE_RSS_FETCH }}
+      POSTGRES_URI: ${{ secrets.POSTGRES_URI }}
+      POSTGRES_DB: ${{ secrets.POSTGRES_DB }}
+      POSTGRES_HOST: ${{ secrets.POSTGRES_HOST }}
+      POSTGRES_PORT: ${{ secrets.POSTGRES_PORT }}
+      POSTGRES_USER: ${{ secrets.POSTGRES_USER }}
+      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
     steps:
       - uses: actions/checkout@v3 # 检出仓库
 
@@ -29,38 +40,16 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
       - name: Install dependencies
         run: |
           npm install
-          sudo apt install -y xvfb
-      #github action设置的action环境变量会完全替换掉env文件的读取，所以需要在action里手动进行加载env文件
-      - name: Load environment variables
-        run: |
-          echo "Debug: Checking if .env file exists..."
-
-          # 检查 .env 文件是否存在
-          if [ -f .env ]; then
-            echo ".env file found. Loading environment variables from .env file"
-            
-            # 加载 .env 文件中的默认值
-            set -a
-            source .env
-            set +a
-            
-            echo "Loaded .env variables:"
-          else
-            echo ".env file not found. Skipping loading."
-          fi
-
-
-          if [ -n "${{ secrets.WEBSITE }}" ] && [ ! -z "${{ secrets.WEBSITE }}" ]; then
-            echo "Using GitHub Secret for WEBSITE"
-            echo "WEBSITE=${{ secrets.WEBSITE }}" >> $GITHUB_ENV
-          else
-            echo "WEBSITE=${WEBSITE}" >> $GITHUB_ENV
-          fi
-
-        shell: bash
 
       - name: Run a script
-        run: node bypasscf.js --USERNAMES "$USERNAMES" --PASSWORDS "$PASSWORDS" --WEBSITE "$WEBSITE"
+        run: node bypasscf.js

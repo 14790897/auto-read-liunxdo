@@ -51,23 +51,44 @@ export async function parseRss(xmlData) {
       source: items.source?._,
       sourceUrl: items.source?.$?.url,
     });
-  }
-  // items反转，最新的内容排在最前面
+  } // items反转，最新的内容排在最前面
   const reversedItems = extractedItems.reverse();
 
-  // 用于存储要推送的内容
-  let textContentArr = [];
-  for (let idx = 0; idx < reversedItems.length; idx++) {
-    const item = reversedItems[idx];
+  // 先过滤出新的帖子（不存在的）
+  const newItems = [];
+  for (const item of reversedItems) {
     if (item.guid) {
       const exists = await isGuidExists(item.guid);
       if (exists) {
-        console.warn(`GUID ${item.guid} 已存在，跳过保存。`);
+        console.warn(`GUID ${item.guid} 已存在，跳过。`);
         continue;
       }
     }
+    newItems.push(item);
+  }
+
+  // 如果没有新帖子，直接返回空内容
+  if (newItems.length === 0) {
+    console.log("没有新帖子需要处理");
+    return "";
+  }
+
+  // 先保存新帖子到数据库
+  try {
+    await savePosts(newItems);
+    console.log(`成功保存 ${newItems.length} 个新帖子到数据库`);
+  } catch (e) {
+    console.error("保存帖子到数据库失败:", e);
+    // 如果保存失败，不推送任何内容
+    return "";
+  }
+
+  // 保存成功后，构建推送内容
+  const textContentArr = [];
+  for (let idx = 0; idx < newItems.length; idx++) {
+    const item = newItems[idx];
     const isFirst = idx === 0;
-    const isLast = idx === reversedItems.length - 1;
+    const isLast = idx === newItems.length - 1;
     const msg = [
       isFirst ? `标题: ${item.title}` : "",
       `作者: ${item.creator}`,
@@ -84,12 +105,6 @@ export async function parseRss(xmlData) {
     if (msg) {
       textContentArr.push(msg);
     }
-  }
-  // 存入数据库
-  try {
-    await savePosts(reversedItems);
-  } catch (e) {
-    console.error("保存帖子到数据库失败:", e);
   }
 
   const textContent = textContentArr.filter(Boolean).join("\n");

@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.13.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.12.0...v1.13.0) (2025-06-05)
+
+
+### Features
+
+* 优化发送逻辑 ([6387c9e](https://www.github.com/14790897/auto-read-liunxdo/commit/6387c9e5daa0954760c6543281a207d46849cb36))
+* 保存到数据库 ([ded9f4f](https://www.github.com/14790897/auto-read-liunxdo/commit/ded9f4fe7e378854ea2d9b31521f5b0bf699f18b))
+* 去除锁，靠数据库排斥相同数据 ([2970b3a](https://www.github.com/14790897/auto-read-liunxdo/commit/2970b3a9910234ecba5ebeb69e0ce7bf12a91ef5))
+* 抓取rss内容发送到电报 ([ac66311](https://www.github.com/14790897/auto-read-liunxdo/commit/ac66311b01c231a0d0088b8672bd6fca7ed2194b))
+* 随机点赞时间 ([7630dd7](https://www.github.com/14790897/auto-read-liunxdo/commit/7630dd78ac4f101a08a03463efec486059ae8e94))
+
+
+### Bug Fixes
+
+* 之前没有添加action的其它环境变量 ([353edb3](https://www.github.com/14790897/auto-read-liunxdo/commit/353edb34fbde487642116e7bd13b0c35633d4243))
+* 先保存后查重 ([932e9e6](https://www.github.com/14790897/auto-read-liunxdo/commit/932e9e65f07742cc22930ee380dbd3d8ec5a4ea6))
+* 字符串 "false" 在 JavaScript 中是真值（truthy） ([3c0bcad](https://www.github.com/14790897/auto-read-liunxdo/commit/3c0bcadb26c9385923c536592a64421222d77fbf))
+* 存在死锁问题 ([d45d7a3](https://www.github.com/14790897/auto-read-liunxdo/commit/d45d7a3b22bb6305905c220174354320350f56ac))
+* 执行顺序 ([d0440b8](https://www.github.com/14790897/auto-read-liunxdo/commit/d0440b8242c99e959c39dfe403da228152e9bcb7))
+* 电报未渲染 ([e3bc349](https://www.github.com/14790897/auto-read-liunxdo/commit/e3bc34938805d6545abcb4d9bfab40461a1ec489))
+* 电报未渲染 ([27b40e2](https://www.github.com/14790897/auto-read-liunxdo/commit/27b40e28c36bcbb1e3fea4339dc273146ad9e536))
+
 ## [1.12.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.11.0...v1.12.0) (2025-05-31)
 
 

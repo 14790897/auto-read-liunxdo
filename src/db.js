@@ -470,3 +470,168 @@ export async function closeAllConnections() {
   await Promise.allSettled(closePromises);
   console.log("所有数据库连接关闭完成");
 }
+
+// 保存话题 JSON 数据的函数
+export async function saveTopicData(topicData) {
+  if (!topicData || !topicData.id) {
+    console.warn("无效的话题数据，跳过保存");
+    return;
+  }
+
+  const allDatabases = await getAllDatabases();
+
+  const createTopicsTableQuery = `
+    CREATE TABLE IF NOT EXISTS topics (
+      id SERIAL PRIMARY KEY,
+      topic_id INTEGER UNIQUE,
+      title TEXT,
+      slug TEXT,
+      posts_count INTEGER,
+      created_at TIMESTAMP,
+      last_posted_at TIMESTAMP,
+      views INTEGER,
+      like_count INTEGER,
+      category_id INTEGER,
+      tags TEXT[],
+      raw_data JSONB,
+      saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `;
+
+  const insertTopicQuery = `
+    INSERT INTO topics (topic_id, title, slug, posts_count, created_at, last_posted_at, views, like_count, category_id, tags, raw_data)
+    VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+    ON CONFLICT (topic_id) DO UPDATE SET
+      title = EXCLUDED.title,
+      slug = EXCLUDED.slug,
+      posts_count = EXCLUDED.posts_count,
+      last_posted_at = EXCLUDED.last_posted_at,
+      views = EXCLUDED.views,
+      like_count = EXCLUDED.like_count,
+      tags = EXCLUDED.tags,
+      raw_data = EXCLUDED.raw_data,
+      saved_at = CURRENT_TIMESTAMP
+  `;
+
+  const savePromises = allDatabases.map(async ({ name, pool, db, type }) => {
+    try {
+      console.log(`正在保存话题数据到 ${name}...`);
+
+      if (type === "mongo" && db) {
+        // MongoDB 操作
+        const collection = db.collection("topics");
+        
+        const mongoDocument = {
+          topic_id: topicData.id,
+          title: topicData.title,
+          slug: topicData.slug,
+          posts_count: topicData.posts_count,
+          created_at: new Date(topicData.created_at),
+          last_posted_at: topicData.last_posted_at ? new Date(topicData.last_posted_at) : null,
+          views: topicData.views,
+          like_count: topicData.like_count,
+          category_id: topicData.category_id,
+          tags: topicData.tags || [],
+          raw_data: topicData,
+          saved_at: new Date(),
+        };
+
+        await collection.updateOne(
+          { topic_id: topicData.id },
+          { $set: mongoDocument },
+          { upsert: true }
+        );
+      } else if (type === "mysql" && pool) {        // MySQL 操作
+        const mysqlCreateTableQuery = `
+          CREATE TABLE IF NOT EXISTS topics (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            topic_id INT UNIQUE,
+            title TEXT,
+            slug TEXT,
+            posts_count INT,
+            created_at DATETIME,
+            last_posted_at DATETIME NULL,
+            views INT,
+            like_count INT,
+            category_id INT,
+            tags JSON,
+            raw_data JSON,
+            saved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `;
+
+        const mysqlInsertQuery = `
+          INSERT INTO topics (topic_id, title, slug, posts_count, created_at, last_posted_at, views, like_count, category_id, tags, raw_data)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+          title = VALUES(title),
+          slug = VALUES(slug),
+          posts_count = VALUES(posts_count),
+          last_posted_at = VALUES(last_posted_at),
+          views = VALUES(views),
+          like_count = VALUES(like_count),
+          tags = VALUES(tags),
+          raw_data = VALUES(raw_data),
+          saved_at = CURRENT_TIMESTAMP
+        `;        await pool.execute(mysqlCreateTableQuery);
+        
+        // 转换日期格式为 MySQL 兼容格式 (YYYY-MM-DD HH:MM:SS)
+        const formatDateForMySQL = (dateString) => {
+          if (!dateString) return null;
+          const date = new Date(dateString);
+          return date.toISOString().slice(0, 19).replace('T', ' ');
+        };
+        
+        await pool.execute(mysqlInsertQuery, [
+          topicData.id,
+          topicData.title,
+          topicData.slug,
+          topicData.posts_count,
+          formatDateForMySQL(topicData.created_at),
+          formatDateForMySQL(topicData.last_posted_at),
+          topicData.views,
+          topicData.like_count,
+          topicData.category_id,
+          JSON.stringify(topicData.tags || []),
+          JSON.stringify(topicData),
+        ]);
+      } else if (pool) {
+        // PostgreSQL 操作
+        await pool.query(createTopicsTableQuery);
+        
+        await pool.query(insertTopicQuery, [
+          topicData.id,
+          topicData.title,
+          topicData.slug,
+          topicData.posts_count,
+          topicData.created_at,
+          topicData.last_posted_at,
+          topicData.views,
+          topicData.like_count,
+          topicData.category_id,
+          topicData.tags || [],
+          topicData,
+        ]);
+      }
+
+      console.log(`✅ ${name} 话题数据保存成功 (话题ID: ${topicData.id})`);
+      return { name, success: true };
+    } catch (error) {
+      console.error(`❌ ${name} 话题数据保存失败:`, error.message);
+      return { name, success: false, error: error.message };
+    }
+  });
+
+  const results = await Promise.allSettled(savePromises);
+  const successCount = results.filter(
+    (result) => result.status === "fulfilled" && result.value.success
+  ).length;
+
+  console.log(
+    `话题数据保存结果: ${successCount}/${allDatabases.length} 个数据库保存成功`
+  );
+
+  if (successCount === 0) {
+    throw new Error("所有数据库话题数据保存都失败了");
+  }
+}

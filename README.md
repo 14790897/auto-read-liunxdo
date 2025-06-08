@@ -23,6 +23,12 @@ https://t.me/linuxdoSQL
 
 .env 里面设置用户名 密码 以及其它 env 里面指明的信息
 
+<!-- #### 新功能：话题数据抓取
+- `ENABLE_RSS_FETCH=true` - 启用RSS数据抓取功能（默认关闭）
+- `ENABLE_TOPIC_DATA_FETCH=true` - 启用话题JSON数据抓取功能（默认关闭）
+
+话题数据抓取功能会自动获取访问的话题页面的详细信息（如标题、回复数、浏览量、点赞数等）并保存到数据库中，支持PostgreSQL、MongoDB和MySQL数据库。 -->
+
 ### 2.运行
 
 #### Windows

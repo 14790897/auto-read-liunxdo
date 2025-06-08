@@ -9,6 +9,7 @@ import TelegramBot from "node-telegram-bot-api";
 import fetch from "node-fetch";
 import { parseStringPromise } from "xml2js";
 import { parseRss } from "./src/parse_rss.js";
+import { processAndSaveTopicData } from "./src/topic_data.js";
 dotenv.config();
 
 // 截图保存的文件夹
@@ -41,7 +42,6 @@ console.log(
   `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
 );
 
-
 // 设置一个定时器，在运行时间到达时终止进程
 const shutdownTimer = setTimeout(() => {
   console.log("时间到,Reached time limit, shutting down the process...");
@@ -63,11 +63,17 @@ const delayBetweenBatches =
 const isLikeSpecificUser = process.env.LIKE_SPECIFIC_USER || "false";
 const isAutoLike = process.env.AUTO_LIKE || "true";
 const enableRssFetch = process.env.ENABLE_RSS_FETCH === "true"; // 是否开启抓取RSS，只有显式设置为 "true" 才开启
+const enableTopicDataFetch = process.env.ENABLE_TOPIC_DATA_FETCH === "true"; // 是否开启抓取话题数据，只有显式设置为 "true" 才开启
 
 console.log(
   `RSS抓取功能状态: ${enableRssFetch ? "开启" : "关闭"} (ENABLE_RSS_FETCH=${
     process.env.ENABLE_RSS_FETCH
   })`
+);
+console.log(
+  `话题数据抓取功能状态: ${
+    enableTopicDataFetch ? "开启" : "关闭"
+  } (ENABLE_TOPIC_DATA_FETCH=${process.env.ENABLE_TOPIC_DATA_FETCH})`
 );
 
 let bot;
@@ -355,36 +361,51 @@ async function launchBrowserForUser(username, password) {
       sendToTelegram(`${username} 登录成功`);
     } // 监听页面跳转到新话题，自动推送RSS example：https://linux.do/t/topic/525305.rss
     // 记录已推送过的 topicId，防止重复推送
-    if (enableRssFetch) {
+    if (enableRssFetch || enableTopicDataFetch) {
       const pushedTopicIds = new Set();
+      const processedTopicIds = new Set(); // 用于话题数据处理的记录
       page.on("framenavigated", async (frame) => {
         if (frame.parentFrame() !== null) return;
         const url = frame.url();
         const match = url.match(/https:\/\/linux\.do\/t\/topic\/(\d+)/);
         if (match) {
           const topicId = match[1];
-          if (pushedTopicIds.has(topicId)) {
-            return; // 已推送过则跳过
+
+          // RSS抓取处理
+          if (enableRssFetch && !pushedTopicIds.has(topicId)) {
+            pushedTopicIds.add(topicId);
+            const rssUrl = `https://linux.do/t/topic/${topicId}.rss`;
+            console.log("检测到话题跳转，抓取RSS：", rssUrl);
+            try {
+              // 停顿1.5秒再抓取
+              await new Promise((r) => setTimeout(r, 1500));
+              const rssPage = await browser.newPage();
+              await rssPage.goto(rssUrl, {
+                waitUntil: "domcontentloaded",
+                timeout: 20000,
+              });
+              // 停顿0.5秒再获取内容，确保页面渲染完成
+              await new Promise((r) => setTimeout(r, 1000));
+              const xml = await rssPage.evaluate(() => document.body.innerText);
+              await rssPage.close();
+              const parsedData = await parseRss(xml);
+              sendToTelegramGroup(parsedData);
+            } catch (e) {
+              console.error("抓取或发送RSS失败：", e, "可能是非公开话题");
+            }
           }
-          pushedTopicIds.add(topicId);
-          const rssUrl = `https://linux.do/t/topic/${topicId}.rss`;
-          console.log("检测到话题跳转，抓取RSS：", rssUrl);
-          try {
-            // 停顿1.5秒再抓取
-            await new Promise((r) => setTimeout(r, 1500));
-            const rssPage = await browser.newPage();
-            await rssPage.goto(rssUrl, {
-              waitUntil: "domcontentloaded",
-              timeout: 20000,
-            });
-            // 停顿0.5秒再获取内容，确保页面渲染完成
-            await new Promise((r) => setTimeout(r, 1000));
-            const xml = await rssPage.evaluate(() => document.body.innerText);
-            await rssPage.close();
-            const parsedData = await parseRss(xml);
-            sendToTelegramGroup(parsedData);
-          } catch (e) {
-            console.error("抓取或发送RSS失败：", e, "可能是非公开话题");
+
+          // 话题数据抓取处理
+          if (enableTopicDataFetch && !processedTopicIds.has(topicId)) {
+            processedTopicIds.add(topicId);
+            console.log("检测到话题跳转，抓取话题数据：", url);
+            try {
+              // 停顿1秒再处理话题数据
+              await new Promise((r) => setTimeout(r, 1000));
+              await processAndSaveTopicData(page, url);
+            } catch (e) {
+              console.error("抓取或保存话题数据失败：", e);
+            }
           }
         }
         // 停顿0.5秒后允许下次抓取

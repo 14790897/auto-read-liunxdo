@@ -6,6 +6,13 @@ const { Pool } = pkg;
 import { MongoClient } from "mongodb";
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
+import { createLogger } from "./logger.js";
+import { retryWithPolicy } from "./retry.js";
+import PerformanceMonitor from "./performance.js";
+
+// 初始化日志和性能监控
+const logger = createLogger("DATABASE");
+const performanceMonitor = new PerformanceMonitor();
 dotenv.config();
 if (fs.existsSync(".env.local")) {
   console.log("Using .env.local file to supply config environment variables");
@@ -53,6 +60,7 @@ let mysqlPool;
 async function initMySQL() {
   if (process.env.AIVEN_MYSQL_URI && !mysqlPool) {
     try {
+      logger.info("初始化 MySQL 连接池...");
       mysqlPool = mysql.createPool({
         uri: process.env.AIVEN_MYSQL_URI,
         connectionLimit: 5,
@@ -60,9 +68,11 @@ async function initMySQL() {
         timeout: 60000,
         ssl: { rejectUnauthorized: false },
       });
-      console.log("✅ MySQL 连接池创建成功");
+      logger.info("MySQL 连接池创建成功");
+      performanceMonitor.incrementCounter("database.mysql.connections.created");
     } catch (error) {
-      console.error("❌ MySQL 连接池创建失败:", error.message);
+      logger.error("MySQL 连接池创建失败", { error: error.message });
+      performanceMonitor.incrementCounter("database.mysql.connections.failed");
       mysqlPool = null;
     }
   }
@@ -77,6 +87,7 @@ let mongoDb;
 async function initMongoDB() {
   if (process.env.MONGO_URI && !mongoClient) {
     try {
+      logger.info("初始化 MongoDB 连接...");
       mongoClient = new MongoClient(process.env.MONGO_URI, {
         maxPoolSize: 5,
         serverSelectionTimeoutMS: 5000,
@@ -85,9 +96,15 @@ async function initMongoDB() {
       // 连接到数据库
       await mongoClient.connect();
       mongoDb = mongoClient.db("auto_read_posts"); // 使用专门的数据库名
-      console.log("✅ MongoDB 连接成功");
+      logger.info("MongoDB 连接成功");
+      performanceMonitor.incrementCounter(
+        "database.mongodb.connections.created"
+      );
     } catch (error) {
-      console.error("❌ MongoDB 连接失败:", error.message);
+      logger.error("MongoDB 连接失败", { error: error.message });
+      performanceMonitor.incrementCounter(
+        "database.mongodb.connections.failed"
+      );
       mongoClient = null;
       mongoDb = null;
     }
@@ -117,7 +134,14 @@ async function getAllDatabases() {
 }
 
 export async function savePosts(posts) {
-  if (!Array.isArray(posts) || posts.length === 0) return;
+  if (!Array.isArray(posts) || posts.length === 0) {
+    logger.warn("savePosts 调用时 posts 为空或不是数组");
+    return;
+  }
+
+  const startTime = Date.now();
+  logger.info(`开始保存 ${posts.length} 条帖子到所有数据库`);
+  performanceMonitor.incrementCounter("database.save_posts.attempts");
 
   const allDatabases = await getAllDatabases();
 
@@ -142,116 +166,147 @@ export async function savePosts(posts) {
     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
     ON CONFLICT (guid) DO NOTHING
   `;
-  // 并行操作所有数据库
+
+  // 并行操作所有数据库，每个数据库操作都包含重试逻辑
   const savePromises = allDatabases.map(async ({ name, pool, db, type }) => {
-    try {
-      console.log(`正在保存到 ${name}...`);
+    return retryWithPolicy(
+      async () => {
+        const dbStartTime = Date.now();
+        logger.info(`正在保存到 ${name}...`);
+        if (type === "mongo" && db) {
+          // MongoDB 操作
+          const collection = db.collection("posts");
 
-      if (type === "mongo" && db) {
-        // MongoDB 操作
-        const collection = db.collection("posts");
+          // 准备 MongoDB 文档
+          const mongoDocuments = posts.map((post) => ({
+            title: post.title,
+            creator: post.creator,
+            description: post.description,
+            link: post.link,
+            pubDate: post.pubDate,
+            guid: post.guid,
+            guidIsPermaLink: post.guidIsPermaLink,
+            source: post.source,
+            sourceUrl: post.sourceUrl,
+            created_at: new Date(),
+          }));
 
-        // 准备 MongoDB 文档
-        const mongoDocuments = posts.map((post) => ({
-          title: post.title,
-          creator: post.creator,
-          description: post.description,
-          link: post.link,
-          pubDate: post.pubDate,
-          guid: post.guid,
-          guidIsPermaLink: post.guidIsPermaLink,
-          source: post.source,
-          sourceUrl: post.sourceUrl,
-          created_at: new Date(),
-        }));
+          // 使用 upsert 操作避免重复
+          const bulkOps = mongoDocuments.map((doc) => ({
+            updateOne: {
+              filter: { guid: doc.guid },
+              update: { $set: doc },
+              upsert: true,
+            },
+          }));
+          if (bulkOps.length > 0) {
+            await collection.bulkWrite(bulkOps);
+          }
+        } else if (type === "mysql" && pool) {
+          // MySQL 操作
+          const mysqlCreateTableQuery = `
+            CREATE TABLE IF NOT EXISTS posts (
+              id INT AUTO_INCREMENT PRIMARY KEY,
+              title TEXT,
+              creator TEXT,
+              description TEXT,
+              link TEXT,
+              pubDate TEXT,
+              guid VARCHAR(500) UNIQUE,
+              guidIsPermaLink TEXT,
+              source TEXT,
+              sourceUrl TEXT,
+              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+          `;
 
-        // 使用 upsert 操作避免重复
-        const bulkOps = mongoDocuments.map((doc) => ({
-          updateOne: {
-            filter: { guid: doc.guid },
-            update: { $set: doc },
-            upsert: true,
-          },
-        }));
-        if (bulkOps.length > 0) {
-          await collection.bulkWrite(bulkOps);
+          const mysqlInsertQuery = `
+            INSERT INTO posts (title, creator, description, link, pubDate, guid, guidIsPermaLink, source, sourceUrl)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ON DUPLICATE KEY UPDATE
+            title = VALUES(title),
+            creator = VALUES(creator),
+            description = VALUES(description),
+            link = VALUES(link),
+            pubDate = VALUES(pubDate),
+            guidIsPermaLink = VALUES(guidIsPermaLink),
+            source = VALUES(source),
+            sourceUrl = VALUES(sourceUrl)
+          `;
+
+          // 建表
+          await pool.execute(mysqlCreateTableQuery);
+
+          // 插入数据
+          for (const post of posts) {
+            await pool.execute(mysqlInsertQuery, [
+              post.title,
+              post.creator,
+              post.description,
+              post.link,
+              post.pubDate,
+              post.guid,
+              post.guidIsPermaLink,
+              post.source,
+              post.sourceUrl,
+            ]);
+          }
+        } else if (pool) {
+          // PostgreSQL 操作
+          // 建表
+          await pool.query(createTableQuery);
+
+          // 插入数据
+          for (const post of posts) {
+            await pool.query(insertQuery, [
+              post.title,
+              post.creator,
+              post.description,
+              post.link,
+              post.pubDate,
+              post.guid,
+              post.guidIsPermaLink,
+              post.source,
+              post.sourceUrl,
+            ]);
+          }
         }
-      } else if (type === "mysql" && pool) {
-        // MySQL 操作
-        const mysqlCreateTableQuery = `
-          CREATE TABLE IF NOT EXISTS posts (
-            id INT AUTO_INCREMENT PRIMARY KEY,
-            title TEXT,
-            creator TEXT,
-            description TEXT,
-            link TEXT,
-            pubDate TEXT,
-            guid VARCHAR(500) UNIQUE,
-            guidIsPermaLink TEXT,
-            source TEXT,
-            sourceUrl TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-          )
-        `;
 
-        const mysqlInsertQuery = `
-          INSERT INTO posts (title, creator, description, link, pubDate, guid, guidIsPermaLink, source, sourceUrl)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-          ON DUPLICATE KEY UPDATE
-          title = VALUES(title),
-          creator = VALUES(creator),
-          description = VALUES(description),
-          link = VALUES(link),
-          pubDate = VALUES(pubDate),
-          guidIsPermaLink = VALUES(guidIsPermaLink),
-          source = VALUES(source),
-          sourceUrl = VALUES(sourceUrl)
-        `;
-
-        // 建表
-        await pool.execute(mysqlCreateTableQuery);
-
-        // 插入数据
-        for (const post of posts) {
-          await pool.execute(mysqlInsertQuery, [
-            post.title,
-            post.creator,
-            post.description,
-            post.link,
-            post.pubDate,
-            post.guid,
-            post.guidIsPermaLink,
-            post.source,
-            post.sourceUrl,
-          ]);
-        }
-      } else if (pool) {
-        // PostgreSQL 操作
-        // 建表
-        await pool.query(createTableQuery);
-
-        // 插入数据
-        for (const post of posts) {
-          await pool.query(insertQuery, [
-            post.title,
-            post.creator,
-            post.description,
-            post.link,
-            post.pubDate,
-            post.guid,
-            post.guidIsPermaLink,
-            post.source,
-            post.sourceUrl,
-          ]);
-        }
+        const duration = Date.now() - dbStartTime;
+        logger.info(
+          `${name} 保存成功 (${posts.length} 条记录, 耗时 ${duration}ms)`
+        );
+        performanceMonitor.recordTiming(
+          `database.${type || "postgresql"}.save_duration`,
+          duration
+        );
+        performanceMonitor.incrementCounter(
+          `database.${type || "postgresql"}.saves.success`
+        );
+        return { name, success: true };
+      },
+      "database",
+      {
+        context: { databaseName: name, postsCount: posts.length },
+        onRetry: (attempt, error) => {
+          logger.warn(`${name} 保存重试 (第${attempt}次)`, {
+            error: error.message,
+          });
+          performanceMonitor.incrementCounter(
+            `database.${type || "postgresql"}.saves.retry`
+          );
+        },
       }
-
-      console.log(`✅ ${name} 保存成功 (${posts.length} 条记录)`);
-      return { name, success: true };
-    } catch (error) {
-      console.error(`❌ ${name} 保存失败:`, error.message);
+    ).catch((error) => {
+      logger.error(`${name} 保存失败`, {
+        error: error.message,
+        postsCount: posts.length,
+      });
+      performanceMonitor.incrementCounter(
+        `database.${type || "postgresql"}.saves.failed`
+      );
       return { name, success: false, error: error.message };
-    }
+    });
   });
 
   // 等待所有数据库操作完成
@@ -262,9 +317,20 @@ export async function savePosts(posts) {
     (result) => result.status === "fulfilled" && result.value.success
   ).length;
 
-  console.log(
-    `数据库保存结果: ${successCount}/${allDatabases.length} 个数据库保存成功`
+  const totalDuration = Date.now() - startTime;
+  logger.info(
+    `数据库保存结果: ${successCount}/${allDatabases.length} 个数据库保存成功, 总耗时 ${totalDuration}ms`
   );
+  performanceMonitor.recordTiming(
+    "database.save_posts.total_duration",
+    totalDuration
+  );
+
+  if (successCount > 0) {
+    performanceMonitor.incrementCounter("database.save_posts.success");
+  } else {
+    performanceMonitor.incrementCounter("database.save_posts.failed");
+  }
 
   // 如果至少有一个数据库保存成功，就认为操作成功
   if (successCount === 0) {
@@ -273,85 +339,154 @@ export async function savePosts(posts) {
 }
 
 export async function isGuidExists(guid) {
+  if (!guid) {
+    logger.warn("isGuidExists 调用时 guid 为空");
+    return false;
+  }
+
+  const startTime = Date.now();
+  performanceMonitor.incrementCounter("database.guid_check.attempts");
+
   // 优先查询主数据库 (Aiven PostgreSQL)
   try {
-    const res = await pool.query(
-      "SELECT 1 FROM posts WHERE guid = $1 LIMIT 1",
-      [guid]
+    const result = await retryWithPolicy(
+      async () => {
+        const res = await pool.query(
+          "SELECT 1 FROM posts WHERE guid = $1 LIMIT 1",
+          [guid]
+        );
+        return res.rowCount > 0;
+      },
+      "database",
+      { context: { operation: "guid_check", database: "postgresql_main" } }
     );
-    // console.log("isGuidExists查询结果:", res.rows); 存在的返回[ { '?column?': 1 } ]
-    if (res.rowCount > 0) {
+
+    if (result) {
+      const duration = Date.now() - startTime;
+      logger.debug(`主数据库中找到GUID: ${guid} (耗时 ${duration}ms)`);
+      performanceMonitor.recordTiming("database.guid_check.duration", duration);
+      performanceMonitor.incrementCounter("database.guid_check.found");
       return true;
     }
   } catch (error) {
-    console.warn(`主数据库查询GUID失败: ${error.message}`);
+    logger.warn("主数据库查询GUID失败", { error: error.message, guid });
+    performanceMonitor.incrementCounter("database.guid_check.main_failed");
   }
+
   // 如果主数据库查询失败或未找到，尝试查询备用数据库
   const allDatabases = await getAllDatabases();
   for (const { name, pool, db, type } of allDatabases.slice(1)) {
     // 跳过主数据库
     try {
-      if (type === "mongo" && db) {
-        // MongoDB 查询
-        const collection = db.collection("posts");
-        const count = await collection.countDocuments(
-          { guid: guid },
-          { limit: 1 }
+      const result = await retryWithPolicy(
+        async () => {
+          if (type === "mongo" && db) {
+            // MongoDB 查询
+            const collection = db.collection("posts");
+            const count = await collection.countDocuments(
+              { guid: guid },
+              { limit: 1 }
+            );
+            return count > 0;
+          } else if (type === "mysql" && pool) {
+            // MySQL 查询
+            const [rows] = await pool.execute(
+              "SELECT 1 FROM posts WHERE guid = ? LIMIT 1",
+              [guid]
+            );
+            return rows.length > 0;
+          } else if (pool) {
+            // PostgreSQL 查询
+            const res = await pool.query(
+              "SELECT 1 FROM posts WHERE guid = $1 LIMIT 1",
+              [guid]
+            );
+            return res.rowCount > 0;
+          }
+          return false;
+        },
+        "database",
+        { context: { operation: "guid_check", database: name } }
+      );
+
+      if (result) {
+        const duration = Date.now() - startTime;
+        logger.info(
+          `在备用数据库 ${name} 中找到GUID: ${guid} (耗时 ${duration}ms)`
         );
-        if (count > 0) {
-          console.log(`在备用数据库 ${name} 中找到GUID: ${guid}`);
-          return true;
-        }
-      } else if (type === "mysql" && pool) {
-        // MySQL 查询
-        const [rows] = await pool.execute(
-          "SELECT 1 FROM posts WHERE guid = ? LIMIT 1",
-          [guid]
+        performanceMonitor.recordTiming(
+          "database.guid_check.duration",
+          duration
         );
-        if (rows.length > 0) {
-          console.log(`在备用数据库 ${name} 中找到GUID: ${guid}`);
-          return true;
-        }
-      } else if (pool) {
-        // PostgreSQL 查询
-        const res = await pool.query(
-          "SELECT 1 FROM posts WHERE guid = $1 LIMIT 1",
-          [guid]
-        );
-        if (res.rowCount > 0) {
-          console.log(`在备用数据库 ${name} 中找到GUID: ${guid}`);
-          return true;
-        }
+        performanceMonitor.incrementCounter("database.guid_check.found");
+        return true;
       }
     } catch (error) {
-      console.warn(`备用数据库 ${name} 查询GUID失败: ${error.message}`);
+      logger.warn(`备用数据库 ${name} 查询GUID失败`, {
+        error: error.message,
+        database: name,
+      });
+      performanceMonitor.incrementCounter("database.guid_check.backup_failed");
     }
   }
 
+  const duration = Date.now() - startTime;
+  logger.debug(`所有数据库中都未找到GUID: ${guid} (总耗时 ${duration}ms)`);
+  performanceMonitor.recordTiming("database.guid_check.duration", duration);
+  performanceMonitor.incrementCounter("database.guid_check.not_found");
   return false;
 }
 
 // 测试所有数据库连接
 export async function testAllConnections() {
-  console.log("正在测试所有数据库连接...");
+  const startTime = Date.now();
+  logger.info("开始测试所有数据库连接...");
+  performanceMonitor.incrementCounter("database.connection_test.attempts");
+
   const allDatabases = await getAllDatabases();
   const testPromises = allDatabases.map(async ({ name, pool, db, type }) => {
+    const dbStartTime = Date.now();
+
     try {
-      if (type === "mongo" && db) {
-        // 测试 MongoDB 连接
-        await db.admin().ping();
-      } else if (type === "mysql" && pool) {
-        // 测试 MySQL 连接
-        await pool.execute("SELECT 1");
-      } else if (pool) {
-        // 测试 PostgreSQL 连接
-        await pool.query("SELECT 1");
-      }
-      console.log(`✅ ${name} 连接正常`);
-      return { name, connected: true };
+      await retryWithPolicy(
+        async () => {
+          if (type === "mongo" && db) {
+            // 测试 MongoDB 连接
+            await db.admin().ping();
+          } else if (type === "mysql" && pool) {
+            // 测试 MySQL 连接
+            await pool.execute("SELECT 1");
+          } else if (pool) {
+            // 测试 PostgreSQL 连接
+            await pool.query("SELECT 1");
+          }
+        },
+        "database",
+        { context: { operation: "connection_test", database: name } }
+      );
+
+      const duration = Date.now() - dbStartTime;
+      logger.info(`${name} 连接正常 (耗时 ${duration}ms)`);
+      performanceMonitor.recordTiming(
+        `database.${type || "postgresql"}.connection_test_duration`,
+        duration
+      );
+      performanceMonitor.incrementCounter(
+        `database.${type || "postgresql"}.connection_test.success`
+      );
+      return { name, connected: true, responseTime: duration };
     } catch (error) {
-      console.error(`❌ ${name} 连接失败:`, error.message);
-      return { name, connected: false, error: error.message };
+      const duration = Date.now() - dbStartTime;
+      logger.error(`${name} 连接失败`, { error: error.message, duration });
+      performanceMonitor.incrementCounter(
+        `database.${type || "postgresql"}.connection_test.failed`
+      );
+      return {
+        name,
+        connected: false,
+        error: error.message,
+        responseTime: duration,
+      };
     }
   });
 
@@ -360,9 +495,21 @@ export async function testAllConnections() {
     (result) => result.status === "fulfilled" && result.value.connected
   ).length;
 
-  console.log(
-    `数据库连接测试结果: ${connectedCount}/${allDatabases.length} 个数据库连接正常`
+  const totalDuration = Date.now() - startTime;
+  logger.info(
+    `数据库连接测试结果: ${connectedCount}/${allDatabases.length} 个数据库连接正常, 总耗时 ${totalDuration}ms`
   );
+  performanceMonitor.recordTiming(
+    "database.connection_test.total_duration",
+    totalDuration
+  );
+
+  if (connectedCount > 0) {
+    performanceMonitor.incrementCounter("database.connection_test.success");
+  } else {
+    performanceMonitor.incrementCounter("database.connection_test.failed");
+  }
+
   return results;
 }
 

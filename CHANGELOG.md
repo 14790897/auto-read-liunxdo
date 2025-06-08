@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.14.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.13.0...v1.14.0) (2025-06-08)
+
+
+### Features
+
+* mongodb ([acf7be0](https://www.github.com/14790897/auto-read-liunxdo/commit/acf7be0e65317f7237eea216fa846fe3c3c025ae))
+* 修复保存逻辑 ([b36e628](https://www.github.com/14790897/auto-read-liunxdo/commit/b36e62818cf7cc497c94dbcd9177974882cb4398))
+* 多数据库 ([6a9a857](https://www.github.com/14790897/auto-read-liunxdo/commit/6a9a857ecd14cc3fd53f6b82147599a1cf3b64c1))
+
 ## [1.13.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.12.0...v1.13.0) (2025-06-05)
 
 

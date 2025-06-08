@@ -353,8 +353,7 @@ async function launchBrowserForUser(username, password) {
     }
     if (token && chatId) {
       sendToTelegram(`${username} 登录成功`);
-    }
-    // 监听页面跳转到新话题，自动推送RSS example：https://linux.do/t/topic/525305.rss
+    } // 监听页面跳转到新话题，自动推送RSS example：https://linux.do/t/topic/525305.rss
     // 记录已推送过的 topicId，防止重复推送
     if (enableRssFetch) {
       const pushedTopicIds = new Set();
@@ -362,7 +361,7 @@ async function launchBrowserForUser(username, password) {
         if (frame.parentFrame() !== null) return;
         const url = frame.url();
         const match = url.match(/https:\/\/linux\.do\/t\/topic\/(\d+)/);
-        if (match && username === usernames[0]) {
+        if (match) {
           const topicId = match[1];
           if (pushedTopicIds.has(topicId)) {
             return; // 已推送过则跳过

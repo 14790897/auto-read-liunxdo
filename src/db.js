@@ -1,9 +1,10 @@
-// 多数据库工具 (PostgreSQL + MongoDB)
+// 多数据库工具 (PostgreSQL + MongoDB + MySQL)
 import fs from "fs";
 
 import pkg from "pg";
 const { Pool } = pkg;
 import { MongoClient } from "mongodb";
+import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 dotenv.config();
 if (fs.existsSync(".env.local")) {
@@ -36,6 +37,7 @@ const cockroachPool = new Pool({
 });
 
 // 备用数据库连接池 (Neon)
+// 备用数据库连接池 (Neon)
 const neonPool = new Pool({
   connectionString: process.env.NEON_URI,
   max: 3,
@@ -43,6 +45,29 @@ const neonPool = new Pool({
   connectionTimeoutMillis: 2000,
   ssl: { rejectUnauthorized: false },
 });
+
+// MySQL 连接池 (Aiven MySQL)
+let mysqlPool;
+
+// 初始化 MySQL 连接池
+async function initMySQL() {
+  if (process.env.AIVEN_MYSQL_URI && !mysqlPool) {
+    try {
+      mysqlPool = mysql.createPool({
+        uri: process.env.AIVEN_MYSQL_URI,
+        connectionLimit: 5,
+        acquireTimeout: 60000,
+        timeout: 60000,
+        ssl: { rejectUnauthorized: false },
+      });
+      console.log("✅ MySQL 连接池创建成功");
+    } catch (error) {
+      console.error("❌ MySQL 连接池创建失败:", error.message);
+      mysqlPool = null;
+    }
+  }
+  return mysqlPool;
+}
 
 // MongoDB 连接
 let mongoClient;
@@ -77,12 +102,17 @@ const allPools = [
   { name: "Neon", pool: neonPool },
 ];
 
-// 获取所有数据库连接数组 (包括 MongoDB)
+// 获取所有数据库连接数组 (包括 MongoDB 和 MySQL)
 async function getAllDatabases() {
-  const db = await initMongoDB();
+  const mongoDb = await initMongoDB();
+  const mysqlPool = await initMySQL();
+
   return [
     ...allPools,
-    ...(db ? [{ name: "MongoDB", db: db, type: "mongo" }] : []),
+    ...(mongoDb ? [{ name: "MongoDB", db: mongoDb, type: "mongo" }] : []),
+    ...(mysqlPool
+      ? [{ name: "Aiven MySQL", pool: mysqlPool, type: "mysql" }]
+      : []),
   ];
 }
 
@@ -143,9 +173,57 @@ export async function savePosts(posts) {
             upsert: true,
           },
         }));
-
         if (bulkOps.length > 0) {
           await collection.bulkWrite(bulkOps);
+        }
+      } else if (type === "mysql" && pool) {
+        // MySQL 操作
+        const mysqlCreateTableQuery = `
+          CREATE TABLE IF NOT EXISTS posts (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            title TEXT,
+            creator TEXT,
+            description TEXT,
+            link TEXT,
+            pubDate TEXT,
+            guid VARCHAR(500) UNIQUE,
+            guidIsPermaLink TEXT,
+            source TEXT,
+            sourceUrl TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          )
+        `;
+
+        const mysqlInsertQuery = `
+          INSERT INTO posts (title, creator, description, link, pubDate, guid, guidIsPermaLink, source, sourceUrl)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+          ON DUPLICATE KEY UPDATE
+          title = VALUES(title),
+          creator = VALUES(creator),
+          description = VALUES(description),
+          link = VALUES(link),
+          pubDate = VALUES(pubDate),
+          guidIsPermaLink = VALUES(guidIsPermaLink),
+          source = VALUES(source),
+          sourceUrl = VALUES(sourceUrl)
+        `;
+
+        // 建表
+        await pool.execute(mysqlCreateTableQuery);
+
+        // 插入数据
+        for (const post of posts) {
+          await pool.execute(mysqlInsertQuery, [
+            post.title,
+            post.creator,
+            post.description,
+            post.link,
+            post.pubDate,
+            post.guid,
+            post.guidIsPermaLink,
+            post.source,
+            post.sourceUrl,
+          ]);
         }
       } else if (pool) {
         // PostgreSQL 操作
@@ -224,6 +302,16 @@ export async function isGuidExists(guid) {
           console.log(`在备用数据库 ${name} 中找到GUID: ${guid}`);
           return true;
         }
+      } else if (type === "mysql" && pool) {
+        // MySQL 查询
+        const [rows] = await pool.execute(
+          "SELECT 1 FROM posts WHERE guid = ? LIMIT 1",
+          [guid]
+        );
+        if (rows.length > 0) {
+          console.log(`在备用数据库 ${name} 中找到GUID: ${guid}`);
+          return true;
+        }
       } else if (pool) {
         // PostgreSQL 查询
         const res = await pool.query(
@@ -252,6 +340,9 @@ export async function testAllConnections() {
       if (type === "mongo" && db) {
         // 测试 MongoDB 连接
         await db.admin().ping();
+      } else if (type === "mysql" && pool) {
+        // 测试 MySQL 连接
+        await pool.execute("SELECT 1");
       } else if (pool) {
         // 测试 PostgreSQL 连接
         await pool.query("SELECT 1");
@@ -291,11 +382,25 @@ export async function getAllDatabaseStats() {
           {},
           { sort: { created_at: -1 } }
         );
-
         stats = {
           name,
           totalPosts,
           latestPost: latestPost?.created_at || null,
+          status: "healthy",
+        };
+      } else if (type === "mysql" && pool) {
+        // MySQL 统计
+        const [countResult] = await pool.execute(
+          "SELECT COUNT(*) as count FROM posts"
+        );
+        const [latestResult] = await pool.execute(
+          "SELECT created_at FROM posts ORDER BY created_at DESC LIMIT 1"
+        );
+
+        stats = {
+          name,
+          totalPosts: parseInt(countResult[0].count),
+          latestPost: latestResult[0]?.created_at || null,
           status: "healthy",
         };
       } else if (pool) {
@@ -348,6 +453,10 @@ export async function closeAllConnections() {
           mongoClient = null;
           mongoDb = null;
         }
+      } else if (type === "mysql" && pool) {
+        // 关闭 MySQL 连接
+        await pool.end();
+        mysqlPool = null;
       } else if (pool) {
         // 关闭 PostgreSQL 连接
         await pool.end();

@@ -1,4 +1,4 @@
-// 多数据库功能测试脚本 (PostgreSQL + MongoDB)
+// 多数据库功能测试脚本 (PostgreSQL + MongoDB + MySQL)
 import {
   testAllConnections,
   getAllDatabaseStats,
@@ -8,7 +8,7 @@ import {
 } from "./src/db.js";
 
 async function testMultiDatabase() {
-  console.log("🚀 开始多数据库功能测试 (PostgreSQL + MongoDB)...\n");
+  console.log("🚀 开始多数据库功能测试 (PostgreSQL + MongoDB + MySQL)...\n");
 
   try {
     // 1. 测试所有数据库连接
@@ -25,12 +25,13 @@ async function testMultiDatabase() {
     console.log("=== 3. 测试保存数据 ===");
     const testPosts = [
       {
-        title: "测试帖子标题 - 多数据库测试 (含MongoDB)",
+        title: "测试帖子标题 - 多数据库测试 (含MongoDB+MySQL)",
         creator: "test_user",
-        description: "这是一个多数据库功能测试帖子，包括 PostgreSQL 和 MongoDB",
-        link: "https://linux.do/t/topic/test-mongo-123",
+        description:
+          "这是一个多数据库功能测试帖子，包括 PostgreSQL、MongoDB 和 MySQL",
+        link: "https://linux.do/t/topic/test-mysql-123",
         pubDate: new Date().toISOString(),
-        guid: `test-multi-db-mongo-${Date.now()}`,
+        guid: `test-multi-db-mysql-${Date.now()}`,
         guidIsPermaLink: "false",
         source: "Linux.do",
         sourceUrl: "https://linux.do",
@@ -63,8 +64,7 @@ async function testMultiDatabase() {
         );
       }
     });
-
-    console.log("\n✅ 多数据库功能测试完成 (PostgreSQL + MongoDB)");
+    console.log("\n✅ 多数据库功能测试完成 (PostgreSQL + MongoDB + MySQL)");
   } catch (error) {
     console.error("❌ 测试过程中发生错误:", error);
   } finally {

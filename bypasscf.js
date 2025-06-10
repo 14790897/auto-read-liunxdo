@@ -543,6 +543,7 @@ async function navigatePage(url, page, browser) {
     // 检查是否超过15秒
     if (Date.now() - startTime > 35000) {
       console.log("Timeout exceeded, aborting actions.");
+      sendToTelegram(`超时了,无法通过Cloudflare验证`);
       await browser.close();
       return; // 超时则退出函数
     }

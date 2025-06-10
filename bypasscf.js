@@ -453,7 +453,11 @@ async function login(page, username, password, retryCount = 3) {
       await page.goto(`${loginUrl}/t/topic/1`, {
         waitUntil: "domcontentloaded",
       });
-      await page.click(".discourse-reactions-reaction-button");
+      try {
+        await page.click(".discourse-reactions-reaction-button");
+      } catch (error) {
+        console.log("没有找到点赞按钮，可能是页面没有加载完成或按钮不存在");
+      }
     }
   }
   // 等待用户名输入框加载

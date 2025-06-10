@@ -532,7 +532,7 @@ async function navigatePage(url, page, browser) {
   const startTime = Date.now(); // 记录开始时间
   let pageTitle = await page.title(); // 获取当前页面标题
 
-  while (pageTitle.includes("Just a moment")) {
+  while (pageTitle.includes("Just a moment") || pageTitle.includes("请稍候")) {
     console.log("The page is under Cloudflare protection. Waiting...");
 
     await delayClick(2000); // 每次检查间隔2秒

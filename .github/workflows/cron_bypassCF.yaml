@@ -3,7 +3,7 @@ name: readLike（自动阅读随机点赞）
 on:
   schedule:
     # 每天 UTC 时间 19:40 运行
-    - cron: '5 14 * * *'
+    - cron: '25 6 * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:

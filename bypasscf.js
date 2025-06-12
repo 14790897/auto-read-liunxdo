@@ -453,7 +453,11 @@ async function login(page, username, password, retryCount = 3) {
       await page.goto(`${loginUrl}/t/topic/1`, {
         waitUntil: "domcontentloaded",
       });
-      await page.click(".discourse-reactions-reaction-button");
+      try {
+        await page.click(".discourse-reactions-reaction-button");
+      } catch (error) {
+        console.log("没有找到点赞按钮，可能是页面没有加载完成或按钮不存在");
+      }
     }
   }
   // 等待用户名输入框加载
@@ -528,7 +532,7 @@ async function navigatePage(url, page, browser) {
   const startTime = Date.now(); // 记录开始时间
   let pageTitle = await page.title(); // 获取当前页面标题
 
-  while (pageTitle.includes("Just a moment")) {
+  while (pageTitle.includes("Just a moment") || pageTitle.includes("请稍候")) {
     console.log("The page is under Cloudflare protection. Waiting...");
 
     await delayClick(2000); // 每次检查间隔2秒
@@ -539,6 +543,7 @@ async function navigatePage(url, page, browser) {
     // 检查是否超过15秒
     if (Date.now() - startTime > 35000) {
       console.log("Timeout exceeded, aborting actions.");
+      sendToTelegram(`超时了,无法通过Cloudflare验证`);
       await browser.close();
       return; // 超时则退出函数
     }

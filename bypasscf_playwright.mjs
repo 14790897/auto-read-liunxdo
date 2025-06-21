@@ -31,6 +31,14 @@ import { chromium } from "playwright-extra";
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 const stealth = StealthPlugin();
 chromium.use(stealth);
+
+// 代理配置
+import { 
+  getProxyConfig, 
+  getPlaywrightProxyConfig, 
+  testProxyConnection, 
+  getCurrentIP 
+} from "./src/proxy_config.js";
 // -----------------------------------------------------------------------
 // 环境变量加载
 // -----------------------------------------------------------------------
@@ -80,6 +88,27 @@ const delay = (ms) => new Promise((r) => setTimeout(r, ms));
 // -----------------------------------------------------------------------
 (async () => {
   try {
+    // 代理配置检查
+    const proxyConfig = getProxyConfig();
+    if (proxyConfig) {
+      console.log(`代理配置: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`);
+      
+      // 测试代理连接
+      console.log("正在测试代理连接...");
+      const proxyWorking = await testProxyConnection(proxyConfig);
+      if (proxyWorking) {
+        console.log("✅ 代理连接测试成功");
+      } else {
+        console.log("❌ 代理连接测试失败，将使用直连");
+      }
+    } else {
+      console.log("未配置代理，使用直连");
+      const currentIP = await getCurrentIP();
+      if (currentIP) {
+        console.log(`当前IP地址: ${currentIP}`);
+      }
+    }
+
     const batches = [];
     for (let i = 0; i < totalAccounts; i += maxConcurrentAccounts) {
       batches.push(usernames.slice(i, i + maxConcurrentAccounts).map((u, idx) => ({
@@ -125,15 +154,28 @@ async function launchBrowserForUser(username, password, instanceDelay) {
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   };
 
+  // 添加代理配置
+  const proxyConfig = getProxyConfig();
+  const playwrightProxy = getPlaywrightProxyConfig(proxyConfig);
+  
   const browser = await chromium.launch(launchOpts);
-  const context = await browser.newContext({
+  
+  const contextOptions = {
     locale: "en-US",
     userAgent: `Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36`,
     viewport: {
       width: 1280 + Math.floor(Math.random() * 100),
       height: 720 + Math.floor(Math.random() * 100),
     },
-  });
+  };
+  
+  // 如果有代理配置，添加到context选项
+  if (playwrightProxy) {
+    contextOptions.proxy = playwrightProxy;
+    console.log(`为用户 ${username} 启用代理: ${playwrightProxy.server}`);
+  }
+  
+  const context = await browser.newContext(contextOptions);
   await context.setExtraHTTPHeaders({ "accept-language": "en-US,en;q=0.9" });
 
   const page = await context.newPage();

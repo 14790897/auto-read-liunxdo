@@ -10,6 +10,13 @@ import fetch from "node-fetch";
 import { parseStringPromise } from "xml2js";
 import { parseRss } from "./src/parse_rss.js";
 import { processAndSaveTopicData } from "./src/topic_data.js";
+import {
+  getProxyConfig,
+  getPuppeteerProxyArgs,
+  testProxyConnection,
+  getCurrentIP,
+} from "./src/proxy_config.js";
+
 dotenv.config();
 
 // 截图保存的文件夹
@@ -75,6 +82,29 @@ console.log(
     enableTopicDataFetch ? "开启" : "关闭"
   } (ENABLE_TOPIC_DATA_FETCH=${process.env.ENABLE_TOPIC_DATA_FETCH})`
 );
+
+// 代理配置
+const proxyConfig = getProxyConfig();
+if (proxyConfig) {
+  console.log(
+    `代理配置: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`
+  );
+
+  // 测试代理连接
+  console.log("正在测试代理连接...");
+  const proxyWorking = await testProxyConnection(proxyConfig);
+  if (proxyWorking) {
+    console.log("✅ 代理连接测试成功");
+  } else {
+    console.log("❌ 代理连接测试失败，将使用直连");
+  }
+} else {
+  console.log("未配置代理，使用直连");
+  const currentIP = await getCurrentIP();
+  if (currentIP) {
+    console.log(`当前IP地址: ${currentIP}`);
+  }
+}
 
 let bot;
 if (token && (chatId || groupId)) {
@@ -222,15 +252,25 @@ async function launchBrowserForUser(username, password) {
       args: ["--no-sandbox", "--disable-setuid-sandbox"], // Linux 需要的安全设置
     };
 
-    // 如果环境变量不是 'dev'，则添加代理配置
-    // if (process.env.ENVIRONMENT !== "dev") {
-    // browserOptions["proxy"] = {
-    //   host: "38.154.227.167",
-    //   port: "5868",
-    //   username: "pqxujuyl",
-    //   password: "y1nmb5kjbz9t",
-    // };
-    // }
+    // 添加代理配置到浏览器选项
+    const proxyConfig = getProxyConfig();
+    if (proxyConfig) {
+      const proxyArgs = getPuppeteerProxyArgs(proxyConfig);
+      browserOptions.args.push(...proxyArgs);
+      console.log(
+        `为用户 ${username} 启用代理: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`
+      );
+
+      // 如果有用户名密码，puppeteer-real-browser会自动处理
+      if (proxyConfig.username && proxyConfig.password) {
+        browserOptions.proxy = {
+          host: proxyConfig.host,
+          port: proxyConfig.port,
+          username: proxyConfig.username,
+          password: proxyConfig.password,
+        };
+      }
+    }
 
     var { connect } = await import("puppeteer-real-browser");
     const { page, browser: newBrowser } = await connect(browserOptions);

@@ -20,6 +20,7 @@ jobs:
       PASSWORDS: ${{ secrets.PASSWORDS }}
       WEBSITE: ${{ secrets.WEBSITE }}
       RUN_TIME_LIMIT_MINUTES: ${{ secrets.RUN_TIME_LIMIT_MINUTES }}
+      MAX_CONCURRENT_ACCOUNTS: ${{ secrets.MAX_CONCURRENT_ACCOUNTS }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
       TELEGRAM_GROUP_ID: ${{ secrets.TELEGRAM_GROUP_ID }}

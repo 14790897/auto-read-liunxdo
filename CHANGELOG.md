@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.14.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.0...v1.14.1) (2025-06-21)
+
+
+### Bug Fixes
+
+* 环境变量错误 ([ca0426e](https://www.github.com/14790897/auto-read-liunxdo/commit/ca0426e1651f50d8bcf7b0a689fe833b6051fe45))
+
 ## [1.14.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.13.0...v1.14.0) (2025-06-11)
 
 

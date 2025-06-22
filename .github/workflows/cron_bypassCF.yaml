@@ -15,7 +15,8 @@ jobs:
       matrix:
         node-version: [20.x]
     env:
-      # 在作业级别设置环境变量      USERNAMES: ${{ secrets.USERNAMES }}
+      # 在作业级别设置环境变量      
+      USERNAMES: ${{ secrets.USERNAMES }}
       PASSWORDS: ${{ secrets.PASSWORDS }}
       WEBSITE: ${{ secrets.WEBSITE }}
       RUN_TIME_LIMIT_MINUTES: ${{ secrets.RUN_TIME_LIMIT_MINUTES }}

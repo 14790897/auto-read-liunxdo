@@ -181,7 +181,7 @@ function delayClick(time) {
 (async () => {
   try {
     if (usernames.length !== passwords.length) {
-      console.log(usernames.length, usernames, passwords.length, passwords);
+      console.log(usernames.length, passwords.length);
       throw new Error("用户名和密码的数量不匹配！");
     }
 

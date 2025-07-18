@@ -31,39 +31,6 @@ https://t.me/linuxdoSQL
 
 ### 2.运行
 
-#### 🌐 代理配置 (可选)
-
-本项目支持HTTP、HTTPS、SOCKS4、SOCKS5代理，可以帮助你：
-- 绕过地理位置限制
-- 提高访问稳定性
-- 保护隐私
-
-**配置方法1: 使用代理URL (推荐)**
-```sh
-# HTTP代理
-PROXY_URL=http://username:password@proxy.example.com:8080
-
-# SOCKS5代理  
-PROXY_URL=socks5://username:password@proxy.example.com:1080
-
-# 无需认证的代理
-PROXY_URL=http://proxy.example.com:8080
-```
-
-**配置方法2: 分别设置参数**
-```sh
-PROXY_TYPE=http
-PROXY_HOST=proxy.example.com
-PROXY_PORT=8080
-PROXY_USERNAME=your_username
-PROXY_PASSWORD=your_password
-```
-
-**测试代理配置**
-```sh
-# 测试代理连接
-node test_proxy.js
-```
 
 #### Windows
 

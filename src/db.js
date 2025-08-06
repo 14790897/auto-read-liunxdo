@@ -7,6 +7,23 @@ import { MongoClient } from "mongodb";
 import mysql from "mysql2/promise";
 import dotenv from "dotenv";
 dotenv.config();
+
+// Utility function to format error information for better logging
+function formatErrorInfo(error) {
+  if (!error) return { errorMsg: '未知错误', errorCode: '无错误代码' };
+  
+  let errorMsg = error?.message || error?.toString() || '未知错误';
+  const errorCode = error?.code || '无错误代码';
+  
+  // Handle AggregateError specially
+  if (error instanceof AggregateError && error.errors?.length > 0) {
+    const innerError = error.errors[0];
+    const innerMsg = innerError?.message || innerError?.toString() || '内部错误';
+    errorMsg = `${errorMsg} (${innerMsg})`;
+  }
+  
+  return { errorMsg, errorCode };
+}
 if (fs.existsSync(".env.local")) {
   console.log("Using .env.local file to supply config environment variables");
   const envConfig = dotenv.parse(fs.readFileSync(".env.local"));
@@ -117,9 +134,31 @@ async function getAllDatabases() {
 }
 
 export async function savePosts(posts) {
-  if (!Array.isArray(posts) || posts.length === 0) return;
+  if (!Array.isArray(posts) || posts.length === 0) {
+    console.warn("无效的帖子数据或空数组，跳过保存");
+    return;
+  }
+
+  // 验证帖子数据
+  const validPosts = posts.filter(post => {
+    if (!post || !post.guid || typeof post.guid !== 'string' || post.guid.trim() === '') {
+      console.warn(`跳过无效帖子数据: ${JSON.stringify({title: post?.title, guid: post?.guid})}`);
+      return false;
+    }
+    return true;
+  });
+
+  if (validPosts.length === 0) {
+    console.warn("没有有效的帖子数据，跳过保存");
+    return;
+  }
 
   const allDatabases = await getAllDatabases();
+
+  if (allDatabases.length === 0) {
+    console.warn("没有可用的数据库连接，跳过保存");
+    return;
+  }
 
   const createTableQuery = `
     CREATE TABLE IF NOT EXISTS posts (
@@ -152,7 +191,7 @@ export async function savePosts(posts) {
         const collection = db.collection("posts");
 
         // 准备 MongoDB 文档
-        const mongoDocuments = posts.map((post) => ({
+        const mongoDocuments = validPosts.map((post) => ({
           title: post.title,
           creator: post.creator,
           description: post.description,
@@ -212,7 +251,7 @@ export async function savePosts(posts) {
         await pool.execute(mysqlCreateTableQuery);
 
         // 插入数据
-        for (const post of posts) {
+        for (const post of validPosts) {
           await pool.execute(mysqlInsertQuery, [
             post.title,
             post.creator,
@@ -231,7 +270,7 @@ export async function savePosts(posts) {
         await pool.query(createTableQuery);
 
         // 插入数据
-        for (const post of posts) {
+        for (const post of validPosts) {
           await pool.query(insertQuery, [
             post.title,
             post.creator,
@@ -246,11 +285,12 @@ export async function savePosts(posts) {
         }
       }
 
-      console.log(`✅ ${name} 保存成功 (${posts.length} 条记录)`);
+      console.log(`✅ ${name} 保存成功 (${validPosts.length} 条记录)`);
       return { name, success: true };
     } catch (error) {
-      console.error(`❌ ${name} 保存失败:`, error.message);
-      return { name, success: false, error: error.message };
+      const { errorMsg, errorCode } = formatErrorInfo(error);
+      console.error(`❌ ${name} 保存失败 [${errorCode}]:`, errorMsg);
+      return { name, success: false, error: errorMsg };
     }
   });
 
@@ -273,6 +313,12 @@ export async function savePosts(posts) {
 }
 
 export async function isGuidExists(guid) {
+  // 验证输入参数
+  if (!guid || typeof guid !== 'string' || guid.trim() === '') {
+    console.warn(`无效的GUID参数: ${JSON.stringify(guid)}`);
+    return false;
+  }
+
   // 优先查询主数据库 (Aiven PostgreSQL)
   try {
     const res = await pool.query(
@@ -284,7 +330,8 @@ export async function isGuidExists(guid) {
       return true;
     }
   } catch (error) {
-    console.warn(`主数据库查询GUID失败: ${error.message}`);
+    const { errorMsg, errorCode } = formatErrorInfo(error);
+    console.warn(`主数据库查询GUID失败 [${errorCode}]: ${errorMsg}`);
   }
   // 如果主数据库查询失败或未找到，尝试查询备用数据库
   const allDatabases = await getAllDatabases();
@@ -324,7 +371,8 @@ export async function isGuidExists(guid) {
         }
       }
     } catch (error) {
-      console.warn(`备用数据库 ${name} 查询GUID失败: ${error.message}`);
+      const { errorMsg, errorCode } = formatErrorInfo(error);
+      console.warn(`备用数据库 ${name} 查询GUID失败 [${errorCode}]: ${errorMsg}`);
     }
   }
 
@@ -350,8 +398,9 @@ export async function testAllConnections() {
       console.log(`✅ ${name} 连接正常`);
       return { name, connected: true };
     } catch (error) {
-      console.error(`❌ ${name} 连接失败:`, error.message);
-      return { name, connected: false, error: error.message };
+      const { errorMsg, errorCode } = formatErrorInfo(error);
+      console.error(`❌ ${name} 连接失败 [${errorCode}]:`, errorMsg);
+      return { name, connected: false, error: errorMsg };
     }
   });
 
@@ -423,13 +472,14 @@ export async function getAllDatabaseStats() {
       console.log(`📊 ${name}: ${stats.totalPosts} 条记录`);
       return stats;
     } catch (error) {
-      console.error(`❌ ${name} 统计信息获取失败:`, error.message);
+      const { errorMsg, errorCode } = formatErrorInfo(error);
+      console.error(`❌ ${name} 统计信息获取失败 [${errorCode}]:`, errorMsg);
       return {
         name,
         totalPosts: -1,
         latestPost: null,
         status: "error",
-        error: error.message,
+        error: errorMsg,
       };
     }
   });
@@ -463,7 +513,8 @@ export async function closeAllConnections() {
       }
       console.log(`✅ ${name} 连接已关闭`);
     } catch (error) {
-      console.error(`❌ ${name} 连接关闭失败:`, error.message);
+      const { errorMsg, errorCode } = formatErrorInfo(error);
+      console.error(`❌ ${name} 连接关闭失败 [${errorCode}]:`, errorMsg);
     }
   });
 
@@ -617,8 +668,9 @@ export async function saveTopicData(topicData) {
       console.log(`✅ ${name} 话题数据保存成功 (话题ID: ${topicData.id})`);
       return { name, success: true };
     } catch (error) {
-      console.error(`❌ ${name} 话题数据保存失败:`, error.message);
-      return { name, success: false, error: error.message };
+      const { errorMsg, errorCode } = formatErrorInfo(error);
+      console.error(`❌ ${name} 话题数据保存失败 [${errorCode}]:`, errorMsg);
+      return { name, success: false, error: errorMsg };
     }
   });
 

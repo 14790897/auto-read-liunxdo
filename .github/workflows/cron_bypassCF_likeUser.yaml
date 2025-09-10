@@ -3,7 +3,7 @@ name: likeUser (点赞特定用户)
 on:
   schedule:
     # 每天 UTC 时间 18:00 运行
-    - cron: '49 21 * * *'
+    - cron: '59 13 * * *'
   workflow_dispatch: # 允许手动触发
 
 jobs:

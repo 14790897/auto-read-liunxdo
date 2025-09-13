@@ -19,6 +19,24 @@ import {
 
 dotenv.config();
 
+// 捕获未处理的异常/Promise拒绝，避免因 Target closed 之类错误导致进程退出
+process.on("unhandledRejection", (reason) => {
+  try {
+    const msg = (reason && reason.message) ? reason.message : String(reason);
+    console.warn("[unhandledRejection]", msg);
+  } catch {
+    console.warn("[unhandledRejection] (non-string reason)");
+  }
+});
+process.on("uncaughtException", (err) => {
+  try {
+    const msg = (err && err.message) ? err.message : String(err);
+    console.warn("[uncaughtException]", msg);
+  } catch {
+    console.warn("[uncaughtException] (non-string error)");
+  }
+});
+
 // 截图保存的文件夹
 // const screenshotDir = "screenshots";
 // if (!fs.existsSync(screenshotDir)) {
@@ -110,25 +128,42 @@ let bot;
 if (token && (chatId || groupId)) {
   bot = new TelegramBot(token);
 }
-function sendToTelegram(message) {
-  if (!bot || !chatId) return;
-
-  bot
-    .sendMessage(chatId, message)
-    .then(() => {
-      console.log("Telegram message sent successfully");
-    })
-    .catch((error) => {
+// 简单的 Telegram 发送重试
+async function tgSendWithRetry(id, message, maxRetries = 3) {
+  let lastErr;
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      await bot.sendMessage(id, message);
+      return true;
+    } catch (e) {
+      lastErr = e;
+      const delay = 1500 * (i + 1);
       console.error(
-        "Error sending Telegram message:",
-        error && error.code ? error.code : "",
-        error && error.message
-          ? error.message.slice(0, 100)
-          : String(error).slice(0, 100)
+        `Telegram send failed (attempt ${i + 1}/${maxRetries}): ${
+          e && e.message ? e.message : e
+        }`
       );
-    });
+      await new Promise((r) => setTimeout(r, delay));
+    }
+  }
+  throw lastErr;
 }
-function sendToTelegramGroup(message) {
+async function sendToTelegram(message) {
+  if (!bot || !chatId) return;
+  try {
+    await tgSendWithRetry(chatId, message, 3);
+    console.log("Telegram message sent successfully");
+  } catch (error) {
+    console.error(
+      "Error sending Telegram message:",
+      error && error.code ? error.code : "",
+      error && error.message
+        ? error.message.slice(0, 100)
+        : String(error).slice(0, 100)
+    );
+  }
+}
+async function sendToTelegramGroup(message) {
   if (!bot || !groupId) {
     console.error("sendToTelegramGroup: bot 或 groupId 不存在");
     return;
@@ -145,29 +180,25 @@ function sendToTelegramGroup(message) {
     let part = 1;
     while (start < message.length) {
       const chunk = message.slice(start, start + MAX_LEN);
-      bot
-        .sendMessage(groupId, chunk)
-        .then(() => {
-          console.log(`Telegram group message part ${part} sent successfully`);
-        })
-        .catch((error) => {
-          console.error(
-            `Error sending Telegram group message part ${part}:`,
-            error
-          );
-        });
+      try {
+        await tgSendWithRetry(groupId, chunk, 3);
+        console.log(`Telegram group message part ${part} sent successfully`);
+      } catch (error) {
+        console.error(
+          `Error sending Telegram group message part ${part}:`,
+          error
+        );
+      }
       start += MAX_LEN;
       part++;
     }
   } else {
-    bot
-      .sendMessage(groupId, message)
-      .then(() => {
-        console.log("Telegram group message sent successfully");
-      })
-      .catch((error) => {
-        console.error("Error sending Telegram group message:", error);
-      });
+    try {
+      await tgSendWithRetry(groupId, message, 3);
+      console.log("Telegram group message sent successfully");
+    } catch (error) {
+      console.error("Error sending Telegram group message:", error);
+    }
   }
 }
 
@@ -316,9 +347,26 @@ async function launchBrowserForUser(username, password) {
         // 设置标志变量为 true，表示即将刷新页面
         page._isReloaded = true;
         //由于油候脚本它这个时候可能会导航到新的网页,会导致直接执行代码报错,所以使用这个来在每个新网页加载之前来执行
-        await page.evaluateOnNewDocument(() => {
-          localStorage.setItem("autoLikeEnabled", "false");
-        });
+        try {
+          await page.evaluateOnNewDocument(() => {
+            localStorage.setItem("autoLikeEnabled", "false");
+          });
+        } catch (e) {
+          // Fallback to immediate evaluate when target already navigated/closed
+          try {
+            if (!page.isClosed || !page.isClosed()) {
+              await page.evaluate(() => {
+                localStorage.setItem("autoLikeEnabled", "false");
+              });
+            }
+          } catch (e2) {
+            console.warn(
+              `Skip disabling autoLike due to closed target: ${
+                (e2 && e2.message) ? e2.message : e2
+              }`
+            );
+          }
+        }
         // 等待一段时间，比如 3 秒
         await new Promise((resolve) => setTimeout(resolve, 3000));
         console.log("Retrying now...");
@@ -387,15 +435,38 @@ async function launchBrowserForUser(username, password) {
     if (loginUrl == "https://linux.do") {
       await page.goto("https://linux.do/t/topic/13716/790", {
         waitUntil: "domcontentloaded",
+        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
       });
     } else if (loginUrl == "https://meta.appinn.net") {
       await page.goto("https://meta.appinn.net/t/topic/52006", {
         waitUntil: "domcontentloaded",
+        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
       });
     } else {
       await page.goto(`${loginUrl}/t/topic/1`, {
         waitUntil: "domcontentloaded",
+        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
       });
+    }
+    // Ensure automation injected after navigation (fallback in case init-script failed)
+    try {
+      await page.evaluate(
+        (specificUser, scriptToEval, isAutoLike) => {
+          if (!window.__autoInjected) {
+            localStorage.setItem("read", true);
+            localStorage.setItem("specificUser", specificUser);
+            localStorage.setItem("isFirstRun", "false");
+            localStorage.setItem("autoLikeEnabled", isAutoLike);
+            try { eval(scriptToEval); } catch (e) { console.error("eval external script failed", e); }
+            window.__autoInjected = true;
+          }
+        },
+        specificUser,
+        externalScript,
+        isAutoLike
+      );
+    } catch (e) {
+      console.warn(`Post-navigation inject failed: ${e && e.message ? e.message : e}`);
     }
     if (token && chatId) {
       sendToTelegram(`${username} 登录成功`);
@@ -487,11 +558,13 @@ async function login(page, username, password, retryCount = 3) {
     if (loginUrl == "https://meta.appinn.net") {
       await page.goto("https://meta.appinn.net/t/topic/52006", {
         waitUntil: "domcontentloaded",
+        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
       });
       await page.click(".discourse-reactions-reaction-button");
     } else {
       await page.goto(`${loginUrl}/t/topic/1`, {
         waitUntil: "domcontentloaded",
+        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
       });
       try {
         await page.click(".discourse-reactions-reaction-button");
@@ -552,7 +625,7 @@ async function login(page, username, password, retryCount = 3) {
     } else {
       if (retryCount > 0) {
         console.log("Retrying login...");
-        await page.reload({ waitUntil: "domcontentloaded" });
+        await page.reload({ waitUntil: "domcontentloaded", timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10) });
         await delayClick(2000); // 增加重试前的延迟
         return await login(page, username, password, retryCount - 1);
       } else {
@@ -567,6 +640,11 @@ async function login(page, username, password, retryCount = 3) {
 }
 
 async function navigatePage(url, page, browser) {
+  try {
+    page.setDefaultNavigationTimeout(
+      parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10)
+    );
+  } catch {}
   await page.goto(url, { waitUntil: "domcontentloaded" }); //如果使用默认的load,linux下页面会一直加载导致无法继续执行
 
   const startTime = Date.now(); // 记录开始时间

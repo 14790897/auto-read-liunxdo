@@ -9,6 +9,7 @@
 // @match        https://meta.appinn.net/*
 // @match        https://community.openai.com/
 // @match        https://idcflare.com/*
+// @exclude      https://linux.do/a/9611/0
 // @grant        none
 // @license      MIT
 // @icon         https://www.google.com/s2/favicons?domain=linux.do

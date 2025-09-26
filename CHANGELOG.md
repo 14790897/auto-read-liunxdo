@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.14.2](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.1...v1.14.2) (2025-09-26)
+
+
+### Bug Fixes
+
+* // [@exclude](https://www.github.com/exclude)      https://linux.do/a/9611/0 ([150d94a](https://www.github.com/14790897/auto-read-liunxdo/commit/150d94a49d6f47468ec95838ee6f70a17eb0d13b))
+* TargetCloseError: Protocol error (Page.addScriptToEvaluateOnNewDocument): Target closed ([a0633d0](https://www.github.com/14790897/auto-read-liunxdo/commit/a0633d06237c60aa49509b5359c30e992fea6ab7))
+
 ### [1.14.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.0...v1.14.1) (2025-06-25)
 
 

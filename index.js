@@ -1,13 +1,14 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.4.2
+// @version      1.4.4
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
 // @match        https://linux.do/*
 // @match        https://meta.appinn.net/*
 // @match        https://community.openai.com/
+// @match        https://idcflare.com/*
 // @grant        none
 // @license      MIT
 // @icon         https://www.google.com/s2/favicons?domain=linux.do
@@ -23,6 +24,7 @@
     "https://meta.discourse.org",
     "https://meta.appinn.net",
     "https://community.openai.com",
+    "https://idcflare.com/",
   ];
   const commentLimit = 1000;
   const topicListLimit = 100;

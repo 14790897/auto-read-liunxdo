@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Auto Read
 // @namespace    http://tampermonkey.net/
-// @version      1.4.5
+// @version      1.4.6
 // @description  自动刷linuxdo文章
 // @author       liuweiqing
 // @match        https://meta.discourse.org/*
@@ -303,7 +303,7 @@
     } else {
       // 如果是Linuxdo，就导航到我的帖子
       if (BASE_URL == "https://linux.do") {
-        window.location.href = "https://linux.do/t/topic/13716/700";
+        window.location.href = "https://linux.do/t/topic/13716/900";
       } else {
         window.location.href = `${BASE_URL}/t/topic/1`;
       }

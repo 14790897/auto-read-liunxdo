@@ -1,0 +1,63 @@
+name: Deploy to HuggingFace Spaces
+
+on:
+  push:
+    branches:
+      - dev
+      - main
+    paths-ignore:
+      - '.github/workflows/cron_*.yaml'
+      - '.github/workflows/cron_*.yml'
+  workflow_dispatch:
+
+jobs:
+  check-secret:
+    runs-on: ubuntu-latest
+    outputs:
+      token-set: ${{ steps.check-key.outputs.defined }}
+    steps:
+      - id: check-key
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        if: "${{ env.HF_TOKEN != '' }}"
+        run: echo "defined=true" >> $GITHUB_OUTPUT
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [check-secret]
+    if: needs.check-secret.outputs.token-set == 'true'
+    env:
+      HF_TOKEN: ${{ secrets.HF_TOKEN }}
+      HF_REPO: ${{ secrets.HF_REPO }}
+      HF_USER: ${{ secrets.HF_USER }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Remove git history
+        run: rm -rf .git
+
+      - name: Prepend YAML front matter to README.md
+        run: |
+          echo "---" > temp_readme.md
+          echo "title: yolo_track_inference" >> temp_readme.md
+          echo "emoji: 🐳" >> temp_readme.md
+          echo "colorFrom: red" >> temp_readme.md
+          echo "colorTo: gray" >> temp_readme.md
+          echo "sdk: docker" >> temp_readme.md
+          echo "app_port: 7860" >> temp_readme.md
+          echo "---" >> temp_readme.md
+          cat README.md >> temp_readme.md
+          mv temp_readme.md README.md
+
+      - name: Configure git
+        run: |
+          git config --global user.email "liuweiqing147@gmail.com"
+          git config --global user.name "14790897"
+      - name: Set up Git and push to Space
+        run: |
+          git init --initial-branch=main
+          git lfs track "*.ttf"
+          git add .
+          git commit -m "yolo: ${{ github.sha }}"
+          git push --force https://${HF_USER}:${HF_TOKEN}@huggingface.co/spaces/${HF_USER}/${HF_REPO} main

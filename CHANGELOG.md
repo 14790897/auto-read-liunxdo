@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.14.3](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.2...v1.14.3) (2025-10-26)
+
+
+### Bug Fixes
+
+* ignore cron push ([fbdb7dd](https://www.github.com/14790897/auto-read-liunxdo/commit/fbdb7ddb052c75c7be57c169e6e7f0af3cc82d01))
+
 ### [1.14.2](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.1...v1.14.2) (2025-09-26)
 
 

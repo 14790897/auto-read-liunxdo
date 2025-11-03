@@ -83,6 +83,9 @@ LIKE_SPECIFIC_USER=true node ./bypasscf.js
 在 GitHub action 的 secrets 设置用户名密码（变量名参考.env 中给出的），这里无法读取.env 变量
 ![设置环境变量教程](image2.png)
 
+除此之外要修改时间还要改action的时间变量:
+https://github.com/14790897/auto-read-liunxdo/blob/117af32dfdd0d3a6c2daf08dcd69e1aa3b7c4d00/.github/workflows/cron_bypassCF.yaml#L12
+
 ### 3.启动 workflow
 
 教程：https://github.com/ChatGPTNextWeb/ChatGPT-Next-Web?tab=readme-ov-file#enable-automatic-updates

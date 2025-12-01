@@ -22,7 +22,7 @@ dotenv.config();
 // 捕获未处理的异常/Promise拒绝，避免因 Target closed 之类错误导致进程退出
 process.on("unhandledRejection", (reason) => {
   try {
-    const msg = (reason && reason.message) ? reason.message : String(reason);
+    const msg = reason && reason.message ? reason.message : String(reason);
     console.warn("[unhandledRejection]", msg);
   } catch {
     console.warn("[unhandledRejection] (non-string reason)");
@@ -30,7 +30,7 @@ process.on("unhandledRejection", (reason) => {
 });
 process.on("uncaughtException", (err) => {
   try {
-    const msg = (err && err.message) ? err.message : String(err);
+    const msg = err && err.message ? err.message : String(err);
     console.warn("[uncaughtException]", msg);
   } catch {
     console.warn("[uncaughtException] (non-string error)");
@@ -53,7 +53,7 @@ if (fs.existsSync(".env.local")) {
   }
 } else {
   console.log(
-    "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git"
+    "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git",
   );
 }
 
@@ -64,7 +64,7 @@ const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 20;
 const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
 
 console.log(
-  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
+  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`,
 );
 
 // 设置一个定时器，在运行时间到达时终止进程
@@ -76,8 +76,9 @@ const shutdownTimer = setTimeout(() => {
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
 const groupId = process.env.TELEGRAM_GROUP_ID;
-const specificUser = process.env.SPECIFIC_USER || "14790897";
-const maxConcurrentAccounts = parseInt(process.env.MAX_CONCURRENT_ACCOUNTS) || 3; // 每批最多同时运行的账号数
+const specificUser = process.env.SPECIFIC_USER;
+const maxConcurrentAccounts =
+  parseInt(process.env.MAX_CONCURRENT_ACCOUNTS) || 3; // 每批最多同时运行的账号数
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
 const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
@@ -88,24 +89,25 @@ const delayBetweenBatches =
 const isLikeSpecificUser = process.env.LIKE_SPECIFIC_USER || "false";
 const isAutoLike = process.env.AUTO_LIKE || "true";
 const enableRssFetch = (process.env.ENABLE_RSS_FETCH || "false") === "true"; // 是否开启抓取RSS，没有设置时默认为false
-const enableTopicDataFetch = (process.env.ENABLE_TOPIC_DATA_FETCH || "false") === "true"; // 是否开启抓取话题数据，没有设置时默认为false
+const enableTopicDataFetch =
+  (process.env.ENABLE_TOPIC_DATA_FETCH || "false") === "true"; // 是否开启抓取话题数据，没有设置时默认为false
 
 console.log(
   `RSS抓取功能状态: ${enableRssFetch ? "开启" : "关闭"} (ENABLE_RSS_FETCH=${
     process.env.ENABLE_RSS_FETCH
-  })`
+  })`,
 );
 console.log(
   `话题数据抓取功能状态: ${
     enableTopicDataFetch ? "开启" : "关闭"
-  } (ENABLE_TOPIC_DATA_FETCH=${process.env.ENABLE_TOPIC_DATA_FETCH})`
+  } (ENABLE_TOPIC_DATA_FETCH=${process.env.ENABLE_TOPIC_DATA_FETCH})`,
 );
 
 // 代理配置
 const proxyConfig = getProxyConfig();
 if (proxyConfig) {
   console.log(
-    `代理配置: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`
+    `代理配置: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`,
   );
 
   // 测试代理连接
@@ -141,7 +143,7 @@ async function tgSendWithRetry(id, message, maxRetries = 3) {
       console.error(
         `Telegram send failed (attempt ${i + 1}/${maxRetries}): ${
           e && e.message ? e.message : e
-        }`
+        }`,
       );
       await new Promise((r) => setTimeout(r, delay));
     }
@@ -159,7 +161,7 @@ async function sendToTelegram(message) {
       error && error.code ? error.code : "",
       error && error.message
         ? error.message.slice(0, 100)
-        : String(error).slice(0, 100)
+        : String(error).slice(0, 100),
     );
   }
 }
@@ -186,7 +188,7 @@ async function sendToTelegramGroup(message) {
       } catch (error) {
         console.error(
           `Error sending Telegram group message part ${part}:`,
-          error
+          error,
         );
       }
       start += MAX_LEN;
@@ -247,7 +249,7 @@ function delayClick(time) {
       if (i + maxConcurrentAccounts < totalAccounts || i === 0) {
         console.log(`等待 ${delayBetweenBatches / 1000} 秒`);
         await new Promise((resolve) =>
-          setTimeout(resolve, delayBetweenBatches)
+          setTimeout(resolve, delayBetweenBatches),
         );
       } else {
         console.log("没有下一个批次，即将结束");
@@ -255,7 +257,7 @@ function delayClick(time) {
       console.log(
         `批次 ${
           Math.floor(i / maxConcurrentAccounts) + 1
-        } 完成，关闭浏览器...,浏览器对象：${browsers}`
+        } 完成，关闭浏览器...,浏览器对象：${browsers}`,
       );
       // 关闭所有浏览器实例
       for (const browser of browsers) {
@@ -289,7 +291,7 @@ async function launchBrowserForUser(username, password) {
       const proxyArgs = getPuppeteerProxyArgs(proxyConfig);
       browserOptions.args.push(...proxyArgs);
       console.log(
-        `为用户 ${username} 启用代理: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`
+        `为用户 ${username} 启用代理: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`,
       );
 
       // 如果有用户名密码，puppeteer-real-browser会自动处理
@@ -329,7 +331,7 @@ async function launchBrowserForUser(username, password) {
       // 检查是否是 localStorage 的访问权限错误
       if (
         error.message.includes(
-          "Failed to read the 'localStorage' property from 'Window'"
+          "Failed to read the 'localStorage' property from 'Window'",
         )
       ) {
         console.log("Trying to refresh the page to resolve the issue...");
@@ -362,8 +364,8 @@ async function launchBrowserForUser(username, password) {
           } catch (e2) {
             console.warn(
               `Skip disabling autoLike due to closed target: ${
-                (e2 && e2.message) ? e2.message : e2
-              }`
+                e2 && e2.message ? e2.message : e2
+              }`,
             );
           }
         }
@@ -394,20 +396,20 @@ async function launchBrowserForUser(username, password) {
       if (randomChoice) {
         externalScriptPath = path.join(
           dirname(fileURLToPath(import.meta.url)),
-          "index_likeUser_activity.js"
+          "index_likeUser_activity.js",
         );
         console.log("使用index_likeUser_activity");
       } else {
         externalScriptPath = path.join(
           dirname(fileURLToPath(import.meta.url)),
-          "index_likeUser.js"
+          "index_likeUser.js",
         );
         console.log("使用index_likeUser");
       }
     } else {
       externalScriptPath = path.join(
         dirname(fileURLToPath(import.meta.url)),
-        "index.js"
+        "index.js",
       );
     }
     const externalScript = fs.readFileSync(externalScriptPath, "utf8");
@@ -425,7 +427,7 @@ async function launchBrowserForUser(username, password) {
       },
       specificUser,
       externalScript,
-      isAutoLike
+      isAutoLike,
     ); //变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的
     // 添加一个监听器来监听每次页面加载完成的事件
     page.on("load", async () => {
@@ -435,17 +437,26 @@ async function launchBrowserForUser(username, password) {
     if (loginUrl == "https://linux.do") {
       await page.goto("https://linux.do/t/topic/13716/790", {
         waitUntil: "domcontentloaded",
-        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
+        timeout: parseInt(
+          process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000",
+          10,
+        ),
       });
     } else if (loginUrl == "https://meta.appinn.net") {
       await page.goto("https://meta.appinn.net/t/topic/52006", {
         waitUntil: "domcontentloaded",
-        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
+        timeout: parseInt(
+          process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000",
+          10,
+        ),
       });
     } else {
       await page.goto(`${loginUrl}/t/topic/1`, {
         waitUntil: "domcontentloaded",
-        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
+        timeout: parseInt(
+          process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000",
+          10,
+        ),
       });
     }
     // Ensure automation injected after navigation (fallback in case init-script failed)
@@ -457,16 +468,22 @@ async function launchBrowserForUser(username, password) {
             localStorage.setItem("specificUser", specificUser);
             localStorage.setItem("isFirstRun", "false");
             localStorage.setItem("autoLikeEnabled", isAutoLike);
-            try { eval(scriptToEval); } catch (e) { console.error("eval external script failed", e); }
+            try {
+              eval(scriptToEval);
+            } catch (e) {
+              console.error("eval external script failed", e);
+            }
             window.__autoInjected = true;
           }
         },
         specificUser,
         externalScript,
-        isAutoLike
+        isAutoLike,
       );
     } catch (e) {
-      console.warn(`Post-navigation inject failed: ${e && e.message ? e.message : e}`);
+      console.warn(
+        `Post-navigation inject failed: ${e && e.message ? e.message : e}`,
+      );
     }
     if (token && chatId) {
       sendToTelegram(`${username} 登录成功`);
@@ -539,7 +556,7 @@ async function login(page, username, password, retryCount = 3) {
     let loginButton = Array.from(document.querySelectorAll("button")).find(
       (button) =>
         button.textContent.includes("登录") ||
-        button.textContent.includes("login")
+        button.textContent.includes("login"),
     ); // 注意loginButton 变量在外部作用域中是无法被 page.evaluate 内部的代码直接修改的。page.evaluate 的代码是在浏览器环境中执行的，这意味着它们无法直接影响 Node.js 环境中的变量
     // 如果没有找到，尝试根据类名查找
     if (!loginButton) {
@@ -558,13 +575,19 @@ async function login(page, username, password, retryCount = 3) {
     if (loginUrl == "https://meta.appinn.net") {
       await page.goto("https://meta.appinn.net/t/topic/52006", {
         waitUntil: "domcontentloaded",
-        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
+        timeout: parseInt(
+          process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000",
+          10,
+        ),
       });
       await page.click(".discourse-reactions-reaction-button");
     } else {
       await page.goto(`${loginUrl}/t/topic/1`, {
         waitUntil: "domcontentloaded",
-        timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10),
+        timeout: parseInt(
+          process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000",
+          10,
+        ),
       });
       try {
         await page.click(".discourse-reactions-reaction-button");
@@ -615,23 +638,29 @@ async function login(page, username, password, retryCount = 3) {
         alertText.includes("不正确")
       ) {
         throw new Error(
-          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 错误信息：${alertText}`
+          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 错误信息：${alertText}`,
         );
       } else {
         throw new Error(
-          `非超时错误，也不是密码错误，可能是IP导致，需使用中国美国香港台湾IP，失败用户 ${username}，错误信息：${alertText}`
+          `非超时错误，也不是密码错误，可能是IP导致，需使用中国美国香港台湾IP，失败用户 ${username}，错误信息：${alertText}`,
         );
       }
     } else {
       if (retryCount > 0) {
         console.log("Retrying login...");
-        await page.reload({ waitUntil: "domcontentloaded", timeout: parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10) });
+        await page.reload({
+          waitUntil: "domcontentloaded",
+          timeout: parseInt(
+            process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000",
+            10,
+          ),
+        });
         await delayClick(2000); // 增加重试前的延迟
         return await login(page, username, password, retryCount - 1);
       } else {
         throw new Error(
-          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${username}, 
-      ${error}`
+          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${username},
+      ${error}`,
         ); //{password}
       }
     }
@@ -642,7 +671,10 @@ async function login(page, username, password, retryCount = 3) {
 async function navigatePage(url, page, browser) {
   try {
     page.setDefaultNavigationTimeout(
-      parseInt(process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000", 10)
+      parseInt(
+        process.env.NAV_TIMEOUT_MS || process.env.NAV_TIMEOUT || "120000",
+        10,
+      ),
     );
   } catch {}
   await page.goto(url, { waitUntil: "domcontentloaded" }); //如果使用默认的load,linux下页面会一直加载导致无法继续执行
@@ -676,7 +708,7 @@ async function takeScreenshots(page) {
     screenshotIndex++;
     const screenshotPath = path.join(
       screenshotDir,
-      `screenshot-${screenshotIndex}.png`
+      `screenshot-${screenshotIndex}.png`,
     );
     try {
       await page.screenshot({ path: screenshotPath, fullPage: true });
@@ -782,6 +814,6 @@ healthApp.get("/", (req, res) => {
 });
 healthApp.listen(HEALTH_PORT, () => {
   console.log(
-    `Health check endpoint is running at http://localhost:${HEALTH_PORT}/health`
+    `Health check endpoint is running at http://localhost:${HEALTH_PORT}/health`,
   );
 });

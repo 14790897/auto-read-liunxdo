@@ -77,7 +77,7 @@ const totalAccounts = usernames.length;
 const delayBetweenInstances = 10_000; // 每批账号实例间隔
 const delayBetweenBatches = runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
 
-const specificUser = process.env.SPECIFIC_USER || "14790897";
+const specificUser = process.env.SPECIFIC_USER ;
 const isLikeSpecificUser = process.env.LIKE_SPECIFIC_USER === "true";
 const isAutoLike = process.env.AUTO_LIKE !== "false"; // 默认自动
 

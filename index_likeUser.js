@@ -28,7 +28,7 @@
   const commentLimit = 1000;
   const specificUserPostListLimit = 100;
   const currentURL = window.location.href;
-  let specificUser = localStorage.getItem("specificUser") || "14790897";
+  let specificUser = localStorage.getItem("specificUser");
   let likeLimit = parseInt(localStorage.getItem("likeLimit") || 200, 10);
   let BASE_URL = possibleBaseURLs.find((url) => currentURL.startsWith(url));
 

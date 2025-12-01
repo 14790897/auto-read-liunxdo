@@ -25,7 +25,7 @@ if (fs.existsSync(".env.local")) {
   }
 } else {
   console.log(
-    "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git"
+    "Using .env file to supply config environment variables, you can create a .env.local file to overwrite defaults, it doesn't upload to git",
   );
 }
 
@@ -36,7 +36,7 @@ const runTimeLimitMinutes = process.env.RUN_TIME_LIMIT_MINUTES || 20;
 const runTimeLimitMillis = runTimeLimitMinutes * 60 * 1000;
 
 console.log(
-  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`
+  `运行时间限制为：${runTimeLimitMinutes} 分钟 (${runTimeLimitMillis} 毫秒)`,
 );
 
 // 设置一个定时器，在运行时间到达时终止进程
@@ -47,7 +47,7 @@ const shutdownTimer = setTimeout(() => {
 
 const token = process.env.TELEGRAM_BOT_TOKEN;
 const chatId = process.env.TELEGRAM_CHAT_ID;
-const specificUser = process.env.SPECIFIC_USER || "14790897";
+const specificUser = process.env.SPECIFIC_USER;
 const maxConcurrentAccounts = 4; // 每批最多同时运行的账号数
 const usernames = process.env.USERNAMES.split(",");
 const passwords = process.env.PASSWORDS.split(",");
@@ -119,7 +119,7 @@ function delayClick(time) {
       if (i + maxConcurrentAccounts < totalAccounts || i === 0) {
         console.log(`等待 ${delayBetweenBatches / 1000} 秒`);
         await new Promise((resolve) =>
-          setTimeout(resolve, delayBetweenBatches)
+          setTimeout(resolve, delayBetweenBatches),
         );
       } else {
         console.log("没有下一个批次，即将结束");
@@ -127,7 +127,7 @@ function delayClick(time) {
       console.log(
         `批次 ${
           Math.floor(i / maxConcurrentAccounts) + 1
-        } 完成，关闭浏览器...,浏览器对象：${browsers}`
+        } 完成，关闭浏览器...,浏览器对象：${browsers}`,
       );
       // 关闭所有浏览器实例
       for (const browser of browsers) {
@@ -191,7 +191,7 @@ async function launchBrowserForUser(username, password) {
       // 检查是否是 localStorage 的访问权限错误
       if (
         error.message.includes(
-          "Failed to read the 'localStorage' property from 'Window'"
+          "Failed to read the 'localStorage' property from 'Window'",
         )
       ) {
         console.log("Trying to refresh the page to resolve the issue...");
@@ -235,7 +235,7 @@ async function launchBrowserForUser(username, password) {
     //真正执行阅读脚本
     const externalScriptPath = path.join(
       dirname(fileURLToPath(import.meta.url)),
-      "index_likeUser.js"
+      "index_likeUser.js",
     );
     const externalScript = fs.readFileSync(externalScriptPath, "utf8");
 
@@ -250,7 +250,7 @@ async function launchBrowserForUser(username, password) {
         eval(scriptToEval);
       },
       specificUser,
-      externalScript
+      externalScript,
     ); //变量必须从外部显示的传入, 因为在浏览器上下文它是读取不了的
     // 添加一个监听器来监听每次页面加载完成的事件
     page.on("load", async () => {
@@ -289,7 +289,7 @@ async function login(page, username, password, retryCount = 3) {
     let loginButton = Array.from(document.querySelectorAll("button")).find(
       (button) =>
         button.textContent.includes("登录") ||
-        button.textContent.includes("login")
+        button.textContent.includes("login"),
     ); // 注意loginButton 变量在外部作用域中是无法被 page.evaluate 内部的代码直接修改的。page.evaluate 的代码是在浏览器环境中执行的，这意味着它们无法直接影响 Node.js 环境中的变量
     // 如果没有找到，尝试根据类名查找
     if (!loginButton) {
@@ -359,11 +359,11 @@ async function login(page, username, password, retryCount = 3) {
         alertText.includes("不正确")
       ) {
         throw new Error(
-          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 错误信息：${alertText}`
+          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 错误信息：${alertText}`,
         );
       } else {
         throw new Error(
-          `非超时错误，也不是密码错误，失败用户 ${username}，错误信息：${alertText}`
+          `非超时错误，也不是密码错误，失败用户 ${username}，错误信息：${alertText}`,
         );
       }
     } else {
@@ -373,8 +373,8 @@ async function login(page, username, password, retryCount = 3) {
         return await login(page, username, password, retryCount - 1);
       } else {
         throw new Error(
-          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${username}, 
-      ${error}`
+          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${username},
+      ${error}`,
         ); //{password}
       }
     }
@@ -413,7 +413,7 @@ async function takeScreenshots(page) {
     screenshotIndex++;
     const screenshotPath = path.join(
       screenshotDir,
-      `screenshot-${screenshotIndex}.png`
+      `screenshot-${screenshotIndex}.png`,
     );
     try {
       await page.screenshot({ path: screenshotPath, fullPage: true });
@@ -519,6 +519,6 @@ healthApp.get("/", (req, res) => {
 });
 healthApp.listen(HEALTH_PORT, () => {
   console.log(
-    `Health check endpoint is running at http://localhost:${HEALTH_PORT}/health`
+    `Health check endpoint is running at http://localhost:${HEALTH_PORT}/health`,
   );
 });

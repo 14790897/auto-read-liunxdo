@@ -28,7 +28,7 @@
   const commentLimit = 1000;
   const specificUserPostListLimit = 100;
   const currentURL = window.location.href;
-  let specificUser = localStorage.getItem("specificUser") || "14790897";
+  let specificUser = localStorage.getItem("specificUser");
   let likeLimit = parseInt(localStorage.getItem("likeLimit") || 200, 10);
   let BASE_URL = possibleBaseURLs.find((url) => currentURL.startsWith(url));
 
@@ -46,7 +46,7 @@
   const storedTime = parseInt(
     localStorage.getItem("clickCounterTimestamp") ||
       defaultTimestamp.toString(),
-    10
+    10,
   );
 
   // 获取当前的点击计数，如果不存在则初始化为0
@@ -141,7 +141,7 @@
     if (specificUserPostList.length > specificUserPostListLimit) {
       specificUserPostList = specificUserPostList.slice(
         0,
-        specificUserPostListLimit
+        specificUserPostListLimit,
       );
     }
 
@@ -149,7 +149,7 @@
     localStorage.setItem("lastOffset", lastOffset);
     localStorage.setItem(
       "specificUserPostList",
-      JSON.stringify(specificUserPostList)
+      JSON.stringify(specificUserPostList),
     );
   }
 
@@ -173,7 +173,7 @@
       const post = specificUserPostList.shift(); // 获取列表中的第一个对象
       localStorage.setItem(
         "specificUserPostList",
-        JSON.stringify(specificUserPostList)
+        JSON.stringify(specificUserPostList),
       );
 
       window.location.href = `${BASE_URL}/t/topic/${post.topic_id}/${post.post_number}`;
@@ -195,7 +195,7 @@
     console.log("post number:", lastPart);
     if (lastPart < 10000) {
       buttons = document.querySelectorAll(
-        "button[aria-label]" //[class*='reply']
+        "button[aria-label]", //[class*='reply']
       );
 
       let targetButton = null;
@@ -213,7 +213,7 @@
         const parentElement = targetButton.parentElement;
         console.log("父级元素:", parentElement);
         reactionButton = parentElement.querySelector(
-          ".discourse-reactions-reaction-button"
+          ".discourse-reactions-reaction-button",
         );
       } else {
         console.log(`未找到包含 #${lastPart} 的按钮`);
@@ -221,7 +221,7 @@
     } else {
       //大于10000说明是主题帖，选择第一个
       reactionButton = document.querySelectorAll(
-        ".discourse-reactions-reaction-button"
+        ".discourse-reactions-reaction-button",
       )[0];
     }
     if (
@@ -238,13 +238,13 @@
     triggerClick(reactionButton);
     clickCounter++;
     console.log(
-      `Clicked like button ${clickCounter},已点赞用户${specificUser}`
+      `Clicked like button ${clickCounter},已点赞用户${specificUser}`,
     );
     localStorage.setItem("clickCounter", clickCounter.toString());
     // 如果点击次数达到likeLimit次，则设置点赞变量为false
     if (clickCounter === likeLimit) {
       console.log(
-        `Reached ${likeLimit} likes, setting the like variable to false.`
+        `Reached ${likeLimit} likes, setting the like variable to false.`,
       );
       localStorage.setItem("read", false);
     } else {
@@ -329,7 +329,7 @@
       localStorage.removeItem("lastOffset");
       specificUser = newSpecificUser;
       console.log(
-        `新的specificUser已保存: ${specificUser}，specificUserPostList已重置`
+        `新的specificUser已保存: ${specificUser}，specificUserPostList已重置`,
       );
     }
   };

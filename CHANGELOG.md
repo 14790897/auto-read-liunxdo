@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.14.4](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.3...v1.14.4) (2025-11-03)
+
+
+### Bug Fixes
+
+* rm hg ([0cd3ab6](https://www.github.com/14790897/auto-read-liunxdo/commit/0cd3ab642fe9cfca109a1732e4ec1e55b3412b63))
+
 ### [1.14.3](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.2...v1.14.3) (2025-10-26)
 
 

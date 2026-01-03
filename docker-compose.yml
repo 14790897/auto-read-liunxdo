@@ -3,8 +3,10 @@ services:
     image: 14790897/auto-read:latest
     container_name: auto-read
     env_file:
-      - ./.env
-      - ./.env.local
+      - path: ./.env
+        required: true   # 这个文件必须存在，否则报错
+      - path: ./.env.local
+        required: false  # 这个文件是可选的：存在就覆盖前者，不存在就忽略
     restart: unless-stopped 
     ports:
       - "7860:7860" 

@@ -2,7 +2,7 @@
 
 ## 注意事项
 
-1. 不能显示脚本运行日志，只有登录结果
+1. 不显示脚本运行日志，只有登录结果
 2. 阅读量统计有延迟，建议看点赞记录
 
 ## 彩蛋
@@ -14,7 +14,7 @@ https://t.me/linuxdoSQL
 
 ### 油猴失去焦点后会停止运行,适合前台运行
 
-油猴脚本代码在 index 开头的文件 中，建议在使用前将浏览器页面缩小，这样子可以一次滚动更多页面，读更多的回复
+油猴脚本代码在 index 开头的文件 中，**建议在使用前将浏览器页面缩小**，这样子可以一次滚动更多页面，读更多的回复
 油猴脚本安装地址：
 
 1. https://greasyfork.org/en/scripts/489464-auto-read 自动阅读随机点赞
@@ -70,7 +70,7 @@ LIKE_SPECIFIC_USER=true node ./bypasscf.js
 
 ## 使用方法三：GitHub Action 每天 随机时间 阅读
 
-#### 说明： 每天运行，每次三十分钟(可自行修改启动时间和持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml)
+#### 说明： 每天运行，每次三十分钟(可自行持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml，持续时间由环境变量的RUN_TIME_LIMIT_MINUTES和yaml配置的timeout-minutes的最小值决定，启动时间目前为随机无法修改)
 
 **目前需要一个额外变量 `PAT_TOKEN`，用于随机时间执行阅读任务。教程：**
 

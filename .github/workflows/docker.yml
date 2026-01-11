@@ -10,6 +10,7 @@ on:
 
 jobs:
   build-and-push:
+    if: github.repository == '14790897/auto-read-liunxdo'
     runs-on: ubuntu-latest
 
     steps:

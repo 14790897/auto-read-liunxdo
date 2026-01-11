@@ -6,6 +6,7 @@ on:
   workflow_dispatch:
 jobs:
   db-test:
+    if: github.repository == '14790897/auto-read-liunxdo'
     runs-on: windows-latest
     timeout-minutes: 10
     strategy:

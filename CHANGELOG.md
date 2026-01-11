@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.14.5](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.4...v1.14.5) (2026-01-11)
+
+
+### Bug Fixes
+
+* add repository condition to workflow jobs for consistency ([bc2c5ba](https://www.github.com/14790897/auto-read-liunxdo/commit/bc2c5ba1efe076d5d55f233f42df4067cca100f6))
+
 ### [1.14.4](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.3...v1.14.4) (2025-11-03)
 
 

@@ -29,8 +29,8 @@ jobs:
       SPECIFIC_USER: ${{ secrets.SPECIFIC_USER }}
       HF_TOKEN: ${{ secrets.HF_TOKEN }}
       LIKE_SPECIFIC_USER: ${{ secrets.LIKE_SPECIFIC_USER }}
-      ENABLE_RSS_FETCH: ${{ secrets.ENABLE_RSS_FETCH }}
-      ENABLE_TOPIC_DATA_FETCH: ${{ secrets.ENABLE_TOPIC_DATA_FETCH }}
+      ENABLE_RSS_FETCH: ${{ secrets.ENABLE_RSS_FETCH || '' }}
+      ENABLE_TOPIC_DATA_FETCH: ${{ secrets.ENABLE_TOPIC_DATA_FETCH || '' }}
       HEALTH_PORT: ${{ secrets.HEALTH_PORT }}
       # 代理配置
       PROXY_URL: ${{ secrets.PROXY_URL }}

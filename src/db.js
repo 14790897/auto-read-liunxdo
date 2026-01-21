@@ -321,9 +321,9 @@ export async function isGuidExists(guid) {
     return false;
   }
 
-  // 优先查询主数据库 (Aiven PostgreSQL)
+  // 优先查询主数据库 (CockroachDB)
   try {
-    const res = await pool.query(
+    const res = await cockroachPool.query(
       "SELECT 1 FROM posts WHERE guid = $1 LIMIT 1",
       [guid]
     );

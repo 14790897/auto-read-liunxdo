@@ -20,42 +20,49 @@ jobs:
             const issueBody = issue.body || '';
             const issueTitle = issue.title || '';
 
-            // Check if it's a bug report or feature request
-            const isBugReport = issueTitle.toLowerCase().includes('[bug]') ||
-                               issueBody.includes('### 问题描述') ||
-                               issueBody.includes('### 重现步骤');
+            // Check for Bug Report template sections
+            const hasBugDescription = issueBody.includes('### 问题描述');
+            const hasBugSteps = issueBody.includes('### 重现步骤');
+            const hasBugAdditionalInfo = issueBody.includes('### 附加信息');
 
-            const isFeatureRequest = issueTitle.toLowerCase().includes('[feature]') ||
-                                     issueBody.includes('### 背景') ||
-                                     issueBody.includes('### 功能描述');
+            // Check for Feature Request template sections
+            const hasFeatureBackground = issueBody.includes('### 背景');
+            const hasFeatureDescription = issueBody.includes('### 功能描述');
 
             let isValid = false;
             let missingFields = [];
 
+            // Determine template type by checking required sections
+            // Bug Report requires all 3 sections
+            const isBugReport = hasBugDescription && hasBugSteps && hasBugAdditionalInfo;
+            // Feature Request requires both sections
+            const isFeatureRequest = hasFeatureBackground && hasFeatureDescription;
+
             if (isBugReport) {
-              // Validate Bug Report template
-              const hasDescription = issueBody.includes('### 问题描述');
-              const hasSteps = issueBody.includes('### 重现步骤');
-              const hasAdditionalInfo = issueBody.includes('### 附加信息');
-
-              if (!hasDescription) missingFields.push('问题描述');
-              if (!hasSteps) missingFields.push('重现步骤');
-              if (!hasAdditionalInfo) missingFields.push('附加信息');
-
-              isValid = hasDescription && hasSteps && hasAdditionalInfo;
+              // All required sections present for Bug Report
+              isValid = true;
             } else if (isFeatureRequest) {
-              // Validate Feature Request template
-              const hasBackground = issueBody.includes('### 背景');
-              const hasDescription = issueBody.includes('### 功能描述');
-
-              if (!hasBackground) missingFields.push('背景');
-              if (!hasDescription) missingFields.push('功能描述');
-
-              isValid = hasBackground && hasDescription;
+              // All required sections present for Feature Request
+              isValid = true;
             } else {
-              // Issue doesn't match any template
+              // Check which template was attempted and what's missing
+              const bugSectionCount = [hasBugDescription, hasBugSteps, hasBugAdditionalInfo].filter(Boolean).length;
+              const featureSectionCount = [hasFeatureBackground, hasFeatureDescription].filter(Boolean).length;
+
+              if (bugSectionCount > 0 || issueTitle.toLowerCase().includes('[bug]')) {
+                // Attempted Bug Report
+                if (!hasBugDescription) missingFields.push('问题描述');
+                if (!hasBugSteps) missingFields.push('重现步骤');
+                if (!hasBugAdditionalInfo) missingFields.push('附加信息');
+              } else if (featureSectionCount > 0 || issueTitle.toLowerCase().includes('[feature]')) {
+                // Attempted Feature Request
+                if (!hasFeatureBackground) missingFields.push('背景');
+                if (!hasFeatureDescription) missingFields.push('功能描述');
+              } else {
+                // No template sections found
+                missingFields.push('未使用任何模板');
+              }
               isValid = false;
-              missingFields.push('未使用任何模板');
             }
 
             if (!isValid) {

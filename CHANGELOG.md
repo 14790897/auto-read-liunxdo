@@ -1,5 +1,13 @@
 # Changelog
 
+### [1.14.5](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.4...v1.14.5) (2026-01-21)
+
+
+### Bug Fixes
+
+* add repository condition to workflow jobs for consistency ([bc2c5ba](https://www.github.com/14790897/auto-read-liunxdo/commit/bc2c5ba1efe076d5d55f233f42df4067cca100f6))
+* update RSS and topic data fetch environment variable handling for clarity ([3ae4ca6](https://www.github.com/14790897/auto-read-liunxdo/commit/3ae4ca66b16095d0e40d5a6ed541fc12990b5707))
+
 ### [1.14.4](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.3...v1.14.4) (2025-11-03)
 
 

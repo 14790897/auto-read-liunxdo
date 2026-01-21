@@ -114,15 +114,17 @@ async function initMongoDB() {
 
 // 所有数据库连接池数组 (PostgreSQL)
 const allPools = [
-  { name: "Aiven PostgreSQL", pool: pool },
+  //注释以下开启数据库
+  // { name: "Aiven PostgreSQL", pool: pool },
   { name: "CockroachDB", pool: cockroachPool },
   // { name: "Neon", pool: neonPool },
 ];
 
 // 获取所有数据库连接数组 (包括 MongoDB 和 MySQL)
 async function getAllDatabases() {
-  const mongoDb = await initMongoDB();
-  const mysqlPool = await initMySQL();
+    //注释以下开启数据库
+  // const mongoDb = await initMongoDB();
+  // const mysqlPool = await initMySQL();
 
   return [
     ...allPools,

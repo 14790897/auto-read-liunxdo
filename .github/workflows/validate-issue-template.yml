@@ -1,0 +1,95 @@
+name: Issue Template Validator
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  issues: write
+
+jobs:
+  validate-issue:
+    if: github.repository == '14790897/auto-read-liunxdo'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate Issue Template
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const issueBody = issue.body || '';
+            const issueTitle = issue.title || '';
+
+            // Check if it's a bug report or feature request
+            const isBugReport = issueTitle.toLowerCase().includes('[bug]') ||
+                               issueBody.includes('### 问题描述') ||
+                               issueBody.includes('### 重现步骤');
+
+            const isFeatureRequest = issueTitle.toLowerCase().includes('[feature]') ||
+                                     issueBody.includes('### 背景') ||
+                                     issueBody.includes('### 功能描述');
+
+            let isValid = false;
+            let missingFields = [];
+
+            if (isBugReport) {
+              // Validate Bug Report template
+              const hasDescription = issueBody.includes('### 问题描述');
+              const hasSteps = issueBody.includes('### 重现步骤');
+              const hasAdditionalInfo = issueBody.includes('### 附加信息');
+
+              if (!hasDescription) missingFields.push('问题描述');
+              if (!hasSteps) missingFields.push('重现步骤');
+              if (!hasAdditionalInfo) missingFields.push('附加信息');
+
+              isValid = hasDescription && hasSteps && hasAdditionalInfo;
+            } else if (isFeatureRequest) {
+              // Validate Feature Request template
+              const hasBackground = issueBody.includes('### 背景');
+              const hasDescription = issueBody.includes('### 功能描述');
+
+              if (!hasBackground) missingFields.push('背景');
+              if (!hasDescription) missingFields.push('功能描述');
+
+              isValid = hasBackground && hasDescription;
+            } else {
+              // Issue doesn't match any template
+              isValid = false;
+              missingFields.push('未使用任何模板');
+            }
+
+            if (!isValid) {
+              // Close the issue with a comment
+              const closeMessage = [
+                '👋 你好！感谢你提交 Issue。',
+                '',
+                '⚠️ 此 Issue 未按照规定的模板填写，已自动关闭。',
+                '',
+                `**缺少的字段：** ${missingFields.join('、')}`,
+                '',
+                '请使用以下模板之一重新提交：',
+                `- 🐛 [Bug Report 模板](https://github.com/${context.repo.owner}/${context.repo.repo}/issues/new?template=bug_report_template.md)`,
+                `- ✨ [Feature Request 模板](https://github.com/${context.repo.owner}/${context.repo.repo}/issues/new?template=feature_request_template.md)`,
+                '',
+                '提供完整的信息有助于我们更快地处理你的问题。谢谢！'
+              ].join('\n');
+
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: closeMessage
+              });
+
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+                state_reason: 'not_planned'
+              });
+
+              core.setFailed('Issue does not follow template and has been closed.');
+            } else {
+              console.log('✅ Issue follows the template format');
+            }

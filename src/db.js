@@ -40,7 +40,7 @@ const pool = new Pool({
   connectionString: process.env.POSTGRES_URI,
   max: 5,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 15000, // 增加到15秒，适应跨区域网络延迟
   ssl: { rejectUnauthorized: false },
 });
 
@@ -49,7 +49,7 @@ const cockroachPool = new Pool({
   connectionString: process.env.COCKROACH_URI,
   max: 3,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 15000, // 增加到15秒，适应跨区域网络延迟
   ssl: { rejectUnauthorized: false },
 });
 
@@ -59,7 +59,7 @@ const neonPool = new Pool({
   connectionString: process.env.NEON_URI,
   max: 3,
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 15000, // 增加到15秒，适应跨区域网络延迟
   ssl: { rejectUnauthorized: false },
 });
 

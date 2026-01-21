@@ -91,12 +91,12 @@ const enableRssFetch = process.env.ENABLE_RSS_FETCH === "true"; // 是否开启�
 const enableTopicDataFetch = process.env.ENABLE_TOPIC_DATA_FETCH === "true"; // 是否开启抓取话题数据，只有明确设置为"true"才开启，默认为false
 
 console.log(
-  `RSS抓取功能状态: ${enableRssFetch ? "开启" : "关闭"} (环境变量值: "${process.env.ENABLE_RSS_FETCH || ''}")`
+  `RSS抓取功能状态: ${enableRssFetch ? "开启" : "关闭"} (环境变量值: "${process.env.ENABLE_RSS_FETCH || ''}")，勿设置`
 );
 console.log(
   `话题数据抓取功能状态: ${
     enableTopicDataFetch ? "开启" : "关闭"
-  } (环境变量值: "${process.env.ENABLE_TOPIC_DATA_FETCH || ''}")`
+  } (环境变量值: "${process.env.ENABLE_TOPIC_DATA_FETCH || ''}")，勿设置`
 );
 
 // 代理配置

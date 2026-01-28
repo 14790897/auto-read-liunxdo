@@ -70,7 +70,7 @@ LIKE_SPECIFIC_USER=true node ./bypasscf.js
 
 ## 使用方法三：GitHub Action 每天 随机时间 阅读
 
-#### 说明： 每天运行，每次三十分钟(可自行持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml，持续时间由环境变量的RUN_TIME_LIMIT_MINUTES和yaml配置的timeout-minutes的最小值决定，启动时间目前为随机无法修改)
+#### 说明： 每天运行，每次三十分钟(可自行调整持续时间，代码.github\workflows\cron_bypassCF.yaml 和 .github\workflows\cron_bypassCF_likeUser.yaml，持续时间由环境变量的RUN_TIME_LIMIT_MINUTES和yaml配置的timeout-minutes的最小值决定，启动时间目前为随机无法修改)
 
 **目前需要一个额外变量 `PAT_TOKEN`，用于随机时间执行阅读任务。教程：**
 

@@ -1,8 +1,8 @@
 name: Update Workflow Cron
 
 on:
-  schedule:
-    - cron: '0 16 * * *' 
+  # schedule:
+  #   - cron: '0 16 * * *' 
   workflow_dispatch: # 允许手动触发
 #   push:
 #     branches:

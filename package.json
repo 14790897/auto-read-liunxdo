@@ -1,7 +1,7 @@
 {
   "type": "module",
   "dependencies": {
-    "@playwright/test": "^1.52.0",
+    "@playwright/test": "^1.56.1",
     "dotenv": "^16.4.5",
     "express": "^4.21.2",
     "https-proxy-agent": "^7.0.6",
@@ -10,7 +10,7 @@
     "node-fetch": "^3.3.2",
     "node-telegram-bot-api": "^0.66.0",
     "pg": "^8.16.0",
-    "playwright": "^1.52.0",
+    "playwright": "^1.56.1",
     "playwright-extra": "^4.3.6",
     "playwright-extra-plugin-stealth": "^0.0.1",
     "puppeteer": "^22.15.0",
@@ -21,5 +21,5 @@
     "xml2js": "^0.6.2",
     "xvfb": "^0.4.0"
   },
-  "version": "1.14.4"
+  "version": "1.15.0"
 }

@@ -14,6 +14,7 @@ jobs:
         node-version: [20.x]
     env:
       POSTGRES_URI: ${{ secrets.POSTGRES_URI }}
+      COCKROACH_URI: ${{ secrets.COCKROACH_URI }}
     steps:
       - uses: actions/checkout@v3
       - name: Use Node.js ${{ matrix.node-version }}

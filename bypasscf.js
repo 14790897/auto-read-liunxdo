@@ -475,7 +475,7 @@ async function launchBrowserForUser(username, password) {
       console.warn(`Post-navigation inject failed: ${e && e.message ? e.message : e}`);
     }
     if (token && chatId) {
-      sendToTelegram(`${maskUsername(username)} 登录成功`);
+      sendToTelegram(`${username} 登录成功`);
     } // 监听页面跳转到新话题，自动推送RSS example：https://linux.do/t/topic/525305.rss
     // 记录已推送过的 topicId，防止重复推送
     if (enableRssFetch || enableTopicDataFetch) {

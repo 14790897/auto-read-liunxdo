@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.16.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.15.1...v1.16.0) (2026-03-01)
+
+
+### Features
+
+* hide account names in action logs by default (HIDE_ACCOUNT_INFO) ([73dab1d](https://www.github.com/14790897/auto-read-liunxdo/commit/73dab1d1e48c9cd5db973e76e6f9bd1936e895dc))
+
+
+### Bug Fixes
+
+* keep full username in Telegram messages, only mask in console logs ([c7f1375](https://www.github.com/14790897/auto-read-liunxdo/commit/c7f13756b9f6637281661fb2edbc59526dec1746))
+
 ### [1.15.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.15.0...v1.15.1) (2026-02-11)
 
 

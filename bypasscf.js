@@ -87,8 +87,16 @@ const delayBetweenBatches =
   runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
 const isLikeSpecificUser = process.env.LIKE_SPECIFIC_USER === "true"; // 只有明确设置为"true"才开启
 const isAutoLike = process.env.AUTO_LIKE !== "false"; // 默认开启，只有明确设置为"false"才关闭
+const hideAccountInfo = process.env.HIDE_ACCOUNT_INFO !== "false"; // 默认隐藏账号信息，只有明确设置为"false"才显示
 const enableRssFetch = process.env.ENABLE_RSS_FETCH === "true"; // 是否开启抓取RSS，只有明确设置为"true"才开启，默认为false
 const enableTopicDataFetch = process.env.ENABLE_TOPIC_DATA_FETCH === "true"; // 是否开启抓取话题数据，只有明确设置为"true"才开启，默认为false
+
+// 账号名脱敏函数，默认仅显示首字母加***
+function maskUsername(username) {
+  if (!hideAccountInfo) return username;
+  if (!username || username.length === 0) return "***";
+  return username[0] + "***";
+}
 
 console.log(
   `RSS抓取功能状态: ${enableRssFetch ? "开启" : "关闭"} (环境变量值: "${process.env.ENABLE_RSS_FETCH || ''}")，勿设置`
@@ -275,7 +283,7 @@ function delayClick(time) {
 async function launchBrowserForUser(username, password) {
   let browser = null; // 在 try 之外声明 browser 变量
   try {
-    console.log("当前用户:", username);
+    console.log("当前用户:", maskUsername(username));
     const browserOptions = {
       headless: "auto",
       args: ["--no-sandbox", "--disable-setuid-sandbox"], // Linux 需要的安全设置
@@ -287,7 +295,7 @@ async function launchBrowserForUser(username, password) {
       const proxyArgs = getPuppeteerProxyArgs(proxyConfig);
       browserOptions.args.push(...proxyArgs);
       console.log(
-        `为用户 ${username} 启用代理: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`
+        `为用户 ${maskUsername(username)} 启用代理: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`
       );
 
       // 如果有用户名密码，puppeteer-real-browser会自动处理
@@ -613,11 +621,11 @@ async function login(page, username, password, retryCount = 3) {
         alertText.includes("不正确")
       ) {
         throw new Error(
-          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 错误信息：${alertText}`
+          `非超时错误，请检查用户名密码是否正确，失败用户 ${maskUsername(username)}, 错误信息：${alertText}`
         );
       } else {
         throw new Error(
-          `非超时错误，也不是密码错误，可能是IP导致，需使用中国美国香港台湾IP，失败用户 ${username}，错误信息：${alertText}`
+          `非超时错误，也不是密码错误，可能是IP导致，需使用中国美国香港台湾IP，失败用户 ${maskUsername(username)}，错误信息：${alertText}`
         );
       }
     } else {
@@ -628,7 +636,7 @@ async function login(page, username, password, retryCount = 3) {
         return await login(page, username, password, retryCount - 1);
       } else {
         throw new Error(
-          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${username}, 
+          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${maskUsername(username)}, 
       ${error}`
         ); //{password}
       }

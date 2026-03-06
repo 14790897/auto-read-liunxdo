@@ -10,7 +10,7 @@
     "node-fetch": "^3.3.2",
     "node-telegram-bot-api": "^0.66.0",
     "pg": "^8.16.0",
-    "playwright": "^1.56.1",
+    "playwright": "^1.58.0",
     "playwright-extra": "^4.3.6",
     "playwright-extra-plugin-stealth": "^0.0.1",
     "puppeteer": "^22.15.0",
@@ -21,5 +21,5 @@
     "xml2js": "^0.6.2",
     "xvfb": "^0.4.0"
   },
-  "version": "1.15.0"
+  "version": "1.15.1"
 }

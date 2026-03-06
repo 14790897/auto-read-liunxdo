@@ -412,9 +412,14 @@ async function launchBrowserForUser(username, password, cookie = null) {
       await login(page, username, password);
     }
     // 查找具有类名 "avatar" 的 img 元素验证登录是否成功
+    // 若存在 span.auth-buttons 则说明处于未登录状态
     const avatarImg = await page.$("img.avatar");
+    const authButtons = await page.$("span.auth-buttons");
 
-    if (avatarImg) {
+    if (authButtons) {
+      console.log("找到 auth-buttons，用户未登录，登录失败");
+      throw new Error("登录失败：页面显示未登录状态（auth-buttons）");
+    } else if (avatarImg) {
       console.log("找到avatarImg，登录成功");
     } else {
       console.log("未找到avatarImg，登录失败");

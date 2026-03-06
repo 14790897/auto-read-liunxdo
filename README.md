@@ -25,7 +25,8 @@ https://t.me/linuxdoSQL
 
 ### 1.设置环境变量
 
-.env 里面设置用户名 密码 以及其它 env 里面指明的信息
+.env 里面设置用户名 密码 COOKIES 以及其它 env 里面指明的信息
+设置COOKIES后无需设置密码，目前密码登录方式由于验证已失效，建议使用cookie登录，获取cookie的方法是在浏览器中打开需要阅读的网站，按F12打开开发者工具，找到Application（应用程序）选项卡，在左侧的Storage（存储）部分选择Cookies，然后找到以_t=开头的cookie值，将其复制到.env文件中的COOKIES变量中，如果有多个账户需要登录，按照逗号分隔开，例如：COOKIES="_t=lnm123,_t=abc123,_t=def456"
 
 <!-- #### 新功能：话题数据抓取
 - `ENABLE_RSS_FETCH=true` - 启用RSS数据抓取功能（默认关闭）

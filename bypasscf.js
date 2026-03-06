@@ -79,7 +79,9 @@ const groupId = process.env.TELEGRAM_GROUP_ID;
 const specificUser = process.env.SPECIFIC_USER || "14790897";
 const maxConcurrentAccounts = parseInt(process.env.MAX_CONCURRENT_ACCOUNTS) || 3; // 每批最多同时运行的账号数
 const usernames = process.env.USERNAMES.split(",");
-const passwords = process.env.PASSWORDS.split(",");
+const passwords = process.env.PASSWORDS ? process.env.PASSWORDS.split(",") : [];
+// 读取每个账号对应的Cookie（逗号分隔，与USERNAMES一一对应），有Cookie则跳过表单登录
+const cookiesEnv = process.env.COOKIES ? process.env.COOKIES.split(",") : [];
 const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
 const delayBetweenInstances = 10000;
 const totalAccounts = usernames.length; // 总的账号数
@@ -209,20 +211,22 @@ function delayClick(time) {
 
 (async () => {
   try {
-    if (usernames.length !== passwords.length) {
-      console.log(usernames.length, passwords.length);
-      throw new Error("用户名和密码的数量不匹配！");
+    const accountsWithCookie = cookiesEnv.filter(c => c && c.trim()).length;
+    if (accountsWithCookie < usernames.length && passwords.length !== usernames.length) {
+      console.log(`usernames: ${usernames.length}, passwords: ${passwords.length}, cookies: ${accountsWithCookie}`);
+      throw new Error("用户名和密码（或Cookie）的数量不匹配！");
     }
 
     // 并发启动浏览器实例进行登录
     const loginTasks = usernames.map((username, index) => {
-      const password = passwords[index];
+      const password = passwords[index] || "";
+      const cookie = cookiesEnv[index] ? cookiesEnv[index].trim() : null;
       const delay = (index % maxConcurrentAccounts) * delayBetweenInstances; // 使得每一组内的浏览器可以分开启动
       return () => {
         // 确保这里返回的是函数
         return new Promise((resolve, reject) => {
           setTimeout(() => {
-            launchBrowserForUser(username, password)
+            launchBrowserForUser(username, password, cookie)
               .then(resolve)
               .catch(reject);
           }, delay);
@@ -272,7 +276,21 @@ function delayClick(time) {
     }
   }
 })();
-async function launchBrowserForUser(username, password) {
+// 将浏览器Cookie字符串（如 "name=value; name2=value2"）解析为 puppeteer setCookie 所需的对象数组
+function parseCookieString(cookieStr, domain) {
+  return cookieStr
+    .split(";")
+    .map((part) => part.trim())
+    .filter((part) => part.includes("="))
+    .map((part) => {
+      const eqIndex = part.indexOf("=");
+      const name = part.substring(0, eqIndex).trim();
+      const value = part.substring(eqIndex + 1).trim();
+      return { name, value, domain, path: "/" };
+    });
+}
+
+async function launchBrowserForUser(username, password, cookie = null) {
   let browser = null; // 在 try 之外声明 browser 变量
   try {
     console.log("当前用户:", username);
@@ -372,9 +390,19 @@ async function launchBrowserForUser(username, password) {
         // await page.reload();
       }
     });
-    // //登录操作
-    console.log("登录操作");
-    await login(page, username, password);
+    // 登录操作：优先使用Cookie，否则使用表单登录
+    if (cookie) {
+      console.log("检测到Cookie，跳过表单登录，直接设置Cookie");
+      const domain = new URL(loginUrl).hostname;
+      const cookieObjects = parseCookieString(cookie, domain);
+      await page.setCookie(...cookieObjects);
+      console.log(`已设置 ${cookieObjects.length} 个Cookie，正在刷新页面...`);
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await delayClick(2000);
+    } else {
+      console.log("登录操作");
+      await login(page, username, password);
+    }
     // 查找具有类名 "avatar" 的 img 元素验证登录是否成功
     const avatarImg = await page.$("img.avatar");
 

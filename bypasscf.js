@@ -219,10 +219,15 @@ function delayClick(time) {
 
 (async () => {
   try {
-    const accountsWithCookie = cookiesEnv.filter(c => c && c.trim()).length;
-    if (accountsWithCookie < usernames.length && passwords.length !== usernames.length) {
-      console.log(`usernames: ${usernames.length}, passwords: ${passwords.length}, cookies: ${accountsWithCookie}`);
-      throw new Error("用户名和密码（或Cookie）的数量不匹配！");
+    // 有Cookie则跳过密码数量校验
+    if (
+      cookiesEnv.filter((c) => c && c.trim()).length === 0 &&
+      passwords.length !== usernames.length
+    ) {
+      console.log(
+        `usernames: ${usernames.length}, passwords: ${passwords.length}`,
+      );
+      throw new Error("用户名和密码的数量不匹配！");
     }
 
     // 并发启动浏览器实例进行登录
@@ -257,7 +262,7 @@ function delayClick(time) {
       if (i + maxConcurrentAccounts < totalAccounts || i === 0) {
         console.log(`等待 ${delayBetweenBatches / 1000} 秒`);
         await new Promise((resolve) =>
-          setTimeout(resolve, delayBetweenBatches)
+          setTimeout(resolve, delayBetweenBatches),
         );
       } else {
         console.log("没有下一个批次，即将结束");
@@ -265,7 +270,7 @@ function delayClick(time) {
       console.log(
         `批次 ${
           Math.floor(i / maxConcurrentAccounts) + 1
-        } 完成，关闭浏览器...,浏览器对象：${browsers}`
+        } 完成，关闭浏览器...,浏览器对象：${browsers}`,
       );
       // 关闭所有浏览器实例
       for (const browser of browsers) {

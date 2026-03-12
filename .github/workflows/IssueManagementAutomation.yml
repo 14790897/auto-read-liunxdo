@@ -1,8 +1,8 @@
 name: IssueManagementAutomation(勿动)
 
 on:
-  schedule:
-    - cron: "0 1-9/3 * * *"   #"0 18 * * *"  "0 */6 * * *"
+  # schedule:
+  #   - cron: "0 1-9/3 * * *"   #"0 18 * * *"  "0 */6 * * *"
   workflow_dispatch:
   push:
     branches:

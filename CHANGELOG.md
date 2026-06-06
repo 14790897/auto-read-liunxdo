@@ -1,5 +1,12 @@
 # Changelog
 
+### [1.15.1](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.15.0...v1.15.1) (2026-02-11)
+
+
+### Bug Fixes
+
+* db测试失败因为没有环境变量 ([5f198a3](https://www.github.com/14790897/auto-read-liunxdo/commit/5f198a302203b18e0f4db85be4630e7fdb72d8cf))
+
 ## [1.15.0](https://www.github.com/14790897/auto-read-liunxdo/compare/v1.14.4...v1.15.0) (2026-01-21)
 
 

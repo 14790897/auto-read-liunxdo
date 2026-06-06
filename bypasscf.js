@@ -79,7 +79,9 @@ const groupId = process.env.TELEGRAM_GROUP_ID;
 const specificUser = process.env.SPECIFIC_USER || "14790897";
 const maxConcurrentAccounts = parseInt(process.env.MAX_CONCURRENT_ACCOUNTS) || 3; // 每批最多同时运行的账号数
 const usernames = process.env.USERNAMES.split(",");
-const passwords = process.env.PASSWORDS.split(",");
+const passwords = process.env.PASSWORDS ? process.env.PASSWORDS.split(",") : [];
+// 读取每个账号对应的Cookie（逗号分隔，与USERNAMES一一对应），有Cookie则跳过表单登录
+const cookiesEnv = process.env.COOKIES ? process.env.COOKIES.split(",") : [];
 const loginUrl = process.env.WEBSITE || "https://linux.do"; //在GitHub action环境里它不能读取默认环境变量,只能在这里设置默认值
 const delayBetweenInstances = 10000;
 const totalAccounts = usernames.length; // 总的账号数
@@ -87,8 +89,16 @@ const delayBetweenBatches =
   runTimeLimitMillis / Math.ceil(totalAccounts / maxConcurrentAccounts);
 const isLikeSpecificUser = process.env.LIKE_SPECIFIC_USER === "true"; // 只有明确设置为"true"才开启
 const isAutoLike = process.env.AUTO_LIKE !== "false"; // 默认开启，只有明确设置为"false"才关闭
+const hideAccountInfo = process.env.HIDE_ACCOUNT_INFO !== "false"; // 默认隐藏账号信息，只有明确设置为"false"才显示
 const enableRssFetch = process.env.ENABLE_RSS_FETCH === "true"; // 是否开启抓取RSS，只有明确设置为"true"才开启，默认为false
 const enableTopicDataFetch = process.env.ENABLE_TOPIC_DATA_FETCH === "true"; // 是否开启抓取话题数据，只有明确设置为"true"才开启，默认为false
+
+// 账号名脱敏函数，默认仅显示首字母加***
+function maskUsername(username) {
+  if (!hideAccountInfo) return username;
+  if (!username || username.length === 0) return "***";
+  return username[0] + "***";
+}
 
 console.log(
   `RSS抓取功能状态: ${enableRssFetch ? "开启" : "关闭"} (环境变量值: "${process.env.ENABLE_RSS_FETCH || ''}")，勿设置`
@@ -209,20 +219,31 @@ function delayClick(time) {
 
 (async () => {
   try {
-    if (usernames.length !== passwords.length) {
-      console.log(usernames.length, passwords.length);
+    // 有Cookie则跳过密码数量校验
+    if (
+      cookiesEnv.filter((c) => c && c.trim()).length === 0 &&
+      passwords.length !== usernames.length
+    ) {
+      console.log(
+        `usernames: ${usernames.length}, passwords: ${passwords.length}`,
+      );
       throw new Error("用户名和密码的数量不匹配！");
     }
 
     // 并发启动浏览器实例进行登录
     const loginTasks = usernames.map((username, index) => {
-      const password = passwords[index];
+      const password = passwords[index] || "";
+      const cookie = cookiesEnv[index] ? cookiesEnv[index].trim() : null;
       const delay = (index % maxConcurrentAccounts) * delayBetweenInstances; // 使得每一组内的浏览器可以分开启动
       return () => {
-        // 确保这里返回的是函数
+        // 确保这里返回的是函数,因为settimeout本身是异步的所以必须在外面给他一个promise await才能让它同步的等待这个时间才能执行
+        // 可以改为 return async () => {
+        // await new Promise((resolve) => setTimeout(resolve, delay));
+        // return await launchBrowserForUser(username, password, cookie);
+        // };  更好理解
         return new Promise((resolve, reject) => {
           setTimeout(() => {
-            launchBrowserForUser(username, password)
+            launchBrowserForUser(username, password, cookie)
               .then(resolve)
               .catch(reject);
           }, delay);
@@ -245,7 +266,7 @@ function delayClick(time) {
       if (i + maxConcurrentAccounts < totalAccounts || i === 0) {
         console.log(`等待 ${delayBetweenBatches / 1000} 秒`);
         await new Promise((resolve) =>
-          setTimeout(resolve, delayBetweenBatches)
+          setTimeout(resolve, delayBetweenBatches),
         );
       } else {
         console.log("没有下一个批次，即将结束");
@@ -253,7 +274,7 @@ function delayClick(time) {
       console.log(
         `批次 ${
           Math.floor(i / maxConcurrentAccounts) + 1
-        } 完成，关闭浏览器...,浏览器对象：${browsers}`
+        } 完成，关闭浏览器...,浏览器对象：${browsers}`,
       );
       // 关闭所有浏览器实例
       for (const browser of browsers) {
@@ -272,10 +293,24 @@ function delayClick(time) {
     }
   }
 })();
-async function launchBrowserForUser(username, password) {
+// 将浏览器Cookie字符串（如 "name=value; name2=value2"）解析为 puppeteer setCookie 所需的对象数组
+function parseCookieString(cookieStr, domain) {
+  return cookieStr
+    .split(";")
+    .map((part) => part.trim())
+    .filter((part) => part.includes("="))
+    .map((part) => {
+      const eqIndex = part.indexOf("=");
+      const name = part.substring(0, eqIndex).trim();
+      const value = part.substring(eqIndex + 1).trim();
+      return { name, value, domain, path: "/" };
+    });
+}
+
+async function launchBrowserForUser(username, password, cookie = null) {
   let browser = null; // 在 try 之外声明 browser 变量
   try {
-    console.log("当前用户:", username);
+    console.log("当前用户:", maskUsername(username));
     const browserOptions = {
       headless: "auto",
       args: ["--no-sandbox", "--disable-setuid-sandbox"], // Linux 需要的安全设置
@@ -287,7 +322,7 @@ async function launchBrowserForUser(username, password) {
       const proxyArgs = getPuppeteerProxyArgs(proxyConfig);
       browserOptions.args.push(...proxyArgs);
       console.log(
-        `为用户 ${username} 启用代理: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`
+        `为用户 ${maskUsername(username)} 启用代理: ${proxyConfig.type}://${proxyConfig.host}:${proxyConfig.port}`
       );
 
       // 如果有用户名密码，puppeteer-real-browser会自动处理
@@ -372,13 +407,28 @@ async function launchBrowserForUser(username, password) {
         // await page.reload();
       }
     });
-    // //登录操作
-    console.log("登录操作");
-    await login(page, username, password);
+    // 登录操作：优先使用Cookie，否则使用表单登录
+    if (cookie) {
+      console.log("检测到Cookie，跳过表单登录，直接设置Cookie");
+      const domain = new URL(loginUrl).hostname;
+      const cookieObjects = parseCookieString(cookie, domain);
+      await page.setCookie(...cookieObjects);
+      console.log(`已设置 ${cookieObjects.length} 个Cookie，正在刷新页面...`);
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await delayClick(2000);
+    } else {
+      console.log("登录操作");
+      await login(page, username, password);
+    }
     // 查找具有类名 "avatar" 的 img 元素验证登录是否成功
+    // 若存在 span.auth-buttons 则说明处于未登录状态
     const avatarImg = await page.$("img.avatar");
+    const authButtons = await page.$("span.auth-buttons");
 
-    if (avatarImg) {
+    if (authButtons) {
+      console.log("找到 auth-buttons，用户未登录，登录失败");
+      throw new Error("登录失败：页面显示未登录状态（auth-buttons）");
+    } else if (avatarImg) {
       console.log("找到avatarImg，登录成功");
     } else {
       console.log("未找到avatarImg，登录失败");
@@ -613,11 +663,11 @@ async function login(page, username, password, retryCount = 3) {
         alertText.includes("不正确")
       ) {
         throw new Error(
-          `非超时错误，请检查用户名密码是否正确，失败用户 ${username}, 错误信息：${alertText}`
+          `非超时错误，请检查用户名密码是否正确，失败用户 ${maskUsername(username)}, 错误信息：${alertText}`
         );
       } else {
         throw new Error(
-          `非超时错误，也不是密码错误，可能是IP导致，需使用中国美国香港台湾IP，失败用户 ${username}，错误信息：${alertText}`
+          `非超时错误，也不是密码错误，可能是IP导致，需使用中国美国香港台湾IP，失败用户 ${maskUsername(username)}，错误信息：${alertText}`
         );
       }
     } else {
@@ -628,7 +678,7 @@ async function login(page, username, password, retryCount = 3) {
         return await login(page, username, password, retryCount - 1);
       } else {
         throw new Error(
-          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${username}, 
+          `Navigation timed out in login.超时了,可能是IP质量问题,失败用户 ${maskUsername(username)}, 
       ${error}`
         ); //{password}
       }
@@ -661,6 +711,7 @@ async function navigatePage(url, page, browser) {
       console.log("Timeout exceeded, aborting actions.");
       sendToTelegram(`超时了,无法通过Cloudflare验证`);
       await browser.close();
+      // todo: 这里其实不能关的m因为我们是在最后统一关的你不能在这里关m如果你在这关,后面就会触发attempted to sue detached frame
       return; // 超时则退出函数
     }
   }
